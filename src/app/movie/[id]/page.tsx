@@ -11,9 +11,6 @@ import dynamic from "next/dynamic";
 import { Params } from "@/types";
 import { NextPage } from "next";
 
-// Add console.log for debugging
-console.log("[MovieDetailPage] Component loaded");
-
 const PhotosSection = dynamic(() => import("@/components/ui/other/PhotosSection"));
 const BackdropSection = dynamic(() => import("@/components/sections/Movie/Detail/Backdrop"));
 const OverviewSection = dynamic(() => import("@/components/sections/Movie/Detail/Overview"));
@@ -22,8 +19,6 @@ const RelatedSection = dynamic(() => import("@/components/sections/Movie/Detail/
 
 const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   const { id } = use(params);
-  
-  console.log("[MovieDetailPage] Rendering with ID:", id);
 
   const {
     data: movie,
@@ -44,24 +39,16 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
     queryKey: ["movie-detail", id],
   });
 
-  console.log("[MovieDetailPage] Query state:", { isPending, hasError: !!error, hasData: !!movie });
-
   if (isPending) {
-    console.log("[MovieDetailPage] Showing spinner");
     return <Spinner size="lg" className="absolute-center" variant="simple" />;
   }
 
   if (error) {
-    console.log("[MovieDetailPage] Error, calling notFound()");
     notFound();
   }
 
-  console.log("[MovieDetailPage] Rendering movie details");
-
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="text-4xl font-bold text-white mb-4">Movie Detail: {movie.title}</h1>
-      <p className="text-white">ID: {id}</p>
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
         <div className="flex flex-col gap-10">
           <BackdropSection movie={movie} />
