@@ -4,12 +4,14 @@ import { NextConfig } from "next/dist/server/config";
 const withPWA = withPWAInit({
   dest: "public",
   register: true,
-  disable: process.env.NODE_ENV === "development",
+  disable: true, // TEMPORARILY DISABLED COMPLETELY TO DEBUG
   reloadOnOnline: true,
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: false, // Disabled to prevent over-caching of navigation/pages
+  cacheOnFrontEndNav: false,
+  aggressiveFrontEndNavCaching: false,
   workboxOptions: {
     disableDevLogs: true,
+    skipWaiting: true,
+    clientsClaim: true,
   },
 });
 
