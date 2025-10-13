@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+
+# Build outputs
+.next
+out
+build
+
+# Environment files
+.env
+.env*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+*.pem
+
+# Supabase
+supabase/.temp
+supabase/functions
+
+# VSCode
+.vscode
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+LICENSE
+CONTRIBUTING.md
