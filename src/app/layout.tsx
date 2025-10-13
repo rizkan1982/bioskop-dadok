@@ -91,20 +91,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html suppressHydrationWarning lang="en">
       <body className={cn("bg-background min-h-dvh antialiased select-none", Poppins.className)}>
-        <NuqsAdapter>
-          <Providers>
-            {IS_PRODUCTION && <Disclaimer />}
-            <TopNavbar />
-            <Sidebar>
-              <main className={cn("container mx-auto max-w-full", SpacingClasses.main)}>
-                <Suspense fallback={<div className="text-white text-2xl p-8">Loading layout...</div>}>
+        <Suspense fallback={<div className="text-white text-2xl p-8 absolute-center">Loading app...</div>}>
+          <NuqsAdapter>
+            <Providers>
+              {IS_PRODUCTION && <Disclaimer />}
+              <TopNavbar />
+              <Sidebar>
+                <main className={cn("container mx-auto max-w-full", SpacingClasses.main)}>
                   {children}
-                </Suspense>
-              </main>
-            </Sidebar>
-            <BottomNavbar />
-          </Providers>
-        </NuqsAdapter>
+                </main>
+              </Sidebar>
+              <BottomNavbar />
+            </Providers>
+          </NuqsAdapter>
+        </Suspense>
         <SpeedInsights debug={false} />
         <Analytics debug={false} />
       </body>
