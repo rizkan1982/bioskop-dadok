@@ -128,7 +128,7 @@ export const siteConfig: SiteConfigType = {
     ],
   },
   socials: {
-    github: "https://github.com/wisnuwirayuda15/cinextma",
+    instagram: "https://www.instagram.com/bukan_ni66a/",
   },
 };
 
