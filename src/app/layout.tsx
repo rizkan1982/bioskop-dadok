@@ -90,6 +90,32 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html suppressHydrationWarning lang="en">
+      <head>
+        {/* Unregister old PWA service workers to fix routing issue */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for(let registration of registrations) {
+                    console.log('[PWA Cleanup] Unregistering old service worker:', registration.scope);
+                    registration.unregister();
+                  }
+                });
+                // Clear all caches
+                if ('caches' in window) {
+                  caches.keys().then(function(names) {
+                    for (let name of names) {
+                      console.log('[PWA Cleanup] Deleting cache:', name);
+                      caches.delete(name);
+                    }
+                  });
+                }
+              }
+            `,
+          }}
+        />
+      </head>
       <body className={cn("bg-background min-h-dvh antialiased select-none", Poppins.className)}>
         <Suspense fallback={<div className="text-white text-2xl p-8 absolute-center">Loading app...</div>}>
           <NuqsAdapter>
