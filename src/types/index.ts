@@ -57,7 +57,7 @@ export type SiteConfigType = {
     icon: React.ReactNode;
   }[];
   socials: {
-    github: string;
+    instagram: string;
   };
 };
 
