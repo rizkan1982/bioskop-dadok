@@ -21,34 +21,34 @@ const DISCLAIMER_CONTENT = {
   paragraphs: [
     {
       id: "welcome",
-      content:
-        "Welcome to Cinextma - a free and open-source movie streaming website. Please read this disclaimer carefully before using this website.",
+      content: "🎬 Selamat datang di Bioskop Dadok",
     },
     {
       id: "purpose",
-      content: "Cinextma is developed solely for",
-      emphasis: "educational and learning purposes.",
-      continuation:
-        "This website is an open-source project intended to demonstrate web development skills and is not meant to promote or encourage digital piracy in any form.",
+      content:
+        "Website ini dibuat hanya untuk keperluan edukasi & eksperimen pribadi. Semua konten yang ditampilkan di sini tidak disimpan, tidak diperjualbelikan, dan bukan untuk tujuan ilegal.",
     },
     {
-      id: "content-source",
-      content:
-        "All content displayed on Cinextma (including but not limited to movies, images, posters, and related information) is sourced from",
-      emphasis: "third-party providers through APIs or embedding.",
-      continuation:
-        "I do not host, store, or distribute any media files on my servers. The website merely aggregates content that is already available on the internet.",
+      id: "fun-note",
+      content: "Jadi santai aja, ini cuma project",
+      emphasis: "iseng–iseng yang serius.",
+      continuation: "😉",
     },
     {
-      id: "responsibility",
-      content:
-        "By using Cinextma, you acknowledge that I bears no responsibility for user actions, content accuracy, or any direct or indirect damages arising from the use of this website. Users are solely responsible for their actions while using this service. I respect intellectual property rights and will respond to legitimate requests from copyright holders for content removal.",
+      id: "creator",
+      content: "🔧 Dibuat oleh",
+      emphasis: "Rizkan Isya Pratama",
     },
     {
-      id: "usage",
+      id: "contact",
       content:
-        "This website should only be used for learning purposes. Any illegal activities, including but not limited to unauthorized downloading, redistribution of content, or commercial use, are strictly prohibited. By using Cinextma, you agree to these terms and acknowledge that",
-      emphasis: "you use the service at your own risk.",
+        "Punya ide buat website keren, aplikasi, atau butuh bantuin soal cybersecurity? Langsung aja kontak lewat:",
+      emphasis: "🌐 dadortx.com",
+      continuation: "(ada WhatsApp-nya juga, tinggal klik)",
+    },
+    {
+      id: "footer",
+      content: "🧠 Coding adalah karya, dan ini salah satunya.",
     },
   ],
 };
