@@ -1,19 +1,7 @@
-import withPWAInit from "@ducanh2912/next-pwa";
+// PWA COMPLETELY REMOVED TO FIX ROUTING ISSUE
+// TODO: Re-enable PWA after movie detail page works correctly
+// import withPWAInit from "@ducanh2912/next-pwa";
 import { NextConfig } from "next/dist/server/config";
-
-const withPWA = withPWAInit({
-  dest: "public",
-  register: true,
-  disable: true, // TEMPORARILY DISABLED COMPLETELY TO DEBUG
-  reloadOnOnline: true,
-  cacheOnFrontEndNav: false,
-  aggressiveFrontEndNavCaching: false,
-  workboxOptions: {
-    disableDevLogs: true,
-    skipWaiting: true,
-    clientsClaim: true,
-  },
-});
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -48,6 +36,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-const pwa = withPWA(nextConfig);
-
-export default pwa;
+export default nextConfig;
