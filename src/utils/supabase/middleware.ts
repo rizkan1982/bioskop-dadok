@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth";
-    url.searchParams.set("redirect", pathname);
+    url.searchParams.set("next", pathname); // Changed from "redirect" to "next" to match callback handler
 
     const redirectRes = NextResponse.redirect(url);
 
