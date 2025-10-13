@@ -20,6 +20,10 @@ const RelatedSection = dynamic(() => import("@/components/sections/Movie/Detail/
 const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   const { id } = use(params);
 
+  // Debug logging to track component mounting
+  console.log("🎬 [MovieDetailPage] Component mounted with ID:", id);
+  console.log("🌐 [MovieDetailPage] Current URL:", typeof window !== "undefined" ? window.location.href : "SSR");
+
   const {
     data: movie,
     isPending,
@@ -39,16 +43,31 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
     queryKey: ["movie-detail", id],
   });
 
+  console.log("📊 [MovieDetailPage] Query state:", { 
+    isPending, 
+    hasError: !!error, 
+    hasData: !!movie,
+    movieTitle: movie?.title 
+  });
+
   if (isPending) {
+    console.log("⏳ [MovieDetailPage] Loading movie data...");
     return <Spinner size="lg" className="absolute-center" variant="simple" />;
   }
 
   if (error) {
+    console.error("❌ [MovieDetailPage] Error loading movie:", error);
     notFound();
   }
 
+  console.log("✅ [MovieDetailPage] Rendering movie:", movie.title);
+
   return (
     <div className="mx-auto max-w-5xl">
+      {/* Visible indicator that movie detail page loaded */}
+      <div className="bg-primary-500 text-white p-2 text-center text-sm mb-4 rounded">
+        ✅ Movie Detail Page Loaded: {movie.title} (ID: {id})
+      </div>
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
         <div className="flex flex-col gap-10">
           <BackdropSection movie={movie} />
