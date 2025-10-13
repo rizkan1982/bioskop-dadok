@@ -64,11 +64,10 @@ export async function updateSession(request: NextRequest) {
   if (user && pathname === "/auth") {
     const url = request.nextUrl.clone();
     
-    // Check if there's a redirect parameter
-    const redirect = request.nextUrl.searchParams.get("redirect");
-    url.pathname = redirect || "/";
-    url.searchParams.delete("redirect");
-
+    // Check if there's a next parameter
+    const next = request.nextUrl.searchParams.get("next");
+    url.pathname = next || "/";
+    url.searchParams.delete("next");
     const redirectRes = NextResponse.redirect(url);
 
     supabaseResponse.cookies.getAll().forEach((cookie) => {
