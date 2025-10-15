@@ -92,6 +92,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html suppressHydrationWarning lang="en">
       <head>
+        {/* PopCash Site Verification */}
+        <meta name="ppck-ver" content="20e8554e142282e76e4c2621f556d78c" />
+        
         {/* Unregister old PWA service workers to fix routing issue */}
         <script
           dangerouslySetInnerHTML={{
