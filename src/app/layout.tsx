@@ -15,6 +15,7 @@ import dynamic from "next/dynamic";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense } from "react";
 const Disclaimer = dynamic(() => import("@/components/ui/overlay/Disclaimer"));
+const PopCashAd = dynamic(() => import("@/components/ui/ads/PopCashAd"));
 
 export const metadata: Metadata = {
   title: siteConfig.name,
@@ -131,6 +132,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </Providers>
           </NuqsAdapter>
         </Suspense>
+        {/* PopCash PopUnder Ads (Indonesia-friendly, payment via Paxum/Bitcoin to Bank Indo) */}
+        {process.env.NEXT_PUBLIC_POPCASH_SITE_ID && (
+          <PopCashAd siteId={process.env.NEXT_PUBLIC_POPCASH_SITE_ID} />
+        )}
         <SpeedInsights debug={false} />
         <Analytics debug={false} />
       </body>
