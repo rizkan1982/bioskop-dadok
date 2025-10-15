@@ -16,6 +16,7 @@ const BackdropSection = dynamic(() => import("@/components/sections/Movie/Detail
 const OverviewSection = dynamic(() => import("@/components/sections/Movie/Detail/Overview"));
 const CastsSection = dynamic(() => import("@/components/sections/Movie/Detail/Casts"));
 const RelatedSection = dynamic(() => import("@/components/sections/Movie/Detail/Related"));
+const AdBanner = dynamic(() => import("@/components/ui/ads/AdBanner"));
 
 const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   const { id } = use(params);
@@ -70,11 +71,25 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
       </div>
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
         <div className="flex flex-col gap-10">
+          {/* Top ad - Native Banner */}
+          <AdBanner provider="adsterra" variant="native" placement="top" />
+          
           <BackdropSection movie={movie} />
           <OverviewSection movie={movie} />
+          
+          {/* Mid-content ad after overview - Banner 320x50 */}
+          <AdBanner provider="adsterra" variant="banner" placement="content" />
+          
           <CastsSection casts={movie.credits.cast as Cast[]} />
           <PhotosSection images={movie.images.backdrops as Image[]} />
+          
+          {/* Ad before related section - Native Banner */}
+          <AdBanner provider="adsterra" variant="native" placement="content" />
+          
           <RelatedSection movie={movie} />
+          
+          {/* Bottom ad - Banner 320x50 */}
+          <AdBanner provider="adsterra" variant="banner" placement="bottom" />
         </div>
       </Suspense>
     </div>
