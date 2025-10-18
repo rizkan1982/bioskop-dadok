@@ -11,7 +11,7 @@ const HomePage: NextPage = () => {
   return (
     <div className="flex flex-col">
       {/* ========================================= */}
-      {/* SCROLLING NOTICE - Seperti di IDLIX */}
+      {/* SCROLLING NOTICE - Banner Informasi */}
       {/* ========================================= */}
       <ScrollingNotice 
         text="Selamat datang di Cinemadadok! Nikmati film dan series terbaik. Jangan lupa follow sosial media kami untuk update terbaru!"
@@ -19,19 +19,26 @@ const HomePage: NextPage = () => {
       
       {/* ========================================= */}
       {/* CUSTOM TOP BANNER - GRID LAYOUT */}
-      {/* Semua iklan tampil sekaligus dalam grid */}
+      {/* Iklan banner custom dari admin panel */}
       {/* ========================================= */}
       <div className="w-full">
         <CustomAdBanner position="top" />
       </div>
       
-      {/* Top banner ad - Native Banner (Adsterra/AdSense existing) */}
+      {/* Top banner ad - Adsterra/AdSense existing */}
       <div className="px-4 md:px-6 lg:px-8">
         <AdBanner provider="adsterra" variant="native" placement="top" />
       </div>
       
-      {/* Main content dengan spacing */}
+      {/* ========================================= */}
+      {/* MAIN CONTENT */}
+      {/* ========================================= */}
       <div className="flex flex-col gap-6 md:gap-10 px-0">
+        
+        {/* TODAY'S TRENDING MOVIES - Dipindah ke atas */}
+        <HomePageList />
+        
+        {/* CONTINUE YOUR JOURNEY - Dipindah ke bawah trending */}
         <ContinueWatching />
         
         {/* ========================================= */}
@@ -45,8 +52,6 @@ const HomePage: NextPage = () => {
         <div className="px-4 md:px-6 lg:px-8">
           <AdBanner provider="adsterra" variant="banner" placement="content" />
         </div>
-        
-        <HomePageList />
         
         {/* ========================================= */}
         {/* CUSTOM BOTTOM BANNER - Carousel */}
