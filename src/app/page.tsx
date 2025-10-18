@@ -5,12 +5,21 @@ const ContinueWatching = dynamic(() => import("@/components/sections/Home/Contin
 const HomePageList = dynamic(() => import("@/components/sections/Home/List"));
 const AdBanner = dynamic(() => import("@/components/ui/ads/AdBanner"));
 const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
+const ScrollingNotice = dynamic(() => import("@/components/ui/ads/ScrollingNotice"));
 
 const HomePage: NextPage = () => {
   return (
     <div className="flex flex-col">
       {/* ========================================= */}
-      {/* CUSTOM TOP BANNER - Iklan dari Admin */}
+      {/* SCROLLING NOTICE - Seperti di IDLIX */}
+      {/* ========================================= */}
+      <ScrollingNotice 
+        text="Selamat datang di Cinemadadok! Nikmati film dan series terbaik. Jangan lupa follow sosial media kami untuk update terbaru!"
+      />
+      
+      {/* ========================================= */}
+      {/* CUSTOM TOP BANNER - GRID LAYOUT */}
+      {/* Semua iklan tampil sekaligus dalam grid */}
       {/* ========================================= */}
       <div className="w-full">
         <CustomAdBanner position="top" />
@@ -26,13 +35,13 @@ const HomePage: NextPage = () => {
         <ContinueWatching />
         
         {/* ========================================= */}
-        {/* CUSTOM MIDDLE BANNER - Iklan dari Admin */}
+        {/* CUSTOM MIDDLE BANNER - Carousel */}
         {/* ========================================= */}
         <div className="w-full">
           <CustomAdBanner position="middle" />
         </div>
         
-        {/* Mid-content banner ad - Banner 320x50 (Adsterra/AdSense existing) */}
+        {/* Mid-content banner ad */}
         <div className="px-4 md:px-6 lg:px-8">
           <AdBanner provider="adsterra" variant="banner" placement="content" />
         </div>
@@ -40,13 +49,13 @@ const HomePage: NextPage = () => {
         <HomePageList />
         
         {/* ========================================= */}
-        {/* CUSTOM BOTTOM BANNER - Iklan dari Admin */}
+        {/* CUSTOM BOTTOM BANNER - Carousel */}
         {/* ========================================= */}
         <div className="w-full mb-6">
           <CustomAdBanner position="bottom" />
         </div>
         
-        {/* Bottom banner ad - Native Banner (Adsterra/AdSense existing) */}
+        {/* Bottom banner ad */}
         <div className="px-4 md:px-6 lg:px-8 mb-8">
           <AdBanner provider="adsterra" variant="native" placement="bottom" />
         </div>
