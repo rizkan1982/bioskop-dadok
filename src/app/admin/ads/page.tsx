@@ -152,7 +152,6 @@ export default function AdsManagementPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <Card className="p-6 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 border border-white/5">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -181,7 +180,6 @@ export default function AdsManagementPage() {
         </div>
       </Card>
 
-      {/* Ads List */}
       <div className="grid gap-6">
         {ads.length === 0 ? (
           <Card className="p-12 text-center border border-dashed border-default-300">
@@ -191,7 +189,6 @@ export default function AdsManagementPage() {
           ads.map((ad) => (
             <Card key={ad.id} className="p-6 hover:shadow-lg transition-shadow border border-white/5">
               <div className="flex flex-col md:flex-row gap-6">
-                {/* Image Preview */}
                 <div className="w-full md:w-48 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-default-100">
                   <img
                     src={ad.image_url}
@@ -203,7 +200,6 @@ export default function AdsManagementPage() {
                   />
                 </div>
 
-                {/* Info */}
                 <div className="flex-1">
                   <div className="flex justify-between items-start mb-3">
                     <div>
@@ -212,10 +208,7 @@ export default function AdsManagementPage() {
                         Posisi: <Chip size="sm" variant="flat" color="primary">{ad.position.toUpperCase()}</Chip>
                       </p>
                     </div>
-                    <Chip
-                      color={ad.is_active ? "success" : "default"}
-                      variant="flat"
-                    >
+                    <Chip color={ad.is_active ? "success" : "default"} variant="flat">
                       {ad.is_active ? "Aktif" : "Nonaktif"}
                     </Chip>
                   </div>
@@ -251,7 +244,6 @@ export default function AdsManagementPage() {
                     )}
                   </div>
 
-                  {/* Actions */}
                   <div className="flex flex-wrap gap-2">
                     <Button
                       size="sm"
@@ -288,7 +280,6 @@ export default function AdsManagementPage() {
         )}
       </div>
 
-      {/* Modal Form */}
       <Modal isOpen={isOpen} onClose={onClose} size="2xl" scrollBehavior="inside">
         <ModalContent>
           {(onClose) => (
