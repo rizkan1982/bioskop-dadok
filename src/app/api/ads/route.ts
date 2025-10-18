@@ -8,11 +8,9 @@ export async function GET(request: NextRequest) {
     const position = searchParams.get("position");
 
     if (activeOnly && position) {
-      // Get active ads for specific position (public)
       const result = await getActiveAdsByPosition(position);
       return NextResponse.json(result);
     } else {
-      // Get all ads (admin only)
       const result = await getAllAds();
       return NextResponse.json(result);
     }
