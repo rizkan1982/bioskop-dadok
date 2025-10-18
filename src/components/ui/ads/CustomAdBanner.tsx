@@ -38,14 +38,15 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
     }
   };
 
+  // Auto-rotate hanya untuk posisi selain top (middle, bottom, sidebar tetap carousel)
   useEffect(() => {
-    if (ads.length > 1) {
+    if (ads.length > 1 && position !== "top") {
       const interval = setInterval(() => {
         setCurrentAdIndex((prev) => (prev + 1) % ads.length);
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [ads.length]);
+  }, [ads.length, position]);
 
   const handleClick = async (ad: Ad) => {
     try {
@@ -63,11 +64,54 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
     return null;
   }
 
+  // GRID LAYOUT untuk posisi TOP (menampilkan semua banner sekaligus)
+  if (position === "top") {
+    return (
+      <div className={`${className} custom-ad-banner-grid my-4 md:my-6`}>
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Grid: 1 kolom mobile, 2 kolom tablet+desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            {ads.map((ad) => (
+              <Card
+                key={ad.id}
+                isPressable
+                onPress={() => handleClick(ad)}
+                className="relative overflow-hidden group cursor-pointer hover:shadow-xl 
+                  transition-all duration-300 rounded-lg border border-default-200 h-28 md:h-32"
+              >
+                <div className="relative w-full h-full bg-gradient-to-br from-default-100 to-default-50">
+                  <img
+                    src={ad.image_url}
+                    alt={ad.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 
+                    transition-all duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg">
+                        <p className="text-white text-xs md:text-sm font-medium">
+                          {ad.title}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // CAROUSEL LAYOUT untuk posisi lain (middle, bottom, sidebar)
   const currentAd = ads[currentAdIndex];
 
-  // Ukuran container berdasarkan posisi
   const containerClasses = {
-    top: "w-full h-40 md:h-52 lg:h-64",
+    top: "w-full h-40 md:h-52 lg:h-64", // tidak dipakai karena top pakai grid
     middle: "w-full h-44 md:h-56 lg:h-72",
     bottom: "w-full h-36 md:h-48 lg:h-56",
     sidebar: "w-full h-auto aspect-[3/4]",
@@ -75,7 +119,6 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
 
   return (
     <div className={`${className} custom-ad-banner-wrapper my-4 md:my-6`}>
-      {/* Container dengan max-width untuk rapi */}
       <div className="max-w-7xl mx-auto px-4">
         <Card
           isPressable
@@ -84,7 +127,6 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
             hover:shadow-2xl transition-all duration-300 rounded-xl border border-default-200`}
         >
           <div className="relative w-full h-full bg-gradient-to-br from-default-100 to-default-50">
-            {/* Gambar dengan object-contain agar tidak terpotong */}
             <img
               src={currentAd.image_url}
               alt={currentAd.title}
@@ -92,7 +134,6 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
               loading="lazy"
             />
             
-            {/* Overlay hover dengan info */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 
               opacity-0 group-hover:opacity-100 transition-opacity duration-300 
               flex flex-col justify-end p-4 md:p-6">
@@ -109,18 +150,15 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
               </div>
             </div>
 
-            {/* Badge posisi (opsional) */}
             <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full">
               <span className="text-white text-xs font-medium uppercase tracking-wide">
-                {position === "top" ? "Iklan Utama" : 
-                 position === "middle" ? "Iklan" : 
+                {position === "middle" ? "Iklan" : 
                  position === "bottom" ? "Sponsor" : "Promosi"}
               </span>
             </div>
           </div>
         </Card>
 
-        {/* Indicator dots untuk multiple ads */}
         {ads.length > 1 && (
           <div className="flex justify-center gap-2 mt-4">
             {ads.map((_, index) => (
