@@ -36,16 +36,16 @@ const HomePageList: React.FC = () => {
             movies.map((movie, index) => (
               <div key={movie.name}>
                 <MovieHomeList {...movie} />
-                {/* Sisipkan banner setelah setiap kategori */}
-                {(index + 1) % 2 === 0 && <InlineBannerAd />}
+                {/* Banner muncul SETIAP 1 kategori (kecuali kategori terakhir) */}
+                {index < movies.length - 1 && <InlineBannerAd />}
               </div>
             ))}
           {content === "tv" &&
             tvShows.map((tv, index) => (
               <div key={tv.name}>
                 <TvShowHomeList {...tv} />
-                {/* Sisipkan banner setelah setiap kategori */}
-                {(index + 1) % 2 === 0 && <InlineBannerAd />}
+                {/* Banner muncul SETIAP 1 kategori (kecuali kategori terakhir) */}
+                {index < tvShows.length - 1 && <InlineBannerAd />}
               </div>
             ))}
         </Suspense>
