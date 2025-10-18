@@ -8,34 +8,49 @@ const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"
 
 const HomePage: NextPage = () => {
   return (
-    <div className="flex flex-col gap-3 md:gap-8">
+    <div className="flex flex-col">
       {/* ========================================= */}
       {/* CUSTOM TOP BANNER - Iklan dari Admin */}
       {/* ========================================= */}
-      <CustomAdBanner position="top" />
+      <div className="w-full">
+        <CustomAdBanner position="top" />
+      </div>
       
       {/* Top banner ad - Native Banner (Adsterra/AdSense existing) */}
-      <AdBanner provider="adsterra" variant="native" placement="top" />
+      <div className="px-4 md:px-6 lg:px-8">
+        <AdBanner provider="adsterra" variant="native" placement="top" />
+      </div>
       
-      <ContinueWatching />
-      
-      {/* ========================================= */}
-      {/* CUSTOM MIDDLE BANNER - Iklan dari Admin */}
-      {/* ========================================= */}
-      <CustomAdBanner position="middle" />
-      
-      {/* Mid-content banner ad - Banner 320x50 (Adsterra/AdSense existing) */}
-      <AdBanner provider="adsterra" variant="banner" placement="content" />
-      
-      <HomePageList />
-      
-      {/* ========================================= */}
-      {/* CUSTOM BOTTOM BANNER - Iklan dari Admin */}
-      {/* ========================================= */}
-      <CustomAdBanner position="bottom" />
-      
-      {/* Bottom banner ad - Native Banner (Adsterra/AdSense existing) */}
-      <AdBanner provider="adsterra" variant="native" placement="bottom" />
+      {/* Main content dengan spacing */}
+      <div className="flex flex-col gap-6 md:gap-10 px-0">
+        <ContinueWatching />
+        
+        {/* ========================================= */}
+        {/* CUSTOM MIDDLE BANNER - Iklan dari Admin */}
+        {/* ========================================= */}
+        <div className="w-full">
+          <CustomAdBanner position="middle" />
+        </div>
+        
+        {/* Mid-content banner ad - Banner 320x50 (Adsterra/AdSense existing) */}
+        <div className="px-4 md:px-6 lg:px-8">
+          <AdBanner provider="adsterra" variant="banner" placement="content" />
+        </div>
+        
+        <HomePageList />
+        
+        {/* ========================================= */}
+        {/* CUSTOM BOTTOM BANNER - Iklan dari Admin */}
+        {/* ========================================= */}
+        <div className="w-full mb-6">
+          <CustomAdBanner position="bottom" />
+        </div>
+        
+        {/* Bottom banner ad - Native Banner (Adsterra/AdSense existing) */}
+        <div className="px-4 md:px-6 lg:px-8 mb-8">
+          <AdBanner provider="adsterra" variant="native" placement="bottom" />
+        </div>
+      </div>
     </div>
   );
 };
