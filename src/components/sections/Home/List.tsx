@@ -6,8 +6,10 @@ import { Spinner } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Suspense } from "react";
+
 const MovieHomeList = dynamic(() => import("@/components/sections/Movie/HomeList"));
 const TvShowHomeList = dynamic(() => import("@/components/sections/TV/HomeList"));
+const InlineBannerAd = dynamic(() => import("@/components/ui/ads/InlineBannerAd"));
 
 const HomePageList: React.FC = () => {
   const { movies, tvShows } = siteConfig.queryLists;
@@ -17,9 +19,9 @@ const HomePageList: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-10 md:gap-12">
       <ContentTypeSelection className="justify-center" />
-      <div className="relative flex min-h-32 flex-col gap-12">
+      <div className="relative flex min-h-32 flex-col gap-8 md:gap-10">
         <Suspense
           fallback={
             <Spinner
@@ -31,8 +33,21 @@ const HomePageList: React.FC = () => {
           }
         >
           {content === "movie" &&
-            movies.map((movie) => <MovieHomeList key={movie.name} {...movie} />)}
-          {content === "tv" && tvShows.map((tv) => <TvShowHomeList key={tv.name} {...tv} />)}
+            movies.map((movie, index) => (
+              <div key={movie.name}>
+                <MovieHomeList {...movie} />
+                {/* Sisipkan banner setelah setiap kategori */}
+                {(index + 1) % 2 === 0 && <InlineBannerAd />}
+              </div>
+            ))}
+          {content === "tv" &&
+            tvShows.map((tv, index) => (
+              <div key={tv.name}>
+                <TvShowHomeList {...tv} />
+                {/* Sisipkan banner setelah setiap kategori */}
+                {(index + 1) % 2 === 0 && <InlineBannerAd />}
+              </div>
+            ))}
         </Suspense>
       </div>
     </div>
