@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Button, Card, Input, Select, SelectItem, Switch, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/react";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, TrendingUp } from "@/utils/icons";
+import { Eye, EyeOff, Trash, TrendUp } from "@/utils/icons";
+import { HiPlus, HiPencil, HiArrowTopRightOnSquare } from "react-icons/hi2";
 import type { Ad } from "@/actions/ads";
 
 export default function AdsManagementPage() {
@@ -170,7 +171,7 @@ export default function AdsManagementPage() {
           </div>
           <Button
             color="primary"
-            startContent={<Plus />}
+            startContent={<HiPlus className="text-xl" />}
             onPress={handleOpenNew}
             size="lg"
             className="font-semibold"
@@ -225,13 +226,13 @@ export default function AdsManagementPage() {
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <TrendingUp className="text-primary" />
+                      <TrendUp className="text-primary" />
                       <span className="text-default-400">Klik:</span>{" "}
                       <strong>{ad.click_count}</strong>
                     </div>
                     {ad.link_url && (
                       <div className="flex items-center gap-2 truncate">
-                        <ExternalLink className="text-default-400" />
+                        <HiArrowTopRightOnSquare className="text-default-400" />
                         <a
                           href={ad.link_url}
                           target="_blank"
@@ -258,7 +259,7 @@ export default function AdsManagementPage() {
                       size="sm"
                       color="primary"
                       variant="flat"
-                      startContent={<Pencil />}
+                      startContent={<HiPencil />}
                       onPress={() => handleEdit(ad)}
                     >
                       Edit
@@ -267,7 +268,7 @@ export default function AdsManagementPage() {
                       size="sm"
                       color="danger"
                       variant="flat"
-                      startContent={<Trash2 />}
+                      startContent={<Trash />}
                       onPress={() => handleDelete(ad.id)}
                     >
                       Hapus
