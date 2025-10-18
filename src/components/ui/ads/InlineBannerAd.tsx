@@ -24,11 +24,9 @@ export default function InlineBannerAd({ className = "" }: InlineBannerAdProps) 
 
   const fetchAd = async () => {
     try {
-      // Ambil random iklan dari posisi middle atau bottom
       const res = await fetch(`/api/ads?active=true&position=middle`);
       const data = await res.json();
       if (data.success && data.data?.length > 0) {
-        // Pilih random ad
         const randomAd = data.data[Math.floor(Math.random() * data.data.length)];
         setAd(randomAd);
       }
@@ -56,12 +54,12 @@ export default function InlineBannerAd({ className = "" }: InlineBannerAdProps) 
   }
 
   return (
-    <div className={`${className} inline-banner-ad my-6 md:my-8`}>
+    <div className={`${className} inline-banner-ad my-4 md:my-5`}>
       <div className="max-w-7xl mx-auto px-4">
         <Card
           isPressable
           onPress={() => handleClick(ad)}
-          className="relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg border border-default-200 h-24 md:h-32"
+          className="relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg border border-default-200 h-20 md:h-24"
         >
           <div className="relative w-full h-full bg-gradient-to-r from-default-100 to-default-50">
             <img
@@ -73,7 +71,7 @@ export default function InlineBannerAd({ className = "" }: InlineBannerAdProps) 
             
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
             
-            <div className="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded text-xs font-bold uppercase">
+            <div className="absolute top-1.5 right-1.5 bg-yellow-500 text-black px-2 py-0.5 rounded text-xs font-bold uppercase">
               Ad
             </div>
           </div>
