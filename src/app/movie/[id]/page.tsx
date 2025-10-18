@@ -17,13 +17,10 @@ const OverviewSection = dynamic(() => import("@/components/sections/Movie/Detail
 const CastsSection = dynamic(() => import("@/components/sections/Movie/Detail/Casts"));
 const RelatedSection = dynamic(() => import("@/components/sections/Movie/Detail/Related"));
 const AdBanner = dynamic(() => import("@/components/ui/ads/AdBanner"));
+const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
 
 const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   const { id } = use(params);
-
-  // Debug logging to track component mounting
-  console.log("🎬 [MovieDetailPage] Component mounted with ID:", id);
-  console.log("🌐 [MovieDetailPage] Current URL:", typeof window !== "undefined" ? window.location.href : "SSR");
 
   const {
     data: movie,
@@ -44,51 +41,48 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
     queryKey: ["movie-detail", id],
   });
 
-  console.log("📊 [MovieDetailPage] Query state:", { 
-    isPending, 
-    hasError: !!error, 
-    hasData: !!movie,
-    movieTitle: movie?.title 
-  });
-
   if (isPending) {
-    console.log("⏳ [MovieDetailPage] Loading movie data...");
     return <Spinner size="lg" className="absolute-center" variant="simple" />;
   }
 
   if (error) {
-    console.error("❌ [MovieDetailPage] Error loading movie:", error);
     notFound();
   }
 
-  console.log("✅ [MovieDetailPage] Rendering movie:", movie.title);
-
   return (
     <div className="mx-auto max-w-5xl">
-      {/* Visible indicator that movie detail page loaded */}
-      <div className="bg-primary-500 text-white p-2 text-center text-sm mb-4 rounded">
-        ✅ Movie Detail Page Loaded: {movie.title} (ID: {id})
-      </div>
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
-        <div className="flex flex-col gap-10">
-          {/* Top ad - Native Banner */}
+        <div className="flex flex-col gap-6 md:gap-8">
+          {/* ========================================= */}
+          {/* TOP BANNER - Custom Ads dari Admin */}
+          {/* ========================================= */}
+          <CustomAdBanner position="top" />
+          
+          {/* Top ad - Adsterra/AdSense */}
           <AdBanner provider="adsterra" variant="native" placement="top" />
           
           <BackdropSection movie={movie} />
           <OverviewSection movie={movie} />
           
-          {/* Mid-content ad after overview - Banner 320x50 */}
+          {/* ========================================= */}
+          {/* MIDDLE BANNER - Custom Ads dari Admin */}
+          {/* ========================================= */}
+          <CustomAdBanner position="middle" />
+          
+          {/* Mid-content ad - Adsterra/AdSense */}
           <AdBanner provider="adsterra" variant="banner" placement="content" />
           
           <CastsSection casts={movie.credits.cast as Cast[]} />
           <PhotosSection images={movie.images.backdrops as Image[]} />
           
-          {/* Ad before related section - Native Banner */}
-          <AdBanner provider="adsterra" variant="native" placement="content" />
-          
           <RelatedSection movie={movie} />
           
-          {/* Bottom ad - Banner 320x50 */}
+          {/* ========================================= */}
+          {/* BOTTOM BANNER - Custom Ads dari Admin */}
+          {/* ========================================= */}
+          <CustomAdBanner position="bottom" />
+          
+          {/* Bottom ad - Adsterra/AdSense */}
           <AdBanner provider="adsterra" variant="banner" placement="bottom" />
         </div>
       </Suspense>
