@@ -51,25 +51,22 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
 
   return (
     <div className="mx-auto max-w-5xl">
+      {/* ========================================= */}
+      {/* BANNER DI PALING ATAS (SEBELUM KONTEN) */}
+      {/* ========================================= */}
+      <div className="mb-6">
+        <CustomAdBanner position="top" />
+      </div>
+
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
         <div className="flex flex-col gap-6 md:gap-8">
-          {/* ========================================= */}
-          {/* TOP BANNER - Custom Ads dari Admin */}
-          {/* ========================================= */}
-          <CustomAdBanner position="top" />
-          
-          {/* Top ad - Adsterra/AdSense */}
-          <AdBanner provider="adsterra" variant="native" placement="top" />
-          
           <BackdropSection movie={movie} />
           <OverviewSection movie={movie} />
           
           {/* ========================================= */}
-          {/* MIDDLE BANNER - Custom Ads dari Admin */}
+          {/* MIDDLE BANNER */}
           {/* ========================================= */}
           <CustomAdBanner position="middle" />
-          
-          {/* Mid-content ad - Adsterra/AdSense */}
           <AdBanner provider="adsterra" variant="banner" placement="content" />
           
           <CastsSection casts={movie.credits.cast as Cast[]} />
@@ -78,11 +75,9 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
           <RelatedSection movie={movie} />
           
           {/* ========================================= */}
-          {/* BOTTOM BANNER - Custom Ads dari Admin */}
+          {/* BOTTOM BANNER */}
           {/* ========================================= */}
           <CustomAdBanner position="bottom" />
-          
-          {/* Bottom ad - Adsterra/AdSense */}
           <AdBanner provider="adsterra" variant="banner" placement="bottom" />
         </div>
       </Suspense>
