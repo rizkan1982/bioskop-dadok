@@ -39,7 +39,6 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
     }
   };
 
-  // Auto-rotate ads every 5 seconds
   useEffect(() => {
     if (ads.length > 1) {
       const interval = setInterval(() => {
