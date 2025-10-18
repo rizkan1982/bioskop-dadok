@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Card } from "@heroui/react";
-import Image from "next/image";
 
 interface CustomAdBannerProps {
   position: "top" | "middle" | "bottom" | "sidebar";
@@ -81,13 +80,10 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
         className={`${sizeClasses[position]} relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform`}
       >
         <div className="relative w-full h-full">
-          <Image
+          <img
             src={currentAd.image_url}
             alt={currentAd.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
-            priority={position === "top"}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
