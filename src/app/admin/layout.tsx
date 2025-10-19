@@ -2,10 +2,58 @@ import AdminSidebar from "@/components/sections/Admin/Sidebar";
 import { isAdmin } from "@/actions/admin";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import { createClient } from "@/utils/supabase/server";
 
-export default async function AdminLayout({ children }: { children: React.Node }) {
+// ============================================
+// WHITELIST EMAIL ADMIN
+// Hanya email ini yang bisa akses admin panel
+// ============================================
+const ADMIN_EMAILS = [
+  "stressgue934@gmail.com",
+  "zflixid@gmail.com",
+];
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  
+  // Redirect jika tidak login
+  if (!user) {
+    redirect("/auth?redirect=/admin");
+  }
+  
+  // Auto-create atau update profile untuk admin yang di whitelist
+  if (user && ADMIN_EMAILS.includes(user.email || "")) {
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id, is_admin")
+      .eq("id", user.id)
+      .single();
+    
+    // Jika profile belum ada, buat baru dengan is_admin = true
+    if (!existingProfile) {
+      await supabase.from("profiles").insert({
+        id: user.id,
+        username: user.email?.split("@")[0] || "admin",
+        is_admin: true,
+      });
+    } else if (!existingProfile.is_admin) {
+      // Jika profile sudah ada tapi is_admin = false, update ke true
+      await supabase
+        .from("profiles")
+        .update({ is_admin: true })
+        .eq("id", user.id);
+    }
+  }
+  
+  // Check admin status
   const admin = await isAdmin();
   
+  // Redirect jika bukan admin
   if (!admin) {
     redirect("/");
   }
@@ -36,6 +84,10 @@ export default async function AdminLayout({ children }: { children: React.Node }
                 Admin Dashboard
               </h1>
               <p className="text-sm text-default-400 mt-1">Cinemadadok Management Panel</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-default-500">Logged in as</p>
+              <p className="text-sm font-medium text-primary">{user.email}</p>
             </div>
           </div>
         </div>
