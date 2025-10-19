@@ -21,34 +21,23 @@ const DISCLAIMER_CONTENT = {
   paragraphs: [
     {
       id: "welcome",
-      content: "🎬 Selamat datang di Bioskop Dadok",
+      content: "🎬 Welcome to Cikini Asia",
     },
     {
       id: "purpose",
       content:
-        "Website ini dibuat hanya untuk keperluan edukasi & eksperimen pribadi. Semua konten yang ditampilkan di sini tidak disimpan, tidak diperjualbelikan, dan bukan untuk tujuan ilegal.",
+        "Cikini Asia is a free movie streaming platform created for entertainment and educational purposes only. All content shown here is sourced from third parties — we don't store, sell, or distribute any media files.",
     },
     {
       id: "fun-note",
-      content: "Jadi santai aja, ini cuma project",
-      emphasis: "iseng–iseng yang serius.",
-      continuation: "😉",
-    },
-    {
-      id: "creator",
-      content: "🔧 Dibuat oleh",
-      emphasis: "Rizkan Isya Pratama",
+      content: "Sit back and enjoy the show — this is just a creative public project made for fun.",
+      emphasis: "😉",
     },
     {
       id: "contact",
       content:
-        "Punya ide buat website keren, aplikasi, atau butuh bantuin soal cybersecurity? Langsung aja kontak lewat:",
-      emphasis: "🌐 dadortx.com",
-      continuation: "(ada WhatsApp-nya juga, tinggal klik)",
-    },
-    {
-      id: "footer",
-      content: "🧠 Coding adalah karya, dan ini salah satunya.",
+        "💼 For business inquiries or banner ad placements, contact us on Telegram:",
+      emphasis: "@Makethman777 or @Guardianmaster (Admin 2)",
     },
   ],
 };
