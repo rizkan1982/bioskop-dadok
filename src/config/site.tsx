@@ -16,7 +16,7 @@ import { TbFolder, TbFolderFilled } from "react-icons/tb";
 export const siteConfig: SiteConfigType = {
   name: "Cikini Asia",
   description: "Your only choice for a free movies and tv shows streaming website.",
-  favicon: "/icons/cikini.png",
+  favicon: "/icons/cikini.png?v=2", // Added version to bust browser cache
   navItems: [
     {
       label: "Home",
@@ -128,7 +128,7 @@ export const siteConfig: SiteConfigType = {
     ],
   },
   socials: {
-    instagram: "https://www.instagram.com/bukan_ni66a/",
+    telegram: "https://t.me/makethman777",
   },
 };
 
