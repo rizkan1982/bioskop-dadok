@@ -67,6 +67,11 @@ export default function InlineBannerAd({ className = "" }: InlineBannerAdProps) 
               alt={ad.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
+              crossOrigin="anonymous"
+              onError={(e) => {
+                console.error("Failed to load inline ad image:", ad.image_url);
+                e.currentTarget.style.display = "block";
+              }}
             />
             
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
