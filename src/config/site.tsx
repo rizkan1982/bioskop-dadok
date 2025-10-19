@@ -14,9 +14,9 @@ import {
 import { TbFolder, TbFolderFilled } from "react-icons/tb";
 
 export const siteConfig: SiteConfigType = {
-  name: "Cinemadadok",
+  name: "Cikini Asia",
   description: "Your only choice for a free movies and tv shows streaming website.",
-  favicon: "/icons/dadologo.png",
+  favicon: "/icons/cikini.png",
   navItems: [
     {
       label: "Home",
