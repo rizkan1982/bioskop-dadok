@@ -45,11 +45,15 @@ export async function updateSession(request: NextRequest) {
   // Check if path is admin (requires admin role)
   const isAdminPath = ADMIN_PATHS.some((path) => pathname.startsWith(path));
 
-  // If user is NOT logged in and trying to access protected content
-  if (!user && !isPublicPath) {
+  // ============================================
+  // HANYA ADMIN PATHS YANG BUTUH LOGIN
+  // User biasa bisa nonton tanpa login!
+  // ============================================
+  // If user is NOT logged in and trying to access ADMIN area
+  if (!user && isAdminPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth";
-    url.searchParams.set("next", pathname); // Changed from "redirect" to "next" to match callback handler
+    url.searchParams.set("next", pathname);
 
     const redirectRes = NextResponse.redirect(url);
 
