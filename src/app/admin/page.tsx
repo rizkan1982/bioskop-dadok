@@ -42,7 +42,7 @@ export default function AdminDashboardPage() {
       <div>
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-foreground-500 mt-2">
-          Welcome back! Here's what's happening with Cinemadadok.
+          Welcome back! Here's what's happening with Cikini Asia.
         </p>
       </div>
       
