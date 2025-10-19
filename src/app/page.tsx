@@ -14,7 +14,7 @@ const HomePage: NextPage = () => {
       {/* SCROLLING NOTICE - Banner Informasi */}
       {/* ========================================= */}
       <ScrollingNotice 
-        text="Selamat datang di Cinemadadok! Nikmati film dan series terbaik. Jangan lupa follow sosial media kami untuk update terbaru!"
+        text="Welcome to Cikini Asia! Enjoy the best movies and series. Follow our social media for the latest updates!"
       />
       
       {/* ========================================= */}
