@@ -3,6 +3,15 @@
 import { createClient } from "@/utils/supabase/server";
 import { unstable_noStore as noStore } from "next/cache";
 
+// ============================================
+// WHITELIST EMAIL ADMIN
+// Hanya email ini yang bisa akses admin panel
+// ============================================
+const ADMIN_EMAILS = [
+  "stressgue934@gmail.com",
+  "zflixid@gmail.com",
+];
+
 // Check if current user is admin
 export async function isAdmin(): Promise<boolean> {
   noStore();
@@ -16,6 +25,12 @@ export async function isAdmin(): Promise<boolean> {
     
     if (!user) return false;
     
+    // Check 1: Email whitelist (priority tertinggi)
+    if (ADMIN_EMAILS.includes(user.email || "")) {
+      return true;
+    }
+    
+    // Check 2: Database is_admin field (fallback)
     const { data: profile } = await supabase
       .from("profiles")
       .select("is_admin")
@@ -26,6 +41,36 @@ export async function isAdmin(): Promise<boolean> {
   } catch (error) {
     console.error("Error checking admin status:", error);
     return false;
+  }
+}
+
+// Get current user with admin status
+export async function getCurrentUser() {
+  noStore();
+  
+  try {
+    const supabase = await createClient();
+    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    
+    if (!user) return null;
+    
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+    
+    return {
+      ...user,
+      profile,
+      isAdmin: await isAdmin(),
+    };
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    return null;
   }
 }
 
