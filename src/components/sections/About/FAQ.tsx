@@ -5,9 +5,9 @@ import { Accordion, AccordionItem, Link } from "@heroui/react";
 
 const FAQS = [
   {
-    title: "🤔 What is Cinemadadok?",
+    title: "🤔 What is Cikini Asia?",
     description:
-      "Just like every other website, Cinemadadok is also a streaming site that helps to easily access all the TV shows and movies we wanted, without spending hours searching for them. Created by Rizkan Isya Pratama.",
+      "Just like every other website, Cikini Asia is also a streaming site that helps to easily access all the TV shows and movies we wanted, without spending hours searching for them.",
   },
   {
     title: "❓ So what do we actually do?",
