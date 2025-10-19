@@ -73,8 +73,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex items-center gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 border border-white/5 backdrop-blur-sm">
             <div className="relative w-14 h-14 rounded-xl overflow-hidden ring-2 ring-primary/50 shadow-lg shadow-primary/20">
               <Image
-                src="/icons/dadologo.png"
-                alt="Cinemadadok"
+                src="/icons/cikini.png"
+                alt="Cikini Asia"
                 fill
                 className="object-cover"
               />
@@ -83,7 +83,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-primary-200 to-primary-400 bg-clip-text text-transparent">
                 Admin Dashboard
               </h1>
-              <p className="text-sm text-default-400 mt-1">Cinemadadok Management Panel</p>
+              <p className="text-sm text-default-400 mt-1">Cikini Asia Management Panel</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-default-500">Logged in as</p>
