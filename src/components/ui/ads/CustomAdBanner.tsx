@@ -82,6 +82,11 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
                     alt={ad.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    crossOrigin="anonymous"
+                    onError={(e) => {
+                      console.error("Failed to load ad image:", ad.image_url);
+                      e.currentTarget.style.display = "block";
+                    }}
                   />
                   
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
@@ -108,8 +113,8 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
   // Ukuran diperkecil lagi
   const containerClasses = {
     top: "w-full h-20 md:h-24",
-    middle: "w-full h-24 md:h-32 lg:h-36", // ← LEBIH KECIL LAGI
-    bottom: "w-full h-20 md:h-28 lg:h-32", // ← LEBIH KECIL LAGI
+    middle: "w-full h-24 md:h-32 lg:h-36",
+    bottom: "w-full h-20 md:h-28 lg:h-32",
     sidebar: "w-full h-auto aspect-[3/4]",
   };
 
@@ -127,6 +132,11 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
               alt={currentAd.title}
               className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500"
               loading="lazy"
+              crossOrigin="anonymous"
+              onError={(e) => {
+                console.error("Failed to load ad image:", currentAd.image_url);
+                e.currentTarget.style.display = "block";
+              }}
             />
             
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 md:p-3">
