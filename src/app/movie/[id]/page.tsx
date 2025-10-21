@@ -16,9 +16,7 @@ const BackdropSection = dynamic(() => import("@/components/sections/Movie/Detail
 const OverviewSection = dynamic(() => import("@/components/sections/Movie/Detail/Overview"));
 const CastsSection = dynamic(() => import("@/components/sections/Movie/Detail/Casts"));
 const RelatedSection = dynamic(() => import("@/components/sections/Movie/Detail/Related"));
-// Ads temporarily disabled for white screen fix
-// const AdBanner = dynamic(() => import("@/components/ui/ads/AdBanner"));
-// const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
+const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
 
 const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   const { id } = use(params);
@@ -52,17 +50,24 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
 
   return (
     <div className="mx-auto max-w-5xl">
-      {/* Ads temporarily disabled for white screen fix */}
-      
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
         <div className="flex flex-col gap-6 md:gap-8">
+          {/* Top Banner Ad */}
+          <CustomAdBanner position="top" />
+          
           <BackdropSection movie={movie} />
           <OverviewSection movie={movie} />
+          
+          {/* Middle Banner Ad */}
+          <CustomAdBanner position="middle" />
           
           <CastsSection casts={movie.credits.cast as Cast[]} />
           <PhotosSection images={movie.images.backdrops as Image[]} />
           
           <RelatedSection movie={movie} />
+          
+          {/* Bottom Banner Ad */}
+          <CustomAdBanner position="bottom" />
         </div>
       </Suspense>
     </div>
