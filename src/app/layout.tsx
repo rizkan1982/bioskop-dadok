@@ -14,7 +14,6 @@ import { IS_PRODUCTION, SpacingClasses } from "@/utils/constants";
 import dynamic from "next/dynamic";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense } from "react";
-
 const Disclaimer = dynamic(() => import("@/components/ui/overlay/Disclaimer"));
 const PopCashAd = dynamic(() => import("@/components/ui/ads/PopCashAd"));
 
@@ -96,17 +95,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* PopCash Site Verification */}
         <meta name="ppck-ver" content="20e8554e142282e76e4c2621f556d78c" />
         
-        {/* Block malicious iframe injections */}
-        <meta httpEquiv="Content-Security-Policy" content="frame-src 'self' https://*.googletagservices.com https://*.googlesyndication.com https://*.propellerads.com https://*.adnxs.com https://*.adsystem.amazon.com; frame-ancestors 'self';" />
-        
-        {/* Viewport meta for better mobile experience */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-        
-        {/* Mobile Web App Capable */}
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        
         {/* Unregister old PWA service workers to fix routing issue */}
         <script
           dangerouslySetInnerHTML={{
@@ -129,30 +117,24 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 }
               }
               
-              // Block suspicious iframe injections
+              // Simple iframe monitoring (non-blocking)
               if (typeof window !== 'undefined') {
-                const observer = new MutationObserver(function(mutations) {
-                  mutations.forEach(function(mutation) {
-                    if (mutation.type === 'childList') {
-                      mutation.addedNodes.forEach(function(node) {
-                        if (node.nodeType === 1 && node.tagName === 'IFRAME') {
-                          const iframe = node;
-                          const src = iframe.src || '';
-                          // Block suspicious iframe sources
-                          if (src.includes('go_banner') || src.includes('формируется') || 
-                              src.match(/[а-яё]/i) || // Cyrillic characters
-                              (!src.startsWith('https://') && src.length > 0)) {
-                            console.warn('[Security] Removing suspicious iframe:', src);
-                            iframe.remove();
-                          }
-                        }
-                      });
-                    }
-                  });
-                });
-                
                 window.addEventListener('load', function() {
-                  observer.observe(document.body, { childList: true, subtree: true });
+                  // Monitor for problematic iframes without blocking
+                  const checkIframes = function() {
+                    const iframes = document.querySelectorAll('iframe');
+                    iframes.forEach(function(iframe) {
+                      const src = iframe.src || '';
+                      if (src.includes('go_banner') || src.includes('формируется')) {
+                        console.warn('[Ad Monitor] Detected problematic iframe:', src);
+                        iframe.style.display = 'none';
+                      }
+                    });
+                  };
+                  
+                  // Check periodically but don't block loading
+                  setTimeout(checkIframes, 3000);
+                  setTimeout(checkIframes, 10000);
                 });
               }
             `,
@@ -174,8 +156,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </Providers>
           </NuqsAdapter>
         </Suspense>
-        {/* Safe PopCash PopUnder Ads only if environment variable is set */}
-        {IS_PRODUCTION && process.env.NEXT_PUBLIC_POPCASH_SITE_ID && (
+        {/* PopCash PopUnder Ads (Indonesia-friendly, payment via Paxum/Bitcoin to Bank Indo) */}
+        {process.env.NEXT_PUBLIC_POPCASH_SITE_ID && (
           <PopCashAd siteId={process.env.NEXT_PUBLIC_POPCASH_SITE_ID} />
         )}
         <SpeedInsights debug={false} />
