@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export interface PropellerAdProps {
   /**
@@ -22,10 +22,15 @@ export interface PropellerAdProps {
    * Container style
    */
   style?: React.CSSProperties;
+  
+  /**
+   * Mobile device detection
+   */
+  isMobile?: boolean;
 }
 
 /**
- * PropellerAds Component
+ * Mobile-Safe PropellerAds Component
  * 
  * Usage:
  * <PropellerAd zoneId="XXXXXXX" type="banner" />
@@ -49,35 +54,74 @@ const PropellerAd: React.FC<PropellerAdProps> = ({
   type = "banner",
   className = "",
   style = {},
+  isMobile = false,
 }) => {
+  const [adLoaded, setAdLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
   useEffect(() => {
+    // Skip certain ad types on mobile to prevent issues
+    if (isMobile && (type === "interstitial" || type === "onclick")) {
+      console.warn(`[PropellerAd] Skipping ${type} ad on mobile device`);
+      return;
+    }
+
+    let timeoutId: NodeJS.Timeout;
+    
     try {
       // Banner dan Native ads menggunakan iframe
       if (type === "banner" || type === "native") {
+        const containerId = `propeller-ad-${zoneId}-${Date.now()}`;
+        
         const script = document.createElement("script");
         script.type = "text/javascript";
         script.innerHTML = `
-          atOptions = {
-            'key' : '${zoneId}',
-            'format' : 'iframe',
-            'height' : ${type === "banner" ? 90 : 250},
-            'width' : ${type === "banner" ? 728 : 300},
-            'params' : {}
-          };
+          try {
+            atOptions = {
+              'key' : '${zoneId}',
+              'format' : 'iframe',
+              'height' : ${type === "banner" ? (isMobile ? 50 : 90) : (isMobile ? 200 : 250)},
+              'width' : ${type === "banner" ? (isMobile ? 320 : 728) : (isMobile ? 280 : 300)},
+              'params' : {}
+            };
+          } catch(e) {
+            console.error('[PropellerAd] Configuration error:', e);
+          }
         `;
-        document.body.appendChild(script);
-
+        
         const adScript = document.createElement("script");
         adScript.type = "text/javascript";
         adScript.src = `//www.highperformanceformat.com/${zoneId}/invoke.js`;
+        adScript.async = true;
+        
+        adScript.onload = () => {
+          setAdLoaded(true);
+          console.log('[PropellerAd] Ad loaded successfully');
+        };
+        
+        adScript.onerror = (error) => {
+          console.error('[PropellerAd] Script load error:', error);
+          setHasError(true);
+        };
+
+        // Set timeout to detect loading issues
+        timeoutId = setTimeout(() => {
+          if (!adLoaded) {
+            console.warn('[PropellerAd] Ad loading timeout');
+            setHasError(true);
+          }
+        }, 10000);
+
+        document.body.appendChild(script);
         document.body.appendChild(adScript);
 
         return () => {
+          clearTimeout(timeoutId);
           try {
             if (document.body.contains(script)) document.body.removeChild(script);
             if (document.body.contains(adScript)) document.body.removeChild(adScript);
           } catch (e) {
-            // Silent cleanup error
+            console.warn('[PropellerAd] Cleanup error:', e);
           }
         };
       }
