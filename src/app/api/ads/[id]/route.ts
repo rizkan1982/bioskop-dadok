@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateAd, deleteAd, incrementAdClick } from "@/actions/ads";
 
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
+    const params = await context.params;
     const body = await request.json();
     const result = await updateAd(params.id, body);
     
@@ -28,9 +33,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
+    const params = await context.params;
     const result = await deleteAd(params.id);
     
     if (!result.success) {
@@ -52,9 +58,10 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
+    const params = await context.params;
     const result = await incrementAdClick(params.id);
     return NextResponse.json(result);
   } catch (error) {
