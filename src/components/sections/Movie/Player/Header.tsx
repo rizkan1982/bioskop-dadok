@@ -6,12 +6,14 @@ interface MoviePlayerHeaderProps {
   id: number;
   movieName: string;
   hidden?: boolean;
+  onOpenSource?: () => void;
 }
 
 const MoviePlayerHeader: React.FC<MoviePlayerHeaderProps> = ({
   id,
   movieName,
   hidden,
+  onOpenSource,
 }) => {
   return (
     <div
