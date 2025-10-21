@@ -16,7 +16,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense } from "react";
 const Disclaimer = dynamic(() => import("@/components/ui/overlay/Disclaimer"));
 const PopCashAd = dynamic(() => import("@/components/ui/ads/PopCashAd"));
-const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
+const LayoutWithAds = dynamic(() => import("@/components/ui/layout/LayoutWithAds"));
 
 export const metadata: Metadata = {
   title: siteConfig.name,
@@ -103,15 +103,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               {IS_PRODUCTION && <Disclaimer />}
               <TopNavbar />
               <Sidebar>
-                <div className="flex w-full">
-                  <main className={cn("container mx-auto max-w-full flex-1", SpacingClasses.main)}>
+                <LayoutWithAds>
+                  <div className={SpacingClasses.main}>
                     {children}
-                  </main>
-                  {/* Sidebar Banner Ads - Hidden on mobile, visible on large screens */}
-                  <aside className="hidden xl:block w-72 flex-shrink-0 sticky top-20 h-fit p-4">
-                    <CustomAdBanner position="sidebar" />
-                  </aside>
-                </div>
+                  </div>
+                </LayoutWithAds>
               </Sidebar>
               <BottomNavbar />
             </Providers>
