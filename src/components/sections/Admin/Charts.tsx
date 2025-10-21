@@ -49,7 +49,7 @@ const containerVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 };
@@ -230,7 +230,7 @@ export default function AdminCharts({
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) =>
+                  label={({ name, percent }: any) =>
                     `${name} ${(percent * 100).toFixed(0)}%`
                   }
                   outerRadius={100}
