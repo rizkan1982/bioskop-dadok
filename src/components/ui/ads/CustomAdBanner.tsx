@@ -20,6 +20,12 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     fetchAds();
@@ -86,7 +92,19 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
     e.currentTarget.style.display = "none";
   };
 
+  // Don't render until mounted (prevents hydration mismatch)
+  if (!isMounted) {
+    return null;
+  }
+
+  // Don't render if loading, no ads, or error
   if (loading || ads.length === 0 || hasError) {
+    return null;
+  }
+
+  // Safety check: ensure ads have valid image URLs
+  const validAds = ads.filter(ad => ad.image_url && ad.image_url.trim().length > 0);
+  if (validAds.length === 0) {
     return null;
   }
 
