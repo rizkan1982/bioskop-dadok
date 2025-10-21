@@ -37,6 +37,7 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
   const players = getTvShowPlayers(id, episode.season_number, episode.episode_number, startAt);
   const idle = useIdle(3000);
   const [episodeOpened, episodeHandlers] = useDisclosure(false);
+  const [sourceOpened, sourceHandlers] = useDisclosure(false);
   const [selectedSource] = useQueryState<number>(
     "src",
     parseAsInteger.withDefault(0),
@@ -60,6 +61,7 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
           episode={episode}
           hidden={idle && !mobile}
           selectedSource={selectedSource}
+          onOpenSource={sourceHandlers.open}
           onOpenEpisode={episodeHandlers.open}
           {...props}
         />
