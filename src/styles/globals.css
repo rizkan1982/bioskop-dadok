@@ -138,6 +138,18 @@ script[src*="go_banner"],
   .custom-ad-banner-grid .grid {
     grid-template-columns: 1fr;
   }
+  
+  /* Prevent banner ads from overlapping bottom navigation on mobile */
+  .custom-ad-banner-wrapper,
+  .custom-ad-banner-grid {
+    margin-bottom: 80px !important; /* Space for bottom navbar */
+  }
+  
+  /* Ensure last banner ad on page has extra spacing */
+  .custom-ad-banner-wrapper:last-of-type,
+  .custom-ad-banner-grid:last-of-type {
+    margin-bottom: 100px !important;
+  }
 }
 
 /* Security: Hide potentially malicious content */
