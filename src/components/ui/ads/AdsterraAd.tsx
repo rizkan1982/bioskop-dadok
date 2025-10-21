@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export interface AdsterraAdProps {
   /**
@@ -9,9 +9,9 @@ export interface AdsterraAdProps {
   adKey: string;
   
   /**
-   * Ad type: 'banner', 'native', 'social-bar', 'popunder', 'direct-link'
+   * Ad type: 'banner' or 'native'
    */
-  type?: "banner" | "native" | "social-bar" | "popunder" | "direct-link";
+  type?: "banner" | "native";
   
   /**
    * Additional CSS classes
@@ -22,164 +22,129 @@ export interface AdsterraAdProps {
    * Container style
    */
   style?: React.CSSProperties;
+  
+  /**
+   * Mobile device detection
+   */
+  isMobile?: boolean;
 }
 
 /**
- * Adsterra Ad Component
- * 
- * Usage:
- * <AdsterraAd adKey="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" type="banner" />
- * 
- * Setup:
- * 1. Daftar di https://publishers.adsterra.com
- * 2. Tambahkan website Anda
- * 3. Buat ad unit (Banner, Native, Social Bar, PopUnder, Direct Link)
- * 4. Copy ad key (32 character string)
- * 5. Paste di environment variables
- * 
- * Ad Types:
- * - banner: Standard banner ads (responsive)
- * - native: Native banner yang blend dengan design
- * - social-bar: Fixed bottom bar with social icons
- * - popunder: PopUnder ads (background popup)
- * - direct-link: Direct link ads (link-based monetization)
+ * Mobile-Safe Adsterra Ad Component
  */
 const AdsterraAd: React.FC<AdsterraAdProps> = ({
   adKey,
-  type = "banner",
+  type = "native",
   className = "",
   style = {},
+  isMobile = false,
 }) => {
+  const [adLoaded, setAdLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const containerId = `adsterra-ad-${adKey}-${Date.now()}`;
+
   useEffect(() => {
-    // Banner ads
-    if (type === "banner") {
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.innerHTML = `
-        atOptions = {
-          'key' : '${adKey}',
-          'format' : 'iframe',
-          'height' : 90,
-          'width' : 728,
-          'params' : {}
-        };
-      `;
-      document.body.appendChild(script);
-
-      const adScript = document.createElement("script");
-      adScript.type = "text/javascript";
-      adScript.src = `//www.topcreativeformat.com/${adKey}/invoke.js`;
-      document.body.appendChild(adScript);
-
-      return () => {
-        if (document.body.contains(script)) document.body.removeChild(script);
-        if (document.body.contains(adScript)) document.body.removeChild(adScript);
-      };
+    if (!adKey) {
+      setHasError(true);
+      return;
     }
 
-    // Native Banner
-    if (type === "native") {
+    let timeoutId: NodeJS.Timeout;
+
+    try {
       const script = document.createElement("script");
       script.type = "text/javascript";
-      script.innerHTML = `
-        atOptions = {
-          'key' : '${adKey}',
-          'format' : 'iframe',
-          'height' : 250,
-          'width' : 300,
-          'params' : {}
-        };
-      `;
-      document.body.appendChild(script);
+      script.async = true;
 
-      const adScript = document.createElement("script");
-      adScript.type = "text/javascript";
-      adScript.src = `//www.topcreativeformat.com/${adKey}/invoke.js`;
-      document.body.appendChild(adScript);
+      if (type === "native") {
+        // Native ad configuration
+        script.innerHTML = `
+          try {
+            atOptions = {
+              'key' : '${adKey}',
+              'format' : 'iframe',
+              'height' : ${isMobile ? 200 : 250},
+              'width' : ${isMobile ? 280 : 300},
+              'params' : {}
+            };
+            document.write('<scr' + 'ipt type="text/javascript" src="//www.profitabledisplaynetwork.com/${adKey}/invoke.js"></scr' + 'ipt>');
+          } catch(e) {
+            console.error('[AdsterraAd] Native ad setup error:', e);
+          }
+        `;
+      } else {
+        // Banner ad configuration
+        script.innerHTML = `
+          try {
+            atOptions = {
+              'key' : '${adKey}',
+              'format' : 'iframe',
+              'height' : ${isMobile ? 50 : 90},
+              'width' : ${isMobile ? 320 : 728},
+              'params' : {}
+            };
+            document.write('<scr' + 'ipt type="text/javascript" src="//www.profitabledisplaynetwork.com/${adKey}/invoke.js"></scr' + 'ipt>');
+          } catch(e) {
+            console.error('[AdsterraAd] Banner ad setup error:', e);
+          }
+        `;
+      }
 
-      return () => {
-        if (document.body.contains(script)) document.body.removeChild(script);
-        if (document.body.contains(adScript)) document.body.removeChild(adScript);
-      };
+      // Create container for the ad
+      const container = document.getElementById(containerId);
+      if (container) {
+        container.appendChild(script);
+      }
+
+      // Set timeout to detect loading issues
+      timeoutId = setTimeout(() => {
+        if (!adLoaded) {
+          console.warn('[AdsterraAd] Ad loading timeout');
+          setHasError(true);
+        }
+      }, 10000);
+
+      // Detect ad load success
+      setTimeout(() => {
+        const adElements = document.querySelectorAll(`#${containerId} iframe`);
+        if (adElements.length > 0) {
+          setAdLoaded(true);
+        }
+      }, 3000);
+
+    } catch (error) {
+      console.error('[AdsterraAd] Setup error:', error);
+      setHasError(true);
     }
 
-    // Social Bar (fixed bottom bar)
-    if (type === "social-bar") {
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.innerHTML = `
-        atOptions = {
-          'key' : '${adKey}',
-          'format' : 'iframe',
-          'height' : 60,
-          'width' : 468,
-          'params' : {}
-        };
-      `;
-      document.body.appendChild(script);
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [adKey, type, isMobile, containerId, adLoaded]);
 
-      const adScript = document.createElement("script");
-      adScript.type = "text/javascript";
-      adScript.src = `//www.topcreativeformat.com/${adKey}/invoke.js`;
-      document.body.appendChild(adScript);
-
-      return () => {
-        if (document.body.contains(script)) document.body.removeChild(script);
-        if (document.body.contains(adScript)) document.body.removeChild(adScript);
-      };
-    }
-
-    // PopUnder ads
-    if (type === "popunder") {
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = `//pl${Math.floor(Math.random() * 25) + 1}.profitabledisplaynetwork.com/d${adKey.substring(0, 8)}/invocations.js`;
-      script.setAttribute("data-cfasync", "false");
-      document.body.appendChild(script);
-
-      return () => {
-        if (document.body.contains(script)) document.body.removeChild(script);
-      };
-    }
-
-    // Direct Link
-    if (type === "direct-link") {
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.innerHTML = `
-        atOptions = {
-          'key' : '${adKey}',
-          'format' : 'iframe',
-          'height' : 90,
-          'width' : 728,
-          'params' : {}
-        };
-      `;
-      document.body.appendChild(script);
-
-      const adScript = document.createElement("script");
-      adScript.type = "text/javascript";
-      adScript.src = `//www.topcreativeformat.com/${adKey}/invoke.js`;
-      document.body.appendChild(adScript);
-
-      return () => {
-        if (document.body.contains(script)) document.body.removeChild(script);
-        if (document.body.contains(adScript)) document.body.removeChild(adScript);
-      };
-    }
-  }, [adKey, type]);
-
-  // Visible container untuk banner, native, social-bar, direct-link
-  if (type !== "popunder") {
-    return (
-      <div className={`adsterra-ad-container ${className}`} style={style}>
-        <div id={`adsterra-ad-${adKey}`} />
-      </div>
-    );
+  // Don't render if error occurred
+  if (hasError) {
+    return null;
   }
 
-  // PopUnder tidak perlu visible container
-  return null;
+  return (
+    <div 
+      className={`adsterra-ad-container ${className}`}
+      style={{
+        minHeight: type === "banner" ? (isMobile ? '50px' : '90px') : (isMobile ? '200px' : '250px'),
+        width: '100%',
+        textAlign: 'center',
+        ...style
+      }}
+    >
+      <div id={containerId} />
+      {!adLoaded && (
+        <div className="ad-loading-placeholder p-4 text-center text-sm text-gray-500">
+          Loading ad...
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default AdsterraAd;
