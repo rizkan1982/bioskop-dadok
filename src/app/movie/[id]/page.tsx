@@ -52,10 +52,11 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
     <div className="mx-auto max-w-5xl">
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
         <div className="flex flex-col gap-6 md:gap-8">
-          {/* Top Banner Ad */}
+          <BackdropSection movie={movie} />
+          
+          {/* Top Banner Ad - After backdrop, before overview */}
           <CustomAdBanner position="top" />
           
-          <BackdropSection movie={movie} />
           <OverviewSection movie={movie} />
           
           {/* Middle Banner Ad */}
