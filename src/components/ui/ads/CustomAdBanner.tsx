@@ -78,8 +78,16 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
     }
 
     if (ad.link_url) {
+      // Fix URL: ensure it has protocol (https:// or http://)
+      let targetUrl = ad.link_url.trim();
+      
+      // If URL doesn't start with http:// or https://, add https://
+      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+        targetUrl = 'https://' + targetUrl;
+      }
+      
       // Use window.open with security measures
-      const newWindow = window.open(ad.link_url, "_blank", "noopener,noreferrer,width=800,height=600");
+      const newWindow = window.open(targetUrl, "_blank", "noopener,noreferrer");
       if (newWindow) {
         newWindow.focus();
       }
