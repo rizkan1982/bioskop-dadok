@@ -1,22 +1,17 @@
 import { NextPage } from "next";
 import dynamic from "next/dynamic";
 
-// Temporarily disable ads for debugging white screen
 const ContinueWatching = dynamic(() => import("@/components/sections/Home/ContinueWatching"));
 const HomePageList = dynamic(() => import("@/components/sections/Home/List"));
-// const AdBanner = dynamic(() => import("@/components/ui/ads/AdBanner"));
-// const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
-// const ScrollingNotice = dynamic(() => import("@/components/ui/ads/ScrollingNotice"));
+const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
 
 const HomePage: NextPage = () => {
   return (
     <div className="flex flex-col">
       {/* ========================================= */}
-      {/* ADS TEMPORARILY DISABLED FOR WHITE SCREEN DEBUG */}
+      {/* TOP BANNER ADS */}
       {/* ========================================= */}
-      <div className="px-4 py-6 text-center bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg mx-4">
-        <p className="text-lg">🎬 Welcome to Cikini Asia - Debugging Mode</p>
-      </div>
+      <CustomAdBanner position="top" />
       
       {/* ========================================= */}
       {/* MAIN CONTENT */}
@@ -26,8 +21,14 @@ const HomePage: NextPage = () => {
         {/* TODAY'S TRENDING MOVIES */}
         <HomePageList />
         
+        {/* MIDDLE BANNER ADS */}
+        <CustomAdBanner position="middle" />
+        
         {/* CONTINUE YOUR JOURNEY */}
         <ContinueWatching />
+        
+        {/* BOTTOM BANNER ADS */}
+        <CustomAdBanner position="bottom" />
         
       </div>
     </div>
