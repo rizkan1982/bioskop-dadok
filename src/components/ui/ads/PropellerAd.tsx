@@ -3,51 +3,16 @@
 import { useEffect, useState } from "react";
 
 export interface PropellerAdProps {
-  /**
-   * PropellerAds zone ID
-   */
   zoneId: string;
-  
-  /**
-   * Ad type: 'banner', 'native', 'interstitial', 'onclick', 'push'
-   */
   type?: "banner" | "native" | "interstitial" | "onclick" | "push";
-  
-  /**
-   * Additional CSS classes
-   */
   className?: string;
-  
-  /**
-   * Container style
-   */
   style?: React.CSSProperties;
-  
-  /**
-   * Mobile device detection
-   */
   isMobile?: boolean;
 }
 
 /**
- * Mobile-Safe PropellerAds Component
- * 
- * Usage:
- * <PropellerAd zoneId="XXXXXXX" type="banner" />
- * 
- * Setup:
- * 1. Daftar di https://propellerads.com
- * 2. Tambahkan website Anda
- * 3. Buat ad zone (Banner, Native, Interstitial, etc)
- * 4. Copy zone ID
- * 5. Paste di environment variables
- * 
- * Ad Types:
- * - banner: Standard banner ads (top, sidebar, bottom)
- * - native: Native ads yang blend dengan content
- * - interstitial: Full-page ads saat navigasi
- * - onclick: PopUnder ads (1 click = 1 popup)
- * - push: Push notification subscriptions
+ * Mobile-Safe PropellerAds Component with Error Handling
+ * Prevents error text from appearing on mobile devices
  */
 const PropellerAd: React.FC<PropellerAdProps> = ({
   zoneId,
@@ -60,33 +25,50 @@ const PropellerAd: React.FC<PropellerAdProps> = ({
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    // Skip certain ad types on mobile to prevent issues
+    if (!zoneId) {
+      console.warn('[PropellerAd] No zone ID provided');
+      return;
+    }
+
+    // Skip certain ad types on mobile
     if (isMobile && (type === "interstitial" || type === "onclick")) {
-      console.warn(`[PropellerAd] Skipping ${type} ad on mobile device`);
       return;
     }
 
     let timeoutId: NodeJS.Timeout;
+    let cleanupFns: (() => void)[] = [];
     
     try {
-      // Banner dan Native ads menggunakan iframe
+      // Banner and Native ads
       if (type === "banner" || type === "native") {
-        const containerId = `propeller-ad-${zoneId}-${Date.now()}`;
+        // Create container first
+        const containerId = `propeller-${zoneId}-${Date.now()}`;
+        const container = document.createElement('div');
+        container.id = containerId;
+        container.style.minHeight = isMobile ? '50px' : '90px';
+        container.style.textAlign = 'center';
         
-        const script = document.createElement("script");
-        script.type = "text/javascript";
-        script.innerHTML = `
-          try {
-            atOptions = {
-              'key' : '${zoneId}',
-              'format' : 'iframe',
-              'height' : ${type === "banner" ? (isMobile ? 50 : 90) : (isMobile ? 200 : 250)},
-              'width' : ${type === "banner" ? (isMobile ? 320 : 728) : (isMobile ? 280 : 300)},
-              'params' : {}
-            };
-          } catch(e) {
-            console.error('[PropellerAd] Configuration error:', e);
-          }
+        // Hide any error text that might appear
+        container.style.overflow = 'hidden';
+        
+        const configScript = document.createElement("script");
+        configScript.type = "text/javascript";
+        configScript.textContent = `
+          (function() {
+            try {
+              if (typeof atOptions === 'undefined') {
+                window.atOptions = {
+                  'key': '${zoneId}',
+                  'format': 'iframe',
+                  'height': ${type === "banner" ? (isMobile ? 50 : 90) : (isMobile ? 200 : 250)},
+                  'width': ${type === "banner" ? (isMobile ? 320 : 728) : (isMobile ? 280 : 300)},
+                  'params': {}
+                };
+              }
+            } catch(e) {
+              console.warn('PropellerAd config error:', e);
+            }
+          })();
         `;
         
         const adScript = document.createElement("script");
@@ -96,56 +78,73 @@ const PropellerAd: React.FC<PropellerAdProps> = ({
         
         adScript.onload = () => {
           setAdLoaded(true);
-          console.log('[PropellerAd] Ad loaded successfully');
         };
         
-        adScript.onerror = (error) => {
-          console.error('[PropellerAd] Script load error:', error);
+        adScript.onerror = () => {
           setHasError(true);
+          // Hide the container on error
+          if (container.parentNode) {
+            container.style.display = 'none';
+          }
         };
 
-        // Set timeout to detect loading issues
+        // Timeout to detect issues
         timeoutId = setTimeout(() => {
           if (!adLoaded) {
-            console.warn('[PropellerAd] Ad loading timeout');
             setHasError(true);
+            if (container.parentNode) {
+              container.style.display = 'none';
+            }
           }
-        }, 10000);
+        }, 8000);
 
-        document.body.appendChild(script);
-        document.body.appendChild(adScript);
-
-        return () => {
-          clearTimeout(timeoutId);
-          try {
-            if (document.body.contains(script)) document.body.removeChild(script);
-            if (document.body.contains(adScript)) document.body.removeChild(adScript);
-          } catch (e) {
-            console.warn('[PropellerAd] Cleanup error:', e);
-          }
-        };
+        // Append scripts
+        try {
+          document.body.appendChild(configScript);
+          document.body.appendChild(adScript);
+          
+          cleanupFns.push(() => {
+            try {
+              if (configScript.parentNode) configScript.parentNode.removeChild(configScript);
+              if (adScript.parentNode) adScript.parentNode.removeChild(adScript);
+            } catch (e) {
+              // Silent cleanup
+            }
+          });
+        } catch (e) {
+          console.warn('[PropellerAd] Script append error:', e);
+          setHasError(true);
+        }
       }
 
       // OnClick PopUnder
       if (type === "onclick") {
         const script = document.createElement("script");
         script.type = "text/javascript";
-        script.innerHTML = `
-          var uid = '${zoneId}';
-          var wid = '${zoneId}';
-          var pop_tag = document.createElement('script');
-          pop_tag.src='//cdn.onclickads.net/'+wid+'.js';
-          document.body.appendChild(pop_tag);
+        script.textContent = `
+          (function() {
+            try {
+              var uid = '${zoneId}';
+              var wid = '${zoneId}';
+              var pop_tag = document.createElement('script');
+              pop_tag.src='//cdn.onclickads.net/'+wid+'.js';
+              document.body.appendChild(pop_tag);
+            } catch(e) {
+              console.warn('OnClick ad error:', e);
+            }
+          })();
         `;
-        document.body.appendChild(script);
-
-        return () => {
-          try {
-            if (document.body.contains(script)) document.body.removeChild(script);
-          } catch (e) {
-            // Silent cleanup error
-          }
-        };
+        
+        try {
+          document.body.appendChild(script);
+          cleanupFns.push(() => {
+            try {
+              if (script.parentNode) script.parentNode.removeChild(script);
+            } catch (e) {}
+          });
+        } catch (e) {
+          console.warn('[PropellerAd] OnClick error:', e);
+        }
       }
 
       // Interstitial
@@ -153,45 +152,87 @@ const PropellerAd: React.FC<PropellerAdProps> = ({
         const script = document.createElement("script");
         script.type = "text/javascript";
         script.src = `//thubanoa.com/1?z=${zoneId}`;
-        document.body.appendChild(script);
-
-        return () => {
-          try {
-            if (document.body.contains(script)) document.body.removeChild(script);
-          } catch (e) {
-            // Silent cleanup error
-          }
-        };
+        script.onerror = () => setHasError(true);
+        
+        try {
+          document.body.appendChild(script);
+          cleanupFns.push(() => {
+            try {
+              if (script.parentNode) script.parentNode.removeChild(script);
+            } catch (e) {}
+          });
+        } catch (e) {
+          console.warn('[PropellerAd] Interstitial error:', e);
+        }
       }
 
       // Push Notification
       if (type === "push") {
-        // @ts-ignore
-        if (typeof window !== "undefined" && !window.propellerPushLoaded) {
-          // @ts-ignore
-          window.propellerPushLoaded = true;
+        const w = window as any;
+        if (!w.propellerPushLoaded) {
+          w.propellerPushLoaded = true;
           const script = document.createElement("script");
           script.src = "//cdn.p-n.io/pushly-sdk.min.js?ver=2.0.0";
           script.setAttribute("data-pushly-app-id", zoneId);
-          document.body.appendChild(script);
+          script.onerror = () => setHasError(true);
+          
+          try {
+            document.body.appendChild(script);
+          } catch (e) {
+            console.warn('[PropellerAd] Push error:', e);
+          }
         }
       }
     } catch (error) {
-      // Silent error handling to prevent crashes
-      console.warn('PropellerAd setup error:', error);
+      console.warn('[PropellerAd] Setup error:', error);
+      setHasError(true);
     }
-  }, [zoneId, type]);
 
-  // Banner dan Native perlu container div
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+      cleanupFns.forEach(fn => {
+        try {
+          fn();
+        } catch (e) {
+          // Silent cleanup
+        }
+      });
+    };
+  }, [zoneId, type, isMobile]);
+
+  // Don't render anything if error or ad hasn't loaded yet on mobile
+  if (hasError) {
+    return null;
+  }
+
+  // Banner and Native need visible container
   if (type === "banner" || type === "native") {
     return (
-      <div className={`propeller-ad-container ${className}`} style={style}>
-        <div id={`propeller-ad-${zoneId}`} />
+      <div 
+        className={`propeller-ad-container ${className}`} 
+        style={{
+          ...style,
+          minHeight: isMobile ? '50px' : '90px',
+          overflow: 'hidden', // Hide error text
+          position: 'relative'
+        }}
+      >
+        {!adLoaded && (
+          <div style={{ 
+            padding: '20px', 
+            textAlign: 'center', 
+            color: '#666',
+            fontSize: '12px'
+          }}>
+            {/* Loading placeholder - will be hidden if ad loads */}
+          </div>
+        )}
       </div>
     );
   }
 
-  // OnClick, Interstitial, Push tidak perlu visible container
+  // OnClick, Interstitial, Push don't need visible container
   return null;
 };
 
