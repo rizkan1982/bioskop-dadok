@@ -94,52 +94,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         {/* PopCash Site Verification */}
         <meta name="ppck-ver" content="20e8554e142282e76e4c2621f556d78c" />
-        
-        {/* Unregister old PWA service workers to fix routing issue */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                  for(let registration of registrations) {
-                    console.log('[PWA Cleanup] Unregistering old service worker:', registration.scope);
-                    registration.unregister();
-                  }
-                });
-                // Clear all caches
-                if ('caches' in window) {
-                  caches.keys().then(function(names) {
-                    for (let name of names) {
-                      console.log('[PWA Cleanup] Deleting cache:', name);
-                      caches.delete(name);
-                    }
-                  });
-                }
-              }
-              
-              // Simple iframe monitoring (non-blocking)
-              if (typeof window !== 'undefined') {
-                window.addEventListener('load', function() {
-                  // Monitor for problematic iframes without blocking
-                  const checkIframes = function() {
-                    const iframes = document.querySelectorAll('iframe');
-                    iframes.forEach(function(iframe) {
-                      const src = iframe.src || '';
-                      if (src.includes('go_banner') || src.includes('формируется')) {
-                        console.warn('[Ad Monitor] Detected problematic iframe:', src);
-                        iframe.style.display = 'none';
-                      }
-                    });
-                  };
-                  
-                  // Check periodically but don't block loading
-                  setTimeout(checkIframes, 3000);
-                  setTimeout(checkIframes, 10000);
-                });
-              }
-            `,
-          }}
-        />
       </head>
       <body className={cn("bg-background min-h-dvh antialiased select-none", Poppins.className)}>
         <Suspense fallback={<div className="text-white text-2xl p-8 absolute-center">Loading app...</div>}>
