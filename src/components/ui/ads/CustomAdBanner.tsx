@@ -19,6 +19,7 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
   const [ads, setAds] = useState<Ad[]>([]);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     fetchAds();
@@ -26,13 +27,23 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
 
   const fetchAds = async () => {
     try {
-      const res = await fetch(`/api/ads?active=true&position=${position}`);
+      const res = await fetch(`/api/ads?active=true&position=${position}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       const data = await res.json();
       if (data.success && data.data?.length > 0) {
         setAds(data.data);
       }
     } catch (error) {
       console.error("Error fetching custom ads:", error);
+      setHasError(true);
     } finally {
       setLoading(false);
     }
@@ -49,17 +60,33 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
 
   const handleClick = async (ad: Ad) => {
     try {
-      await fetch(`/api/ads/${ad.id}`, { method: "PATCH" });
+      // Track click
+      await fetch(`/api/ads/${ad.id}`, { 
+        method: "PATCH",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     } catch (error) {
       console.error("Error tracking click:", error);
     }
 
     if (ad.link_url) {
-      window.open(ad.link_url, "_blank", "noopener,noreferrer");
+      // Use window.open with security measures
+      const newWindow = window.open(ad.link_url, "_blank", "noopener,noreferrer,width=800,height=600");
+      if (newWindow) {
+        newWindow.focus();
+      }
     }
   };
 
-  if (loading || ads.length === 0) {
+  // Handle image load error
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error("Failed to load ad image:", e.currentTarget.src);
+    e.currentTarget.style.display = "none";
+  };
+
+  if (loading || ads.length === 0 || hasError) {
     return null;
   }
 
@@ -83,10 +110,7 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     crossOrigin="anonymous"
-                    onError={(e) => {
-                      console.error("Failed to load ad image:", ad.image_url);
-                      e.currentTarget.style.display = "block";
-                    }}
+                    onError={handleImageError}
                   />
                   
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
@@ -107,10 +131,9 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
     );
   }
 
-  // CAROUSEL LAYOUT untuk posisi lain (LEBIH KECIL LAGI!)
+  // CAROUSEL LAYOUT untuk posisi lain
   const currentAd = ads[currentAdIndex];
 
-  // Ukuran diperkecil lagi
   const containerClasses = {
     top: "w-full h-20 md:h-24",
     middle: "w-full h-24 md:h-32 lg:h-36",
@@ -133,10 +156,7 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
               className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500"
               loading="lazy"
               crossOrigin="anonymous"
-              onError={(e) => {
-                console.error("Failed to load ad image:", currentAd.image_url);
-                e.currentTarget.style.display = "block";
-              }}
+              onError={handleImageError}
             />
             
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 md:p-3">
