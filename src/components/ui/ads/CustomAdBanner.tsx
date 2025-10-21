@@ -111,7 +111,7 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
   // GRID LAYOUT untuk posisi TOP (lebih kecil)
   if (position === "top") {
     return (
-      <div className={`${className} custom-ad-banner-grid my-3 md:my-4`}>
+      <div className={`${className} custom-ad-banner-grid my-3 md:my-4 relative z-10`}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
             {ads.map((ad) => (
@@ -160,7 +160,7 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
   };
 
   return (
-    <div className={`${className} custom-ad-banner-wrapper my-2 md:my-3`}>
+    <div className={`${className} custom-ad-banner-wrapper my-2 md:my-3 relative z-10`}>
       <div className="max-w-7xl mx-auto px-4">
         <Card
           isPressable
