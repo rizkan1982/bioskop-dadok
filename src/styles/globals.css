@@ -110,11 +110,22 @@
   }
 }
 
-/* Block suspicious iframes */
+/* Block suspicious iframes and malicious scripts */
 iframe[src*="go_banner"],
 iframe[src*="формируется"],
-iframe[src*="модуле"] {
+iframe[src*="модуле"],
+iframe[width=""],
+iframe[height=""],
+script[src*="go_banner"],
+.custom-ad-banner-wrapper iframe:not([data-allowed="true"]),
+.custom-ad-banner-grid iframe:not([data-allowed="true"]) {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  pointer-events: none !important;
 }
 
 /* Mobile responsive ad containers */
