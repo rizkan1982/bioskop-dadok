@@ -16,8 +16,9 @@ const BackdropSection = dynamic(() => import("@/components/sections/Movie/Detail
 const OverviewSection = dynamic(() => import("@/components/sections/Movie/Detail/Overview"));
 const CastsSection = dynamic(() => import("@/components/sections/Movie/Detail/Casts"));
 const RelatedSection = dynamic(() => import("@/components/sections/Movie/Detail/Related"));
-const AdBanner = dynamic(() => import("@/components/ui/ads/AdBanner"));
-const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
+// Ads temporarily disabled for white screen fix
+// const AdBanner = dynamic(() => import("@/components/ui/ads/AdBanner"));
+// const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
 
 const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   const { id } = use(params);
@@ -51,34 +52,17 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
 
   return (
     <div className="mx-auto max-w-5xl">
-      {/* ========================================= */}
-      {/* BANNER DI PALING ATAS (SEBELUM KONTEN) */}
-      {/* ========================================= */}
-      <div className="mb-6">
-        <CustomAdBanner position="top" />
-      </div>
-
+      {/* Ads temporarily disabled for white screen fix */}
+      
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
         <div className="flex flex-col gap-6 md:gap-8">
           <BackdropSection movie={movie} />
           <OverviewSection movie={movie} />
           
-          {/* ========================================= */}
-          {/* MIDDLE BANNER */}
-          {/* ========================================= */}
-          <CustomAdBanner position="middle" />
-          <AdBanner provider="adsterra" variant="banner" placement="content" />
-          
           <CastsSection casts={movie.credits.cast as Cast[]} />
           <PhotosSection images={movie.images.backdrops as Image[]} />
           
           <RelatedSection movie={movie} />
-          
-          {/* ========================================= */}
-          {/* BOTTOM BANNER */}
-          {/* ========================================= */}
-          <CustomAdBanner position="bottom" />
-          <AdBanner provider="adsterra" variant="banner" placement="bottom" />
         </div>
       </Suspense>
     </div>
