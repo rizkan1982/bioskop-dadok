@@ -305,10 +305,10 @@ export default function AdsManagementPage() {
                     onChange={(e) => setFormData({ ...formData, position: e.target.value as any })}
                     isRequired
                   >
-                    <SelectItem key="top" value="top">🔝 Top - Banner Atas</SelectItem>
-                    <SelectItem key="middle" value="middle">📍 Middle - Banner Tengah</SelectItem>
-                    <SelectItem key="bottom" value="bottom">⬇️ Bottom - Banner Bawah</SelectItem>
-                    <SelectItem key="sidebar" value="sidebar">📌 Sidebar - Samping</SelectItem>
+                    <SelectItem key="top">🔝 Top - Banner Atas</SelectItem>
+                    <SelectItem key="middle">📍 Middle - Banner Tengah</SelectItem>
+                    <SelectItem key="bottom">⬇️ Bottom - Banner Bawah</SelectItem>
+                    <SelectItem key="sidebar">📌 Sidebar - Samping</SelectItem>
                   </Select>
 
                   <Input
