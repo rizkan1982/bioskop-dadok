@@ -14,15 +14,16 @@ interface ResumeCardProps {
 }
 
 const ResumeCard: React.FC<ResumeCardProps> = ({ media }) => {
-  const releaseYear = new Date(media.release_date).getFullYear();
-  const posterImage = getImageUrl(media.backdrop_path || media.poster_path || "");
+  // Note: release_date, backdrop_path, vote_average not in histories table
+  const releaseYear = new Date().getFullYear(); // Placeholder
+  const posterImage = getImageUrl(media.poster_path || "");
 
   const getRedirectLink = useCallback(() => {
-    if (media.type === "movie") {
-      return `/movie/${media.media_id}/player`;
+    if (media.content_type === "movie") {
+      return `/movie/${media.tmdb_id}/player`;
     }
-    if (media.type === "tv") {
-      return `/tv/${media.media_id}/${media.season}/${media.episode}/player`;
+    if (media.content_type === "tv") {
+      return `/tv/${media.tmdb_id}/${media.season_number}/${media.episode_number}/player`;
     }
     return "/";
   }, [media]);
@@ -40,7 +41,7 @@ const ResumeCard: React.FC<ResumeCardProps> = ({ media }) => {
               <PlayOutline className="h-6 w-6 text-white" />
             </div>
           </div>
-          {media.type === "tv" && (
+          {media.content_type === "tv" && (
             <Chip
               size="sm"
               variant="faded"
@@ -49,7 +50,7 @@ const ResumeCard: React.FC<ResumeCardProps> = ({ media }) => {
               className="absolute right-2 top-2 z-20"
               classNames={{ content: "font-bold" }}
             >
-              S{media.season} E{media.episode}
+              S{media.season_number} E{media.episode_number}
             </Chip>
           )}
           <Chip
@@ -57,17 +58,17 @@ const ResumeCard: React.FC<ResumeCardProps> = ({ media }) => {
             size="sm"
             variant="faded"
             className="absolute left-2 top-2 z-20"
-            color={media.completed ? "success" : undefined}
+            color={media.progress >= 95 ? "success" : undefined}
           >
-            {media.completed ? "Completed" : formatDuration(media.last_position)}
+            {media.progress >= 95 ? "Completed" : `${Math.round(media.progress)}%`}
           </Chip>
           <Progress
             size="sm"
             radius="md"
             aria-label="Watch progress"
             className="absolute bottom-0 z-10 w-full"
-            color={media.type === "movie" ? "primary" : "warning"}
-            value={(media.last_position / media.duration) * 100}
+            color={media.content_type === "movie" ? "primary" : "warning"}
+            value={media.progress}
           />
           <div className="absolute bottom-0 z-2 h-1/2 w-full bg-linear-to-t from-black from-1%" />
           <div className="absolute bottom-0 z-3 flex w-full flex-col gap-1 p-3">
@@ -77,7 +78,7 @@ const ResumeCard: React.FC<ResumeCardProps> = ({ media }) => {
             </div>
             <div className="flex justify-between text-xs">
               <p>{releaseYear}</p>
-              <Rating rate={media.vote_average} />
+              <Rating rate={0} />
             </div>
           </div>
           <Image
