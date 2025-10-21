@@ -223,22 +223,18 @@ export async function incrementAdClick(id: string) {
   try {
     const supabase = await createClient();
     
-    const { error } = await supabase.rpc("increment_ad_clicks", { ad_id: id });
+    // Direct update approach (more reliable without custom RPC functions)
+    const { data: currentAd } = await supabase
+      .from("ads")
+      .select("click_count")
+      .eq("id", id)
+      .single();
     
-    // If RPC doesn't exist, fallback to direct update
-    if (error) {
-      const { data: currentAd } = await supabase
+    if (currentAd) {
+      await supabase
         .from("ads")
-        .select("click_count")
-        .eq("id", id)
-        .single();
-      
-      if (currentAd) {
-        await supabase
-          .from("ads")
-          .update({ click_count: currentAd.click_count + 1 })
-          .eq("id", id);
-      }
+        .update({ click_count: currentAd.click_count + 1 })
+        .eq("id", id);
     }
     
     return { success: true };
