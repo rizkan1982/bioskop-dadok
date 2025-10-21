@@ -91,7 +91,7 @@ export async function getAllUsers() {
       .from("profiles")
       .select(`
         id,
-        username,
+        email,
         is_admin,
         created_at
       `)
@@ -150,14 +150,14 @@ export async function getAllHistories() {
     // Get profiles separately
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, username");
+      .select("id, email");
     
     // Merge data
     const historiesWithProfiles = histories?.map((history) => {
       const profile = profiles?.find((p) => p.id === history.user_id);
       return {
         ...history,
-        profiles: { username: profile?.username || "Unknown" }
+        profiles: { email: profile?.email || "Unknown" }
       };
     });
     
@@ -176,46 +176,49 @@ export async function getAllHistories() {
 export async function getAllWatchlist() {
   noStore();
   
-  try {
-    const supabase = await createClient(true); // Use service role
-    
-    // Check if current user is admin
-    const adminCheck = await isAdmin();
-    if (!adminCheck) {
-      return { success: false, message: "Unauthorized access", data: null };
-    }
-    
-    const { data: watchlist, error } = await supabase
-      .from("watchlist")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
-    
-    if (error) throw error;
-    
-    // Get profiles separately
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, username");
-    
-    // Merge data
-    const watchlistWithProfiles = watchlist?.map((item) => {
-      const profile = profiles?.find((p) => p.id === item.user_id);
-      return {
-        ...item,
-        profiles: { username: profile?.username || "Unknown" }
-      };
-    });
-    
-    return { success: true, message: "Watchlist fetched successfully", data: watchlistWithProfiles };
-  } catch (error) {
-    console.error("Error fetching watchlist:", error);
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Failed to fetch watchlist",
-      data: null,
-    };
-  }
+  // Temporarily disabled - watchlist table not yet defined in database
+  return { success: false, message: "Watchlist feature coming soon", data: null };
+  
+  // try {
+  //   const supabase = await createClient(true); // Use service role
+  //   
+  //   // Check if current user is admin
+  //   const adminCheck = await isAdmin();
+  //   if (!adminCheck) {
+  //     return { success: false, message: "Unauthorized access", data: null };
+  //   }
+  //   
+  //   const { data: watchlist, error } = await supabase
+  //     .from("watchlist")
+  //     .select("*")
+  //     .order("created_at", { ascending: false })
+  //     .limit(100);
+  //   
+  //   if (error) throw error;
+  //   
+  //   // Get profiles separately
+  //   const { data: profiles } = await supabase
+  //     .from("profiles")
+  //     .select("id, email");
+  //   
+  //   // Merge data
+  //   const watchlistWithProfiles = watchlist?.map((item) => {
+  //     const profile = profiles?.find((p) => p.id === item.user_id);
+  //     return {
+  //       ...item,
+  //       profiles: { email: profile?.email || "Unknown" }
+  //     };
+  //   });
+  //   
+  //   return { success: true, message: "Watchlist fetched successfully", data: watchlistWithProfiles };
+  // } catch (error) {
+  //   console.error("Error fetching watchlist:", error);
+  //   return {
+  //     success: false,
+  //     message: error instanceof Error ? error.message : "Failed to fetch watchlist",
+  //     data: null,
+  //   };
+  // }
 }
 
 // Get dashboard statistics
@@ -241,17 +244,15 @@ export async function getAdminStats() {
       .from("histories")
       .select("*", { count: "exact", head: true });
     
-    // Get total watchlist items
-    const { count: totalWatchlist } = await supabase
-      .from("watchlist")
-      .select("*", { count: "exact", head: true });
+    // Get total watchlist items (temporarily disabled)
+    const totalWatchlist = 0; // Watchlist feature coming soon
     
     // Get unique media watched count
     const { data: uniqueMedia } = await supabase
       .from("histories")
-      .select("media_id", { count: "exact" });
+      .select("tmdb_id", { count: "exact" });
     
-    const uniqueMediaCount = new Set(uniqueMedia?.map((h) => h.media_id)).size;
+    const uniqueMediaCount = new Set(uniqueMedia?.map((h) => h.tmdb_id)).size;
     
     // Get recent signups (last 7 days)
     const sevenDaysAgo = new Date();
