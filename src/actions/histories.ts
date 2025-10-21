@@ -62,22 +62,18 @@ export const syncHistory = async (
       .upsert(
         {
           user_id: user.id,
-          media_id: data.mtmdbId,
-          type: data.mediaType,
-          season: data.season || 0,
-          episode: data.episode || 0,
+          tmdb_id: data.mtmdbId,
+          content_type: data.mediaType,
+          season_number: data.season || null,
+          episode_number: data.episode || null,
           duration: data.duration,
-          last_position: data.currentTime,
-          completed: completed || false,
-          adult: "adult" in media ? media.adult : false,
-          backdrop_path: media.backdrop_path,
+          progress: data.currentTime,
           poster_path: media.poster_path,
-          release_date: "release_date" in media ? media.release_date : media.first_air_date,
           title: "title" in media ? mutateMovieTitle(media) : mutateTvShowTitle(media),
-          vote_average: media.vote_average,
+          watched_at: new Date().toISOString(),
         },
         {
-          onConflict: "user_id,media_id,type,season,episode",
+          onConflict: "user_id,tmdb_id,content_type,season_number,episode_number",
         },
       )
       .select();
@@ -166,17 +162,17 @@ export const getMovieLastPosition = async (id: number): Promise<number> => {
 
     const { data, error } = await supabase
       .from("histories")
-      .select("last_position")
+      .select("progress")
       .eq("user_id", user.id)
-      .eq("media_id", id)
-      .eq("type", "movie");
+      .eq("tmdb_id", id)
+      .eq("content_type", "movie");
 
     if (error) {
       console.info("History fetch error:", error);
       return 0;
     }
 
-    return data?.[0]?.last_position || 0;
+    return data?.[0]?.progress || 0;
   } catch (error) {
     console.info("Unexpected error:", error);
     return 0;
@@ -203,19 +199,19 @@ export const getTvShowLastPosition = async (
 
     const { data, error } = await supabase
       .from("histories")
-      .select("last_position")
+      .select("progress")
       .eq("user_id", user.id)
-      .eq("media_id", id)
-      .eq("type", "tv")
-      .eq("season", season)
-      .eq("episode", episode);
+      .eq("tmdb_id", id)
+      .eq("content_type", "tv")
+      .eq("season_number", season)
+      .eq("episode_number", episode);
 
     if (error) {
       console.info("History fetch error:", error);
       return 0;
     }
 
-    return data?.[0]?.last_position || 0;
+    return data?.[0]?.progress || 0;
   } catch (error) {
     console.info("Unexpected error:", error);
     return 0;
