@@ -5,6 +5,7 @@ import { IS_PRODUCTION } from "@/utils/constants";
 import AdSenseAd from "./AdSenseAd";
 import PropellerAd from "./PropellerAd";
 import AdsterraAd from "./AdsterraAd";
+import { useEffect, useState } from "react";
 
 export interface AdBannerProps {
   /**
@@ -30,7 +31,7 @@ export interface AdBannerProps {
 }
 
 /**
- * Universal Ad Banner Component with Dual Adsterra Support
+ * Universal Ad Banner Component with Mobile-Safe Loading
  * 
  * Usage:
  * <AdBanner provider="adsterra" variant="native" placement="top" />
@@ -50,6 +51,34 @@ const AdBanner: React.FC<AdBannerProps> = ({
   variant = "native",
   className = "",
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile device
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    
+    // Add error listener for iframe issues
+    const handleError = (event: ErrorEvent) => {
+      if (event.message && (
+        event.message.includes('go_banner') ||
+        event.message.includes('iframe') ||
+        /[а-яё]/i.test(event.message) // Cyrillic characters
+      )) {
+        console.warn('[AdBanner] Error detected, hiding ad:', event.message);
+        setHasError(true);
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  // Hide ad if error detected
+  if (hasError) {
+    return null;
+  }
+
   // Hanya tampilkan di production
   if (!IS_PRODUCTION) {
     return (
