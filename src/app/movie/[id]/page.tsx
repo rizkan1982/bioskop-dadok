@@ -53,13 +53,9 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
         <div className="flex flex-col gap-6 md:gap-8">
           <BackdropSection movie={movie} />
-          
-          {/* Top Banner Ad - After backdrop, before overview */}
-          <CustomAdBanner position="top" />
-          
           <OverviewSection movie={movie} />
           
-          {/* Middle Banner Ad */}
+          {/* Middle Banner Ad - Setelah overview, sebelum cast */}
           <CustomAdBanner position="middle" />
           
           <CastsSection casts={movie.credits.cast as Cast[]} />
@@ -67,7 +63,7 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
           
           <RelatedSection movie={movie} />
           
-          {/* Bottom Banner Ad */}
+          {/* Bottom Banner Ad - Di akhir page */}
           <CustomAdBanner position="bottom" />
         </div>
       </Suspense>
