@@ -5,6 +5,7 @@ import { IS_PRODUCTION } from "@/utils/constants";
 import AdSenseAd from "./AdSenseAd";
 import PropellerAd from "./PropellerAd";
 import AdsterraAd from "./AdsterraAd";
+import { useEffect, useState } from "react";
 
 export interface AdBannerProps {
   /**
@@ -30,19 +31,7 @@ export interface AdBannerProps {
 }
 
 /**
- * Universal Ad Banner Component with Dual Adsterra Support
- * 
- * Usage:
- * <AdBanner provider="adsterra" variant="native" placement="top" />
- * <AdBanner provider="adsterra" variant="banner" placement="content" />
- * <AdBanner provider="auto" placement="top" /> // Auto-select
- * 
- * Environment Variables:
- * - NEXT_PUBLIC_ADSENSE_CLIENT
- * - NEXT_PUBLIC_ADSENSE_SLOT
- * - NEXT_PUBLIC_PROPELLER_ZONE_ID
- * - NEXT_PUBLIC_ADSTERRA_NATIVE_KEY
- * - NEXT_PUBLIC_ADSTERRA_BANNER_KEY
+ * Universal Ad Banner Component with Mobile-Safe Loading
  */
 const AdBanner: React.FC<AdBannerProps> = ({
   provider = "auto",
@@ -50,7 +39,35 @@ const AdBanner: React.FC<AdBannerProps> = ({
   variant = "native",
   className = "",
 }) => {
-  // Hanya tampilkan di production
+  const [isMobile, setIsMobile] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile device
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    
+    // Add error listener for iframe issues
+    const handleError = (event: ErrorEvent) => {
+      if (event.message && (
+        event.message.includes('go_banner') ||
+        event.message.includes('iframe') ||
+        event.message.match(/[а-яё]/i) // Cyrillic characters
+      )) {
+        console.warn('[AdBanner] Error detected, hiding ad:', event.message);
+        setHasError(true);
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  // Hide ad if error detected
+  if (hasError) {
+    return null;
+  }
+
+  // Show placeholder in development
   if (!IS_PRODUCTION) {
     return (
       <Card className={`my-4 p-4 text-center ${className}`}>
@@ -75,7 +92,7 @@ const AdBanner: React.FC<AdBannerProps> = ({
     }
   }
 
-  // Google AdSense
+  // Google AdSense - Mobile Safe
   if (provider === "adsense") {
     const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "";
     const slot = process.env.NEXT_PUBLIC_ADSENSE_SLOT || "";
@@ -86,7 +103,7 @@ const AdBanner: React.FC<AdBannerProps> = ({
     }
 
     return (
-      <div className={`ad-banner-container my-4 ${className}`}>
+      <div className={`ad-banner-container my-4 ${className}`} style={{ minHeight: isMobile ? '50px' : '90px' }}>
         <AdSenseAd
           client={client}
           slot={slot}
@@ -97,7 +114,7 @@ const AdBanner: React.FC<AdBannerProps> = ({
     );
   }
 
-  // PropellerAds
+  // PropellerAds - Mobile Optimized
   if (provider === "propeller") {
     const zoneId = process.env.NEXT_PUBLIC_PROPELLER_ZONE_ID || "";
     
@@ -108,17 +125,16 @@ const AdBanner: React.FC<AdBannerProps> = ({
 
     return (
       <div className={`ad-banner-container my-4 ${className}`}>
-        <PropellerAd zoneId={zoneId} type="banner" />
+        <PropellerAd zoneId={zoneId} type="banner" isMobile={isMobile} />
       </div>
     );
   }
 
-  // Adsterra with Dual Support
+  // Adsterra with Mobile Safety
   if (provider === "adsterra") {
     const nativeKey = process.env.NEXT_PUBLIC_ADSTERRA_NATIVE_KEY || "";
     const bannerKey = process.env.NEXT_PUBLIC_ADSTERRA_BANNER_KEY || "";
     
-    // Determine which key to use based on variant
     let adKey = "";
     let adType: "banner" | "native" = "native";
     
@@ -129,11 +145,9 @@ const AdBanner: React.FC<AdBannerProps> = ({
       adKey = bannerKey;
       adType = "banner";
     } else if (nativeKey) {
-      // Fallback to native if available
       adKey = nativeKey;
       adType = "native";
     } else if (bannerKey) {
-      // Fallback to banner if available
       adKey = bannerKey;
       adType = "banner";
     }
@@ -145,7 +159,7 @@ const AdBanner: React.FC<AdBannerProps> = ({
 
     return (
       <div className={`ad-banner-container my-4 ${className}`}>
-        <AdsterraAd adKey={adKey} type={adType} />
+        <AdsterraAd adKey={adKey} type={adType} isMobile={isMobile} />
       </div>
     );
   }
