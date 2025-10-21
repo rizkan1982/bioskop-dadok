@@ -118,8 +118,8 @@ const Disclaimer: React.FC = () => {
               <DisclaimerParagraph
                 key={paragraph.id}
                 content={paragraph.content}
-                emphasis={paragraph.emphasis}
-                continuation={paragraph.continuation}
+                emphasis={'emphasis' in paragraph ? paragraph.emphasis : undefined}
+                continuation={'continuation' in paragraph ? (paragraph as any).continuation : undefined}
               />
             ))}
           </ScrollShadow>
