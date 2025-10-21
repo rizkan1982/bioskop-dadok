@@ -1,25 +1,23 @@
-// PWA COMPLETELY REMOVED TO FIX ROUTING ISSUE
-// TODO: Re-enable PWA after movie detail page works correctly
-// import withPWAInit from "@ducanh2912/next-pwa";
-import { NextConfig } from "next/dist/server/config";
+import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Enable strict TypeScript checking
   typescript: {
-    // ⚠️ Temporarily ignore type errors during build for Vercel deployment
-    // TODO: Fix type errors in src/app/admin/layout.tsx and other files
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
+  // Enable ESLint during builds
   eslint: {
-    // ⚠️ Temporarily ignore ESLint errors during build for Vercel deployment
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
-  // https://github.com/payloadcms/payload/issues/12550#issuecomment-2939070941
+  // Turbo configuration
   turbopack: {
     resolveExtensions: [".mdx", ".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
   },
+  // Performance optimizations
   experimental: {
     optimizePackageImports: ["@heroui/react"],
   },
+  // Image optimization
   images: {
     remotePatterns: [
       {
@@ -43,6 +41,32 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+        ],
+      },
+    ];
   },
 };
 
