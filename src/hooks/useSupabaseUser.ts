@@ -8,7 +8,7 @@ import { queryClient } from "@/app/providers";
 import { addToast } from "@heroui/react";
 
 type AuthUserData = User & {
-  username: string;
+  displayName: string;
 };
 
 const fetchUser = async (): Promise<AuthUserData | null> => {
@@ -37,18 +37,11 @@ const fetchUser = async (): Promise<AuthUserData | null> => {
   }
 
   if (user) {
-    const { data: username } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id", user.id)
-      .single();
-
-    if (username) {
-      AuthUser = {
-        ...user,
-        username: username.username,
-      };
-    }
+    // Use email as display name since profiles table doesn't have username field
+    AuthUser = {
+      ...user,
+      displayName: user.email?.split('@')[0] || 'User',
+    };
   }
 
   return AuthUser;
