@@ -59,7 +59,7 @@ const UserProfileButton: React.FC = () => {
 
   const ProfileButton = (
     <Button
-      title={guest ? "Login" : user.username}
+      title={guest ? "Login" : user.displayName}
       variant="light"
       href={guest ? "/auth" : undefined}
       as={guest ? Link : undefined}
@@ -79,7 +79,7 @@ const UserProfileButton: React.FC = () => {
       {guest ? (
         <User className="text-xl" />
       ) : (
-        <p className="hidden max-w-32 truncate md:block lg:max-w-56">{user.username}</p>
+        <p className="hidden max-w-32 truncate md:block lg:max-w-56">{user.displayName}</p>
       )}
     </Button>
   );
