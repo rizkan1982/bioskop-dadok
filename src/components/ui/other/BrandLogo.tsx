@@ -22,8 +22,8 @@ const BrandLogo: React.FC<BrandLogoProps> = ({ animate = false, className }) => 
         )}
       >
         <Image
-          src="/icons/cikini.png"
-          alt="Cikini Asia Logo"
+          src="/icons/dadologobaru.png"
+          alt="DADO CINEMA Logo"
           width={50}
           height={50}
           className="h-10 w-auto object-contain sm:h-12"

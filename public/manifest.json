@@ -1,6 +1,6 @@
 {
-  "name": "Cinemadadok",
-  "short_name": "Cinemadadok",
+  "name": "DADO CINEMA",
+  "short_name": "DADO CINEMA",
   "description": "Your only choice for a free movies and tv shows streaming website.",
   "theme_color": "#0D0C0F",
   "background_color": "#0D0C0F",
@@ -11,7 +11,7 @@
   "icons": [
     {
       "type": "image/png",
-      "src": "icons/cikini.png",
+      "src": "icons/dadologobaru.png",
       "sizes": "512x512",
       "purpose": "any maskable"
     },

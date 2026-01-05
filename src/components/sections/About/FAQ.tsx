@@ -5,9 +5,9 @@ import { Accordion, AccordionItem, Link } from "@heroui/react";
 
 const FAQS = [
   {
-    title: "🤔 What is Cikini Asia?",
+    title: "🤔 What is DADO CINEMA?",
     description:
-      "Just like every other website, Cikini Asia is also a streaming site that helps to easily access all the TV shows and movies we wanted, without spending hours searching for them.",
+      "Just like every other website, DADO CINEMA is also a streaming site that helps to easily access all the TV shows and movies we wanted, without spending hours searching for them.",
   },
   {
     title: "❓ So what do we actually do?",

@@ -6,7 +6,7 @@ interface ScrollingNoticeProps {
 }
 
 export default function ScrollingNotice({ 
-  text = "Welcome to Cikini Asia! Enjoy the best movies and series.",
+  text = "Welcome to DADO CINEMA! Enjoy the best movies and series.",
   className = "" 
 }: ScrollingNoticeProps) {
   return (

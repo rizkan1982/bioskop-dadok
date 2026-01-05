@@ -14,9 +14,9 @@ import {
 import { TbFolder, TbFolderFilled } from "react-icons/tb";
 
 export const siteConfig: SiteConfigType = {
-  name: "Cikini Asia",
+  name: "DADO CINEMA",
   description: "Your only choice for a free movies and tv shows streaming website.",
-  favicon: "/icons/cikini.png?v=2", // Added version to bust browser cache
+  favicon: "/icons/dadologobaru.png?v=2", // Updated to DADO CINEMA logo
   navItems: [
     {
       label: "Home",

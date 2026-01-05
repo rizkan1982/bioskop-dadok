@@ -1,61 +1,43 @@
 import AdminSidebar from "@/components/sections/Admin/Sidebar";
-import { isAdmin } from "@/actions/admin";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
-// ============================================
-// WHITELIST EMAIL ADMIN
-// Hanya email ini yang bisa akses admin panel
-// ============================================
-const ADMIN_EMAILS = [
-  "stressgue934@gmail.com",
-  "zflixid@gmail.com",
-];
+interface AdminSession {
+  username: string;
+  role: string;
+  email: string;
+  exp: number;
+}
+
+async function getAdminSession(): Promise<AdminSession | null> {
+  try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("admin_session");
+    
+    if (!sessionCookie) return null;
+    
+    const session: AdminSession = JSON.parse(
+      Buffer.from(sessionCookie.value, "base64").toString()
+    );
+    
+    // Check if session expired
+    if (Date.now() > session.exp) {
+      return null;
+    }
+    
+    return session;
+  } catch {
+    return null;
+  }
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
+  const session = await getAdminSession();
   
-  // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  
-  // Redirect jika tidak login
-  if (!user) {
-    redirect("/auth?redirect=/admin");
-  }
-  
-  // Auto-create atau update profile untuk admin yang di whitelist
-  if (user && ADMIN_EMAILS.includes(user.email || "")) {
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("id, is_admin")
-      .eq("id", user.id)
-      .single();
-    
-    // Jika profile belum ada, buat baru dengan is_admin = true
-    if (!existingProfile) {
-      await supabase.from("profiles").insert({
-        id: user.id,
-        username: user.email?.split("@")[0] || "admin",
-        is_admin: true,
-      });
-    } else if (!existingProfile.is_admin) {
-      // Jika profile sudah ada tapi is_admin = false, update ke true
-      await supabase
-        .from("profiles")
-        .update({ is_admin: true })
-        .eq("id", user.id);
-    }
-  }
-  
-  // Check admin status
-  const admin = await isAdmin();
-  
-  // Redirect jika bukan admin
-  if (!admin) {
-    redirect("/");
+  // Redirect jika tidak login via admin login
+  if (!session) {
+    redirect("/auth/admin");
   }
   
   return (
@@ -73,21 +55,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex items-center gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 border border-white/5 backdrop-blur-sm">
             <div className="relative w-14 h-14 rounded-xl overflow-hidden ring-2 ring-primary/50 shadow-lg shadow-primary/20">
               <Image
-                src="/icons/cikini.png"
-                alt="Cikini Asia"
+                src="/icons/dadologobaru.png"
+                alt="DADO CINEMA"
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-primary-200 to-primary-400 bg-clip-text text-transparent">
-                Admin Dashboard
+                DADO CINEMA Admin
               </h1>
-              <p className="text-sm text-default-400 mt-1">Cikini Asia Management Panel</p>
+              <p className="text-sm text-default-400 mt-1">DADO CINEMA Management Panel</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-default-500">Logged in as</p>
-              <p className="text-sm font-medium text-primary">{user.email}</p>
+              <p className="text-sm font-medium text-primary">{session.username}</p>
             </div>
           </div>
         </div>

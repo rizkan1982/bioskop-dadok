@@ -21,12 +21,12 @@ const DISCLAIMER_CONTENT = {
   paragraphs: [
     {
       id: "welcome",
-      content: "🎬 Welcome to Cikini Asia",
+      content: "🎬 Welcome to DADO CINEMA",
     },
     {
       id: "purpose",
       content:
-        "Cikini Asia is a free movie streaming platform created for entertainment and educational purposes only. All content shown here is sourced from third parties — we don't store, sell, or distribute any media files.",
+        "DADO CINEMA is a free movie streaming platform created for entertainment and educational purposes only. All content shown here is sourced from third parties — we don't store, sell, or distribute any media files.",
     },
     {
       id: "fun-note",
