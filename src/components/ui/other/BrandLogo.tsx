@@ -22,7 +22,7 @@ const BrandLogo: React.FC<BrandLogoProps> = ({ animate = false, className }) => 
         )}
       >
         <Image
-          src="/icons/dadologobaru.png"
+          src="/dado.png"
           alt="DADO CINEMA Logo"
           width={50}
           height={50}

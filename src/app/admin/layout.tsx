@@ -55,7 +55,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex items-center gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 border border-white/5 backdrop-blur-sm">
             <div className="relative w-14 h-14 rounded-xl overflow-hidden ring-2 ring-primary/50 shadow-lg shadow-primary/20">
               <Image
-                src="/icons/dadologobaru.png"
+                src="/dado.png"
                 alt="DADO CINEMA"
                 fill
                 className="object-cover"

@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
         <CardHeader className="flex flex-col items-center gap-4 pt-8">
           <div className="relative w-20 h-20 rounded-2xl overflow-hidden ring-2 ring-primary/50 shadow-lg shadow-primary/20">
             <Image
-              src="/icons/dadologobaru.png"
+              src="/dado.png"
               alt="DADO CINEMA"
               fill
               className="object-cover"

@@ -16,7 +16,7 @@ import { TbFolder, TbFolderFilled } from "react-icons/tb";
 export const siteConfig: SiteConfigType = {
   name: "DADO CINEMA",
   description: "Your only choice for a free movies and tv shows streaming website.",
-  favicon: "/icons/dadologobaru.png?v=2", // Updated to DADO CINEMA logo
+  favicon: "/dado.png", // DADO CINEMA logo
   navItems: [
     {
       label: "Home",
