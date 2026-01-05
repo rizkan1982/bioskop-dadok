@@ -1,10 +1,16 @@
 import { ImageResponse } from 'next/og'
- 
-export const runtime = 'edge'
+import { readFile } from 'fs/promises'
+import { join } from 'path'
+
 export const size = { width: 180, height: 180 }
 export const contentType = 'image/png'
- 
+
 export default async function AppleIcon() {
+  // Read the dado.png file
+  const imageData = await readFile(join(process.cwd(), 'public', 'dado.png'))
+  const base64 = imageData.toString('base64')
+  const dataUrl = `data:image/png;base64,${base64}`
+
   return new ImageResponse(
     (
       <div
@@ -17,15 +23,15 @@ export default async function AppleIcon() {
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         }}
       >
-        <div
+        <img
+          src={dataUrl}
+          alt="DADO CINEMA"
           style={{
-            fontSize: 80,
-            fontWeight: 'bold',
-            color: 'white',
+            width: '80%',
+            height: '80%',
+            objectFit: 'contain',
           }}
-        >
-          🎬
-        </div>
+        />
       </div>
     ),
     {

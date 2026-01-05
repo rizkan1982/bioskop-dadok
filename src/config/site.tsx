@@ -128,7 +128,7 @@ export const siteConfig: SiteConfigType = {
     ],
   },
   socials: {
-    telegram: "https://t.me/makethman777",
+    whatsapp: "https://wa.me/6281945330179",
   },
 };
 

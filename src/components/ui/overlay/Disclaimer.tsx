@@ -33,12 +33,6 @@ const DISCLAIMER_CONTENT = {
       content: "Sit back and enjoy the show — this is just a creative public project made for fun.",
       emphasis: "😉",
     },
-    {
-      id: "contact",
-      content:
-        "💼 For business inquiries or banner ad placements, contact us on Telegram:",
-      emphasis: "@Makethman777 or @Guardianmaster (Admin 2)",
-    },
   ],
 };
 
