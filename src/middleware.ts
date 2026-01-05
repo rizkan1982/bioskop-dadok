@@ -1,8 +1,14 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 
+
 export async function middleware(request: NextRequest) {
-  // update user's auth session
+  const { pathname } = request.nextUrl;
+  // Skip Supabase session update for admin routes
+  if (pathname.startsWith("/admin") || pathname.startsWith("/auth/admin")) {
+    return;
+  }
+  // update user's auth session for non-admin routes
   return await updateSession(request);
 }
 
