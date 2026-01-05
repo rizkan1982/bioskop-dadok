@@ -56,7 +56,6 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-// This endpoint is now disabled. Use Supabase Auth for admin session.
 import { NextResponse } from "next/server";
 export async function GET() {
   return NextResponse.json({ success: false, message: "Custom admin session is disabled. Please use Google login." }, { status: 403 });
