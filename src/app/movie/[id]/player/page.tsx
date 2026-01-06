@@ -10,7 +10,27 @@ import { useQuery } from "@tanstack/react-query";
 import { NextPage } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { use } from "react";
+import { use, useEffect } from "react";
+
+const MoviePlayerPage: NextPage<Params<{ id: number }>> = ({ params }) => {
+  const { id } = use(params);
+
+  console.log("Movie Player Page - ID:", id);
+
+  // Prevent accidental navigation back
+  useEffect(() => {
+    const preventBack = (e: PopStateEvent) => {
+      console.log("Prevented back navigation");
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", preventBack);
+
+    return () => {
+      window.removeEventListener("popstate", preventBack);
+    };
+  }, []);
 
 const MoviePlayerPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   const { id } = use(params);

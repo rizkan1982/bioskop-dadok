@@ -45,7 +45,8 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
       hasRecorded.current = true;
       // Don't await - run in background to not block player
       recordMovieView(movie.id, title, movie.poster_path ?? null).catch(err => {
-        console.log('Failed to record view:', err);
+        console.log('Failed to record view (non-critical):', err);
+        // Silently fail - don't let this break the player
       });
     }
   }, [movie.id, title, movie.poster_path]);
@@ -123,6 +124,10 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
             key={PLAYER.title}
             src={PLAYER.source}
             className={cn("z-10 h-full", { "pointer-events-none": idle && !mobile })}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-presentation allow-top-navigation"
+            onError={(e) => {
+              console.error("Iframe error:", e);
+            }}
           />
         </Card>
       </div>
