@@ -177,7 +177,6 @@ const LibraryList = () => {
                     <Suspense key={`tv-${data.id}`}>
                       <TvShowPosterCard
                         variant="bordered"
-                        // @ts-expect-error: Type conversion for compatibility
                         tv={{
                           adult: data.adult,
                           backdrop_path: data.backdrop_path,
@@ -195,7 +194,6 @@ const LibraryList = () => {
                   <Suspense key={`movie-${data.id}`}>
                     <MoviePosterCard
                       variant="bordered"
-                      // @ts-expect-error: Type conversion for compatibility
                       movie={{
                         adult: data.adult,
                         backdrop_path: data.backdrop_path,
