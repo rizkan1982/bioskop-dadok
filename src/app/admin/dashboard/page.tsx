@@ -37,13 +37,62 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch("/api/admin/stats");
+      console.log("[DASHBOARD] Fetching stats...");
+      const res = await fetch("/api/admin/stats", {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+        }
+      });
+      
+      console.log("[DASHBOARD] Stats response status:", res.status);
+      
+      if (!res.ok) {
+        throw new Error(`API returned ${res.status}`);
+      }
+      
       const data = await res.json();
-      if (data.success) {
+      console.log("[DASHBOARD] Stats data received:", data);
+      
+      if (data.success && data.data) {
         setStats(data.data);
+      } else {
+        console.warn("[DASHBOARD] Invalid response structure:", data);
+        // Set default empty stats
+        setStats({
+          today: 0,
+          thisWeek: 0,
+          thisMonth: 0,
+          activeNow: 0,
+          totalUsers: 0,
+          totalHistories: 0,
+          uniqueMovies: 0,
+          uniqueTvShows: 0,
+          hourlyTraffic: [],
+          weeklyTraffic: [],
+          countryData: [],
+          deviceDistribution: [],
+          currentWatchers: [],
+        });
       }
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error("[DASHBOARD] Error fetching stats:", error);
+      // Set default empty stats on error
+      setStats({
+        today: 0,
+        thisWeek: 0,
+        thisMonth: 0,
+        activeNow: 0,
+        totalUsers: 0,
+        totalHistories: 0,
+        uniqueMovies: 0,
+        uniqueTvShows: 0,
+        hourlyTraffic: [],
+        weeklyTraffic: [],
+        countryData: [],
+        deviceDistribution: [],
+        currentWatchers: [],
+      });
     } finally {
       setLoading(false);
     }
