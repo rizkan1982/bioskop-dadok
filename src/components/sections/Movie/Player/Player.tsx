@@ -7,11 +7,11 @@ import { getMoviePlayers } from "@/utils/players";
 import { Card, Skeleton } from "@heroui/react";
 import { useDocumentTitle, useIdle } from "@mantine/hooks";
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { MovieDetails } from "tmdb-ts/dist/types/movies";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
 import { recordMovieView } from "@/actions/histories";
-import SubtitleSelector from "@/components/ui/other/SubtitleSelector";
+import SubtitleOverlay from "@/components/ui/other/SubtitleOverlay";
 const MoviePlayerHeader = dynamic(() => import("./Header"));
 
 interface MoviePlayerProps {
@@ -26,10 +26,9 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
   const idle = useIdle(3000);
   const { mobile } = useBreakpoints();
   const hasRecorded = useRef(false);
-  const [selectedSubtitle, setSelectedSubtitle] = useState<string>('id');
 
-  // Get players with current subtitle language
-  const players = getMoviePlayers(movie.id, startAt, selectedSubtitle);
+  // Get players (no subtitle param needed - we use overlay)
+  const players = getMoviePlayers(movie.id, startAt);
   const PLAYER = players[0];
 
   useVidlinkPlayer({ saveHistory: true });
@@ -45,12 +44,6 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
     }
   }, [movie.id, title, movie.poster_path]);
 
-  const handleSubtitleChange = (languageCode: string) => {
-    setSelectedSubtitle(languageCode);
-    console.log('Subtitle changed to:', languageCode);
-    // Player will reload with new subtitle language in URL
-  };
-
   return (
     <div className={cn("relative", SpacingClasses.reset)}>
       <MoviePlayerHeader
@@ -60,23 +53,16 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
         hidden={idle && !mobile}
       />
       
-      {/* Subtitle Selector */}
-      <div className={cn(
-        "absolute top-20 right-4 z-50 transition-opacity duration-300",
-        idle && !mobile ? "opacity-0" : "opacity-100"
-      )}>
-        <SubtitleSelector
-          movieId={movie.id}
-          onSubtitleChange={handleSubtitleChange}
-        />
-      </div>
-      
       <Card shadow="md" radius="none" className="relative h-screen">
         <Skeleton className="absolute h-full w-full" />
+        
+        {/* Subtitle Overlay with AI */}
+        <SubtitleOverlay tmdbId={movie.id} type="movie" />
+        
         <iframe
           allowFullScreen
           allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-          key={`${PLAYER.title}-${selectedSubtitle}`}
+          key={PLAYER.title}
           src={PLAYER.source}
           className="z-10 h-full w-full"
           style={{ border: 'none' }}

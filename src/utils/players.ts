@@ -9,12 +9,11 @@ import { PlayersProps } from "@/types";
  * @returns {PlayersProps[]} - An array of objects, each containing
  * the title of the player and the corresponding source URL.
  */
-export const getMoviePlayers = (id: string | number, startAt?: number, subLang?: string): PlayersProps[] => {
-  const subtitleParam = subLang ? `?sub_lang=${subLang}` : '';
+export const getMoviePlayers = (id: string | number, startAt?: number): PlayersProps[] => {
   return [
     {
       title: "VidSrc",
-      source: `https://vidsrc.xyz/embed/movie/${id}${subtitleParam}`,
+      source: `https://vidsrc.xyz/embed/movie/${id}`,
       recommended: true,
       fast: true,
       ads: false,
@@ -45,13 +44,11 @@ export const getTvShowPlayers = (
   season: number,
   episode: number,
   startAt?: number,
-  subLang?: string,
 ): PlayersProps[] => {
-  const subtitleParam = subLang ? `?sub_lang=${subLang}` : '';
   return [
     {
       title: "VidSrc",
-      source: `https://vidsrc.xyz/embed/tv/${id}/${season}/${episode}${subtitleParam}`,
+      source: `https://vidsrc.xyz/embed/tv/${id}/${season}/${episode}`,
       recommended: true,
       fast: true,
       ads: false,
