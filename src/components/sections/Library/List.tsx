@@ -185,7 +185,7 @@ const LibraryList = () => {
                           name: data.title,
                           poster_path: data.poster_path || "",
                           vote_average: data.vote_average,
-                        }}
+                        } as any}
                       />
                     </Suspense>
                   );
@@ -202,7 +202,7 @@ const LibraryList = () => {
                         release_date: data.release_date,
                         title: data.title,
                         vote_average: data.vote_average,
-                      }}
+                      } as any}
                     />
                   </Suspense>
                 );
