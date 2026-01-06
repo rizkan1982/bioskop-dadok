@@ -172,7 +172,7 @@ const LibraryList = () => {
           <>
             <div className="movie-grid">
               {sortedWatchlist.map((data) => {
-                if (data.type === "tv") {
+                if (data.content_type === "tv") {
                   return (
                     <Suspense key={`tv-${data.id}`}>
                       <TvShowPosterCard
