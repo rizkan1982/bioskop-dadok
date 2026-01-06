@@ -39,12 +39,14 @@ const MoviePlayerPage: NextPage<Params<{ id: number }>> = ({ params }) => {
 
   // Handle error state with user-friendly message
   if (error) {
+    console.error("Movie player error:", error);
     return (
       <div className="absolute-center flex flex-col items-center gap-4 text-center p-4">
         <h2 className="text-xl font-semibold text-red-400">Failed to Load Player</h2>
         <p className="text-slate-400 max-w-md">
           Unable to load movie data. This could be due to network issues or the movie may not be available.
         </p>
+        <p className="text-xs text-slate-500 mt-2">Error: {error instanceof Error ? error.message : String(error)}</p>
         <div className="flex gap-3 mt-2">
           <Button color="primary" onPress={() => refetch()}>
             Try Again

@@ -58,7 +58,10 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
     if (!hasRecorded.current) {
       hasRecorded.current = true;
       const title = `${props.seriesName} - ${props.seasonName} E${episode.episode_number}`;
-      recordTvShowView(id, episode.season_number, episode.episode_number, title, tv.poster_path);
+      // Don't await - run in background to not block player
+      recordTvShowView(id, episode.season_number, episode.episode_number, title, tv.poster_path).catch(err => {
+        console.log('Failed to record view:', err);
+      });
     }
   }, [id, episode.season_number, episode.episode_number, props.seriesName, props.seasonName, tv.poster_path]);
 

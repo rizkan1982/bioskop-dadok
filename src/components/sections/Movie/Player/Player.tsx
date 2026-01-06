@@ -39,7 +39,10 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
   useEffect(() => {
     if (!hasRecorded.current) {
       hasRecorded.current = true;
-      recordMovieView(movie.id, title, movie.poster_path ?? null);
+      // Don't await - run in background to not block player
+      recordMovieView(movie.id, title, movie.poster_path ?? null).catch(err => {
+        console.log('Failed to record view:', err);
+      });
     }
   }, [movie.id, title, movie.poster_path]);
 
