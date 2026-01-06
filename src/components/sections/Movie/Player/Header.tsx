@@ -1,6 +1,8 @@
 import { cn } from "@/utils/helpers";
 import { ArrowLeft } from "@/utils/icons";
 import ActionButton from "./ActionButton";
+import { HiCog6Tooth } from "react-icons/hi2";
+import { Button } from "@heroui/react";
 
 interface MoviePlayerHeaderProps {
   id: number;
@@ -30,6 +32,17 @@ const MoviePlayerHeader: React.FC<MoviePlayerHeaderProps> = ({
       <div className="absolute left-1/2 hidden -translate-x-1/2 flex-col justify-center text-center sm:flex">
         <p className="text-sm text-white text-shadow-lg sm:text-lg lg:text-xl">{movieName}</p>
       </div>
+      {onOpenSource && (
+        <Button
+          isIconOnly
+          variant="flat"
+          className="bg-black/50 hover:bg-black/70"
+          onPress={onOpenSource}
+          aria-label="Change Video Source"
+        >
+          <HiCog6Tooth className="text-2xl text-white" />
+        </Button>
+      )}
     </div>
   );
 };
