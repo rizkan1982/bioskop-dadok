@@ -22,7 +22,7 @@ export const GET = async (request: NextRequest) => {
     
     const { data: profile, error: profileError } = await supabaseServiceRole
       .from("profiles")
-      .select("id, email, is_admin, username")
+      .select("id, email, is_admin")
       .eq("id", user.id)
       .single();
     
@@ -44,7 +44,7 @@ export const GET = async (request: NextRequest) => {
     const sessionData = {
       id: user.id,
       email: user.email,
-      username: profile?.username || user.email?.split("@")[0] || "admin",
+      username: user.user_metadata?.full_name || user.email?.split("@")[0] || "admin",
       role: "admin",
       exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
     };
