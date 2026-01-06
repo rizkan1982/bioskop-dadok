@@ -96,23 +96,32 @@ export async function getAllUsers() {
       `)
       .order("created_at", { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching profiles:", error);
+      throw error;
+    }
     
-    // Get auth users data
-    const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
-    
-    if (usersError) throw usersError;
+    // Try to get auth users data, but don't fail if it doesn't work
+    let users: { id: string; email?: string; last_sign_in_at?: string | null; email_confirmed_at?: string | null }[] = [];
+    try {
+      const { data: authData, error: usersError } = await supabase.auth.admin.listUsers();
+      if (!usersError && authData?.users) {
+        users = authData.users;
+      }
+    } catch (authError) {
+      console.warn("Could not fetch auth users, using profiles only:", authError);
+    }
     
     // Merge profile and auth data
     const usersData = profiles?.map((profile) => {
       const authUser = users.find((u) => u.id === profile.id);
       return {
         ...profile,
-        email: authUser?.email || "N/A",
+        email: profile.email || authUser?.email || "N/A",
         last_sign_in: authUser?.last_sign_in_at || null,
         email_confirmed: authUser?.email_confirmed_at ? true : false,
       };
-    });
+    }) || [];
     
     return { success: true, message: "Users fetched successfully", data: usersData };
   } catch (error) {
@@ -175,49 +184,54 @@ export async function getAllHistories() {
 export async function getAllWatchlist() {
   noStore();
   
-  // Temporarily disabled - watchlist table not yet defined in database
-  return { success: false, message: "Watchlist feature coming soon", data: null };
-  
-  // try {
-  //   const supabase = await createClient(true); // Use service role
-  //   
-  //   // Check if current user is admin
-  //   const adminCheck = await isAdmin();
-  //   if (!adminCheck) {
-  //     return { success: false, message: "Unauthorized access", data: null };
-  //   }
-  //   
-  //   const { data: watchlist, error } = await supabase
-  //     .from("watchlist")
-  //     .select("*")
-  //     .order("created_at", { ascending: false })
-  //     .limit(100);
-  //   
-  //   if (error) throw error;
-  //   
-  //   // Get profiles separately
-  //   const { data: profiles } = await supabase
-  //     .from("profiles")
-  //     .select("id, email");
-  //   
-  //   // Merge data
-  //   const watchlistWithProfiles = watchlist?.map((item) => {
-  //     const profile = profiles?.find((p) => p.id === item.user_id);
-  //     return {
-  //       ...item,
-  //       profiles: { email: profile?.email || "Unknown" }
-  //     };
-  //   });
-  //   
-  //   return { success: true, message: "Watchlist fetched successfully", data: watchlistWithProfiles };
-  // } catch (error) {
-  //   console.error("Error fetching watchlist:", error);
-  //   return {
-  //     success: false,
-  //     message: error instanceof Error ? error.message : "Failed to fetch watchlist",
-  //     data: null,
-  //   };
-  // }
+  try {
+    const supabase = await createClient(true); // Use service role
+    
+    // Check if current user is admin
+    const adminCheck = await isAdmin();
+    if (!adminCheck) {
+      return { success: false, message: "Unauthorized access", data: null };
+    }
+    
+    const { data: watchlist, error } = await supabase
+      .from("watchlist")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    
+    if (error) {
+      console.error("Watchlist fetch error:", error);
+      // If table doesn't exist, return empty
+      if (error.code === "42P01") {
+        return { success: true, message: "Watchlist table not found", data: [] };
+      }
+      throw error;
+    }
+    
+    // Get profiles separately
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, email");
+    
+    // Merge data
+    const watchlistWithProfiles = watchlist?.map((item) => {
+      const profile = profiles?.find((p) => p.id === item.user_id);
+      return {
+        ...item,
+        content_type: item.type, // Map 'type' to 'content_type' for UI
+        profiles: { email: profile?.email || "Unknown" }
+      };
+    }) || [];
+    
+    return { success: true, message: "Watchlist fetched successfully", data: watchlistWithProfiles };
+  } catch (error) {
+    console.error("Error fetching watchlist:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to fetch watchlist",
+      data: null,
+    };
+  }
 }
 
 // Get dashboard statistics

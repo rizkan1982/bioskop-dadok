@@ -10,16 +10,21 @@ import {
   HiUser,
   HiCalendar,
   HiMagnifyingGlass,
-  HiQueueList
+  HiQueueList,
+  HiStar
 } from "react-icons/hi2";
 
 interface WatchlistItem {
-  id: string;
   user_id: string;
-  tmdb_id: number;
-  content_type: string;
+  id: number;
+  type?: string;
+  content_type?: string;
+  adult?: boolean;
+  backdrop_path?: string | null;
+  poster_path?: string | null;
+  release_date?: string;
   title: string;
-  poster_path: string | null;
+  vote_average?: number;
   created_at: string;
   profiles?: { email: string };
 }
@@ -35,8 +40,10 @@ export default function AdminWatchlistPage() {
   useEffect(() => {
     async function fetchWatchlist() {
       const result = await getAllWatchlist();
-      setWatchlist(result.data || []);
-      setFilteredWatchlist(result.data || []);
+      // Cast to unknown first then to WatchlistItem[] for flexible data structure
+      const data = (result.data || []) as unknown as WatchlistItem[];
+      setWatchlist(data);
+      setFilteredWatchlist(data);
       setSuccess(result.success);
       setMessage(result.message);
       setLoading(false);
@@ -149,9 +156,9 @@ export default function AdminWatchlistPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredWatchlist.map((item: WatchlistItem) => (
+              {filteredWatchlist.map((item: WatchlistItem, index: number) => (
                 <div 
-                  key={item.id} 
+                  key={`${item.user_id}-${item.id}-${item.type}`} 
                   className="bg-slate-700/30 rounded-xl border border-slate-600/30 p-4 hover:bg-slate-700/50 transition-colors"
                 >
                   <div className="flex gap-3">
@@ -165,7 +172,7 @@ export default function AdminWatchlistPage() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          {item.content_type === "movie" ? (
+                          {(item.content_type || item.type) === "movie" ? (
                             <HiFilm className="text-2xl text-slate-500" />
                           ) : (
                             <HiTv className="text-2xl text-slate-500" />
@@ -178,17 +185,26 @@ export default function AdminWatchlistPage() {
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-sm text-white truncate">{item.title}</h4>
                       
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mt-2 ${
-                        item.content_type === "movie" 
-                          ? "bg-blue-500/20 text-blue-400" 
-                          : "bg-purple-500/20 text-purple-400"
-                      }`}>
-                        {item.content_type === "movie" ? (
-                          <><HiFilm className="text-xs" /> Film</>
-                        ) : (
-                          <><HiTv className="text-xs" /> TV</>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          (item.content_type || item.type) === "movie" 
+                            ? "bg-blue-500/20 text-blue-400" 
+                            : "bg-purple-500/20 text-purple-400"
+                        }`}>
+                          {(item.content_type || item.type) === "movie" ? (
+                            <><HiFilm className="text-xs" /> Film</>
+                          ) : (
+                            <><HiTv className="text-xs" /> TV</>
+                          )}
+                        </span>
+                        
+                        {item.vote_average && item.vote_average > 0 && (
+                          <span className="inline-flex items-center gap-1 text-xs text-amber-400">
+                            <HiStar className="text-xs" />
+                            {Number(item.vote_average).toFixed(1)}
+                          </span>
                         )}
-                      </span>
+                      </div>
                       
                       {item.profiles?.email && (
                         <p className="flex items-center gap-1 text-xs text-slate-400 mt-2 truncate">
