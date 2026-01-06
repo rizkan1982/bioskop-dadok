@@ -12,11 +12,11 @@ import { PlayersProps } from "@/types";
 export const getMoviePlayers = (id: string | number, startAt?: number): PlayersProps[] => {
   return [
     {
-      title: "SuperEmbed",
-      source: `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
+      title: "VidSrc",
+      source: `https://vidsrc.net/embed/movie/${id}`,
       recommended: true,
       fast: true,
-      ads: true,
+      ads: false,
     },
   ];
 };
@@ -40,11 +40,11 @@ export const getTvShowPlayers = (
 ): PlayersProps[] => {
   return [
     {
-      title: "SuperEmbed",
-      source: `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`,
+      title: "VidSrc",
+      source: `https://vidsrc.net/embed/tv/${id}/${season}/${episode}`,
       recommended: true,
       fast: true,
-      ads: true,
+      ads: false,
     },
   ];
 };
