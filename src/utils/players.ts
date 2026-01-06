@@ -12,11 +12,18 @@ import { PlayersProps } from "@/types";
 export const getMoviePlayers = (id: string | number, startAt?: number): PlayersProps[] => {
   return [
     {
-      title: "VidSrc",
-      source: `https://vidsrc.net/embed/movie/${id}`,
+      title: "VidSrc.to",
+      source: `https://vidsrc.to/embed/movie/${id}`,
       recommended: true,
       fast: true,
       ads: false,
+    },
+    {
+      title: "2Embed",
+      source: `https://www.2embed.cc/embed/${id}`,
+      recommended: false,
+      fast: true,
+      ads: true,
     },
   ];
 };
@@ -40,11 +47,18 @@ export const getTvShowPlayers = (
 ): PlayersProps[] => {
   return [
     {
-      title: "VidSrc",
-      source: `https://vidsrc.net/embed/tv/${id}/${season}/${episode}`,
+      title: "VidSrc.to",
+      source: `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`,
       recommended: true,
       fast: true,
       ads: false,
+    },
+    {
+      title: "2Embed",
+      source: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
+      recommended: false,
+      fast: true,
+      ads: true,
     },
   ];
 };
