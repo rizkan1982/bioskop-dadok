@@ -63,16 +63,24 @@ export default function AdminUsersManagement() {
     setSaving(true);
     setSuccessMessage("");
 
+    const trimmedEmail = email.trim().toLowerCase();
+    console.log("[MANAGE USERS] Starting add admin for email:", trimmedEmail);
+
     try {
+      console.log("[MANAGE USERS] Sending POST request to /api/admin/users");
       const res = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        body: JSON.stringify({ email: trimmedEmail }),
       });
 
+      console.log("[MANAGE USERS] Add response status:", res.status);
+      
       const data = await res.json();
+      console.log("[MANAGE USERS] Add response data:", data);
 
       if (data.success) {
+        console.log("[MANAGE USERS] Add successful, fetching updated list");
         await fetchUsers();
         setEmail("");
         setSuccessMessage(data.message || "Admin berhasil ditambahkan");
@@ -81,11 +89,12 @@ export default function AdminUsersManagement() {
           setSuccessMessage("");
         }, 1500);
       } else {
+        console.warn("[MANAGE USERS] Add failed:", data.message);
         alert(data.message || "Gagal menambah admin");
       }
     } catch (error) {
-      console.error("Error adding user:", error);
-      alert("Terjadi kesalahan");
+      console.error("[MANAGE USERS] Error adding user:", error);
+      alert("Terjadi kesalahan: " + String(error));
     } finally {
       setSaving(false);
     }

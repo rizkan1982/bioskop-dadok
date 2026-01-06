@@ -119,64 +119,84 @@ export async function GET(request: NextRequest) {
 // POST - Add new admin user (by email only)
 export async function POST(request: NextRequest) {
   try {
-    console.log("[ADMIN API] POST /api/admin/users called");
+    console.log("[ADMIN API POST] Starting POST /api/admin/users");
     
     // Check if current user is admin
+    console.log("[ADMIN API POST] Checking admin access...");
     const { isAdmin } = await checkAdminAccess(request);
     if (!isAdmin) {
-      console.log("[ADMIN API] Unauthorized POST attempt");
+      console.log("[ADMIN API POST] Unauthorized POST attempt");
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 403 }
       );
     }
 
+    console.log("[ADMIN API POST] Admin verified, parsing request body");
     const { email } = await request.json();
+    console.log("[ADMIN API POST] Received email:", email);
 
     // Validate email
     if (!email || !email.includes("@")) {
+      console.warn("[ADMIN API POST] Invalid email format:", email);
       return NextResponse.json(
         { success: false, message: "Email tidak valid" },
         { status: 400 }
       );
     }
 
+    const cleanEmail = email.toLowerCase().trim();
+    console.log("[ADMIN API POST] Cleaned email:", cleanEmail);
+    
     const supabase = await createClient(true); // Use service role
 
     // Check if user exists in profiles
+    console.log("[ADMIN API POST] Checking if profile exists for email:", cleanEmail);
     const { data: existingProfile, error: findError } = await supabase
       .from("profiles")
       .select("id, email, is_admin")
-      .eq("email", email.toLowerCase().trim())
+      .eq("email", cleanEmail)
       .single();
 
     if (findError && findError.code !== "PGRST116") {
       // PGRST116 = no rows found (that's okay, we'll create one)
+      console.error("[ADMIN API POST] Database error checking profile:", findError);
       throw findError;
     }
 
+    if (findError?.code === "PGRST116") {
+      console.log("[ADMIN API POST] Profile not found for email (PGRST116)");
+    }
+
     if (existingProfile) {
+      console.log("[ADMIN API POST] Profile found for email:", cleanEmail);
       // User exists, update is_admin flag
       if (existingProfile.is_admin) {
+        console.warn("[ADMIN API POST] User already admin:", cleanEmail);
         return NextResponse.json(
           { success: false, message: "Email ini sudah terdaftar sebagai admin" },
           { status: 400 }
         );
       }
 
+      console.log("[ADMIN API POST] Updating is_admin flag for user:", existingProfile.id);
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ is_admin: true })
         .eq("id", existingProfile.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("[ADMIN API POST] Update error:", updateError);
+        throw updateError;
+      }
 
+      console.log("[ADMIN API POST] Successfully updated admin status for:", cleanEmail);
       return NextResponse.json({
         success: true,
         data: {
           id: existingProfile.id,
-          username: email.split("@")[0],
-          email: email,
+          username: cleanEmail.split("@")[0],
+          email: cleanEmail,
           role: "admin",
           createdAt: new Date().toISOString(),
         },
@@ -184,14 +204,15 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // User doesn't exist yet in the database
+      console.log("[ADMIN API POST] Profile not found, user needs to login first:", cleanEmail);
       // We can't create a profile without the user's auth ID
       // Return success but note that they need to login first to create their profile
       return NextResponse.json({
         success: true,
         data: {
           id: `pending-${Date.now()}`,
-          username: email.split("@")[0],
-          email: email,
+          username: cleanEmail.split("@")[0],
+          email: cleanEmail,
           role: "admin (pending)",
           createdAt: new Date().toISOString(),
         },
@@ -199,9 +220,9 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error("Error adding admin user:", error);
+    console.error("[ADMIN API POST] Error adding admin user:", error);
     return NextResponse.json(
-      { success: false, message: "Gagal menambahkan admin" },
+      { success: false, message: "Gagal menambahkan admin: " + String(error) },
       { status: 500 }
     );
   }
