@@ -2,17 +2,15 @@ import { siteConfig } from "@/config/site";
 import { cn } from "@/utils/helpers";
 import { getTvShowPlayers } from "@/utils/players";
 import { Card, Skeleton } from "@heroui/react";
-import { useDisclosure, useDocumentTitle, useIdle } from "@mantine/hooks";
+import { useDocumentTitle, useIdle } from "@mantine/hooks";
 import dynamic from "next/dynamic";
-import { parseAsInteger, useQueryState } from "nuqs";
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { Episode, TvShowDetails } from "tmdb-ts";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { SpacingClasses } from "@/utils/constants";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
 import { recordTvShowView } from "@/actions/histories";
 const TvShowPlayerHeader = dynamic(() => import("./Header"));
-const TvShowPlayerEpisodeSelection = dynamic(() => import("./EpisodeSelection"));
 
 export interface TvShowPlayerProps {
   tv: TvShowDetails;
@@ -37,12 +35,6 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
   const { mobile } = useBreakpoints();
   const players = getTvShowPlayers(id, episode.season_number, episode.episode_number, startAt);
   const idle = useIdle(3000);
-  const [episodeOpened, episodeHandlers] = useDisclosure(false);
-  const [sourceOpened, sourceHandlers] = useDisclosure(false);
-  const [selectedSource] = useQueryState<number>(
-    "src",
-    parseAsInteger.withDefault(0),
-  );
   const hasRecorded = useRef(false);
 
   useVidlinkPlayer({
@@ -53,54 +45,43 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
     `Play ${props.seriesName} - ${props.seasonName} - ${episode.name} | ${siteConfig.name}`,
   );
 
-  // Record TV show view when player opens (regardless of video source)
+  // Record TV show view when player opens
   useEffect(() => {
     if (!hasRecorded.current) {
       hasRecorded.current = true;
       const title = `${props.seriesName} - ${props.seasonName} E${episode.episode_number}`;
-      // Don't await - run in background to not block player
       recordTvShowView(id, episode.season_number, episode.episode_number, title, tv.poster_path).catch(err => {
         console.log('Failed to record view:', err);
       });
     }
   }, [id, episode.season_number, episode.episode_number, props.seriesName, props.seasonName, tv.poster_path]);
 
-  const PLAYER = useMemo(() => players[selectedSource] || players[0], [players, selectedSource]);
+  const PLAYER = players[0]; // Always use first (and only) source
 
   return (
-    <>
-      <div className={cn("relative", SpacingClasses.reset)}>
-        <TvShowPlayerHeader
-          id={id}
-          episode={episode}
-          hidden={idle && !mobile}
-          selectedSource={selectedSource}
-          onOpenSource={sourceHandlers.open}
-          onOpenEpisode={episodeHandlers.open}
-          {...props}
-        />
-
-        <Card shadow="md" radius="none" className="relative h-screen">
-          <Skeleton className="absolute h-full w-full" />
-          <iframe
-            allowFullScreen
-            key={PLAYER.title}
-            src={PLAYER.source}
-            sandbox="allow-same-origin allow-scripts allow-forms allow-presentation"
-            referrerPolicy="no-referrer"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-            className={cn("z-10 h-full w-full", { "pointer-events-none": idle && !mobile })}
-          />
-        </Card>
-      </div>
-
-      <TvShowPlayerEpisodeSelection
+    <div className={cn("relative", SpacingClasses.reset)}>
+      <TvShowPlayerHeader
         id={id}
-        opened={episodeOpened}
-        onClose={episodeHandlers.close}
-        episodes={episodes}
+        episode={episode}
+        hidden={idle && !mobile}
+        selectedSource={0}
+        onOpenSource={() => {}}
+        onOpenEpisode={() => {}}
+        {...props}
       />
-    </>
+
+      <Card shadow="md" radius="none" className="relative h-screen">
+        <Skeleton className="absolute h-full w-full" />
+        <iframe
+          allowFullScreen
+          key={PLAYER.title}
+          src={PLAYER.source}
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          className="z-10 h-full w-full"
+          style={{ border: 'none' }}
+        />
+      </Card>
+    </div>
   );
 };
 
