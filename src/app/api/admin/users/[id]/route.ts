@@ -19,7 +19,28 @@ export async function DELETE(
 
     const { id } = await params;
     
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
     const supabase = await createClient(true); // Use service role
+
+    // Verify user exists first
+    const { data: existingUser, error: findError } = await supabase
+      .from("profiles")
+      .select("id, email, is_admin")
+      .eq("id", id)
+      .single();
+
+    if (findError || !existingUser) {
+      return NextResponse.json(
+        { success: false, message: "User tidak ditemukan" },
+        { status: 404 }
+      );
+    }
 
     // Update is_admin to false (don't delete the profile)
     const { error } = await supabase
@@ -29,6 +50,8 @@ export async function DELETE(
 
     if (error) throw error;
     
+    console.log(`Admin ${existingUser.email} (${id}) removed successfully`);
+    
     return NextResponse.json({ 
       success: true, 
       message: "Admin berhasil dihapus" 
@@ -36,7 +59,7 @@ export async function DELETE(
   } catch (error) {
     console.error("Error removing admin:", error);
     return NextResponse.json(
-      { success: false, message: "Gagal menghapus admin" },
+      { success: false, message: "Gagal menghapus admin", error: String(error) },
       { status: 500 }
     );
   }

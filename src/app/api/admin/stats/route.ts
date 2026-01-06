@@ -3,24 +3,26 @@ import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
-    // Try to use service role, fallback to regular client
-    let supabase;
-    try {
-      supabase = await createClient(true);
-    } catch {
-      console.warn("Service role not available, using regular client");
-      supabase = await createClient();
-    }
+    // Always use service role for admin stats (bypass RLS)
+    const supabase = await createClient(true);
 
     // Get total users count
-    const { count: totalUsers } = await supabase
+    const { count: totalUsers, error: usersError } = await supabase
       .from("profiles")
       .select("*", { count: "exact", head: true });
 
+    if (usersError) {
+      console.error("Error fetching total users:", usersError);
+    }
+
     // Get watch histories count
-    const { count: totalHistories } = await supabase
+    const { count: totalHistories, error: historiesError } = await supabase
       .from("histories")
       .select("*", { count: "exact", head: true });
+
+    if (historiesError) {
+      console.error("Error fetching total histories:", historiesError);
+    }
 
     // Get today's date range
     const today = new Date();
@@ -36,32 +38,48 @@ export async function GET(request: NextRequest) {
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
     const monthStartISO = monthStart.toISOString();
 
-    // Get today's watch activity
-    const { count: todayWatches } = await supabase
+    // Get today's watch activity (use created_at, not updated_at)
+    const { count: todayWatches, error: todayError } = await supabase
       .from("histories")
       .select("*", { count: "exact", head: true })
-      .gte("updated_at", todayISO);
+      .gte("created_at", todayISO);
 
-    // Get this week's watch activity
-    const { count: weekWatches } = await supabase
-      .from("histories")
-      .select("*", { count: "exact", head: true })
-      .gte("updated_at", weekStartISO);
+    if (todayError) {
+      console.error("Error fetching today watches:", todayError);
+    }
 
-    // Get this month's watch activity
-    const { count: monthWatches } = await supabase
+    // Get this week's watch activity (use created_at, not updated_at)
+    const { count: weekWatches, error: weekError } = await supabase
       .from("histories")
       .select("*", { count: "exact", head: true })
-      .gte("updated_at", monthStartISO);
+      .gte("created_at", weekStartISO);
+
+    if (weekError) {
+      console.error("Error fetching week watches:", weekError);
+    }
+
+    // Get this month's watch activity (use created_at, not updated_at)
+    const { count: monthWatches, error: monthError } = await supabase
+      .from("histories")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", monthStartISO);
+
+    if (monthError) {
+      console.error("Error fetching month watches:", monthError);
+    }
 
     // Get recent watch histories for "Currently Watching"
-    const { data: recentHistories } = await supabase
+    const { data: recentHistories, error: recentError } = await supabase
       .from("histories")
       .select("*")
       .order("updated_at", { ascending: false })
       .limit(10);
 
-    // Get weekly activity (last 7 days)
+    if (recentError) {
+      console.error("Error fetching recent histories:", recentError);
+    }
+
+    // Get weekly activity (last 7 days) - use created_at
     const weeklyData = [];
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     
@@ -72,11 +90,15 @@ export async function GET(request: NextRequest) {
       const nextDate = new Date(date);
       nextDate.setDate(nextDate.getDate() + 1);
 
-      const { count } = await supabase
+      const { count, error: dayError } = await supabase
         .from("histories")
         .select("*", { count: "exact", head: true })
-        .gte("updated_at", date.toISOString())
-        .lt("updated_at", nextDate.toISOString());
+        .gte("created_at", date.toISOString())
+        .lt("created_at", nextDate.toISOString());
+
+      if (dayError) {
+        console.error(`Error fetching data for ${days[date.getDay()]}:`, dayError);
+      }
 
       weeklyData.push({
         day: days[date.getDay()],
@@ -91,10 +113,14 @@ export async function GET(request: NextRequest) {
     }));
 
     // Count histories by hour of creation
-    const { data: allHistories } = await supabase
+    const { data: allHistories, error: hourlyError } = await supabase
       .from("histories")
       .select("created_at")
       .gte("created_at", monthStartISO);
+
+    if (hourlyError) {
+      console.error("Error fetching hourly data:", hourlyError);
+    }
 
     if (allHistories) {
       allHistories.forEach((h) => {
@@ -104,9 +130,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Get unique content watched
-    const { data: uniqueContent } = await supabase
+    const { data: uniqueContent, error: contentError } = await supabase
       .from("histories")
       .select("tmdb_id, content_type");
+
+    if (contentError) {
+      console.error("Error fetching unique content:", contentError);
+    }
 
     const uniqueMovies = new Set(
       (uniqueContent as { tmdb_id: number; content_type: string }[] | null)
