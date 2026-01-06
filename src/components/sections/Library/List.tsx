@@ -179,7 +179,7 @@ const LibraryList = () => {
                         variant="bordered"
                         tv={{
                           adult: data.adult,
-                          backdrop_path: data.backdrop_path,
+                          backdrop_path: data.backdrop_path || "",
                           first_air_date: data.release_date,
                           id: data.id,
                           name: data.title,
@@ -196,7 +196,7 @@ const LibraryList = () => {
                       variant="bordered"
                       movie={{
                         adult: data.adult,
-                        backdrop_path: data.backdrop_path,
+                        backdrop_path: data.backdrop_path || "",
                         id: data.id,
                         poster_path: data.poster_path || "",
                         release_date: data.release_date,
