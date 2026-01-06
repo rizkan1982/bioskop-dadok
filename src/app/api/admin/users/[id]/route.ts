@@ -111,8 +111,8 @@ export async function DELETE(
 
     // Use stored procedure to remove admin access (SECURITY DEFINER bypasses RLS)
     console.log("[ADMIN API DELETE] Calling remove_admin_access() stored procedure...");
-    const { data: procResult, error: procError } = await supabase
-      .rpc("remove_admin_access", { user_id: id });
+    const { data: procResult, error: procError } = await (supabase
+      .rpc("remove_admin_access" as any, { user_id: id }) as any);
 
     console.log("[ADMIN API DELETE] Procedure result:", procResult, "Error:", procError);
 
