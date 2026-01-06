@@ -9,7 +9,7 @@ type FilterType = ContentType | "all";
 
 interface WatchlistItem {
   id: number;
-  type: ContentType;
+  type: ContentType; // Used for input from UI
   adult: boolean;
   backdrop_path: string;
   poster_path?: string | null;
@@ -18,8 +18,16 @@ interface WatchlistItem {
   vote_average: number;
 }
 
-interface WatchlistEntry extends WatchlistItem {
+interface WatchlistEntry {
   user_id: string;
+  id: number;
+  content_type: string; // Database uses content_type
+  adult: boolean;
+  backdrop_path: string | null;
+  poster_path?: string | null;
+  release_date: string;
+  title: string;
+  vote_average: number;
   created_at: string;
 }
 
