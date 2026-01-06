@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 
-// Admin email whitelist (must match ADMIN_EMAILS in actions/admin.ts)
+// Admin email whitelist - DEPRECATED, use database is_admin as source of truth
 const ADMIN_EMAILS = [
   "stressgue934@gmail.com",
 ];
 
 // Helper to check if user is admin in API context
+// Priority: Database is_admin = true > Email whitelist > is_admin = false (blocked)
 async function checkAdminAccess(request: NextRequest): Promise<boolean> {
   try {
     const supabase = await createClient();
@@ -22,13 +23,7 @@ async function checkAdminAccess(request: NextRequest): Promise<boolean> {
 
     console.log("[ADMIN STATS] Checking admin for user:", user.email);
 
-    // Check 1: Email whitelist (priority tertinggi)
-    if (ADMIN_EMAILS.includes(user.email || "")) {
-      console.log("[ADMIN STATS] User is in email whitelist");
-      return true;
-    }
-    
-    // Check 2: Database is_admin field (fallback)
+    // Check database is_admin field FIRST (source of truth)
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("is_admin")
@@ -40,9 +35,26 @@ async function checkAdminAccess(request: NextRequest): Promise<boolean> {
       return false;
     }
 
-    const isAdmin = profile?.is_admin === true;
-    console.log("[ADMIN STATS] Admin status from DB:", isAdmin);
-    return isAdmin;
+    // If database says is_admin = true, they are admin
+    if (profile?.is_admin === true) {
+      console.log("[ADMIN STATS] User is admin (from DB)");
+      return true;
+    }
+
+    // If database says is_admin = false, they are NOT admin (even if in whitelist)
+    if (profile?.is_admin === false) {
+      console.log("[ADMIN STATS] User is NOT admin (from DB - explicitly denied)");
+      return false;
+    }
+
+    // Check email whitelist as fallback if profile doesn't have is_admin value
+    if (ADMIN_EMAILS.includes(user.email || "")) {
+      console.log("[ADMIN STATS] User is in email whitelist (fallback)");
+      return true;
+    }
+    
+    console.log("[ADMIN STATS] User is not admin");
+    return false;
   } catch (error) {
     console.error("[ADMIN STATS] Error checking admin access:", error);
     return false;

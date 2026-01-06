@@ -4,8 +4,9 @@ import { createClient } from "@/utils/supabase/server";
 import { unstable_noStore as noStore } from "next/cache";
 
 // ============================================
-// WHITELIST EMAIL ADMIN
-// Hanya email ini yang bisa akses admin panel
+// WHITELIST EMAIL ADMIN - DEPRECATED
+// Hanya gunakan untuk initial setup
+// Priority: Database is_admin field > Email whitelist
 // ============================================
 const ADMIN_EMAILS = [
   "stressgue934@gmail.com",
@@ -24,19 +25,29 @@ export async function isAdmin(): Promise<boolean> {
     
     if (!user) return false;
     
-    // Check 1: Email whitelist (priority tertinggi)
-    if (ADMIN_EMAILS.includes(user.email || "")) {
-      return true;
-    }
-    
-    // Check 2: Database is_admin field (fallback)
+    // Check 1: Database is_admin field (priority tertinggi - database is source of truth)
     const { data: profile } = await supabase
       .from("profiles")
       .select("is_admin")
       .eq("id", user.id)
       .single();
     
-    return profile?.is_admin === true;
+    // If database says is_admin = true, they are admin
+    if (profile?.is_admin === true) {
+      return true;
+    }
+    
+    // If database says is_admin = false, they are NOT admin (even if in whitelist)
+    if (profile?.is_admin === false) {
+      return false;
+    }
+    
+    // Check 2: Email whitelist as fallback if profile doesn't have is_admin value
+    if (ADMIN_EMAILS.includes(user.email || "")) {
+      return true;
+    }
+    
+    return false;
   } catch (error) {
     console.error("Error checking admin status:", error);
     return false;
