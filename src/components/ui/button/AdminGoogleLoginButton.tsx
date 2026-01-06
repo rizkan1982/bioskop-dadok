@@ -15,10 +15,12 @@ const supabase = createClient();
 const AdminGoogleLoginButton: React.FC<AdminGoogleLoginButtonProps> = ({ variant = "solid", ...props }) => {
   const handleGoogleLogin = useCallback(async () => {
     try {
+      // Use regular callback with admin_login parameter
+      // This works because Supabase only allows whitelisted redirect URLs
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${location.origin}/api/auth/callback/admin`,
+          redirectTo: `${location.origin}/api/auth/callback?admin_login=true`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",
