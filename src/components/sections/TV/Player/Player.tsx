@@ -10,7 +10,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { SpacingClasses } from "@/utils/constants";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
 import { recordTvShowView } from "@/actions/histories";
-import SubtitleOverlay from "@/components/ui/other/SubtitleOverlay";
+import SubtitleGuide from "@/components/ui/other/SubtitleGuide";
 const TvShowPlayerHeader = dynamic(() => import("./Header"));
 
 export interface TvShowPlayerProps {
@@ -75,13 +75,11 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
       <Card shadow="md" radius="none" className="relative h-screen">
         <Skeleton className="absolute h-full w-full" />
         
-        {/* Subtitle Overlay with AI */}
-        <SubtitleOverlay 
-          tmdbId={id} 
-          type="tv" 
-          season={episode.season_number}
-          episode={episode.episode_number}
-        />
+        {/* Subtitle Guide Button */}
+        <SubtitleGuide className={cn(
+          "absolute top-20 right-4 z-50 transition-opacity duration-300",
+          idle && !mobile ? "opacity-0" : "opacity-100"
+        )} />
         
         <iframe
           allowFullScreen

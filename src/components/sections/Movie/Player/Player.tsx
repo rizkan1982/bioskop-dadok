@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 import { MovieDetails } from "tmdb-ts/dist/types/movies";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
 import { recordMovieView } from "@/actions/histories";
-import SubtitleOverlay from "@/components/ui/other/SubtitleOverlay";
+import SubtitleGuide from "@/components/ui/other/SubtitleGuide";
 const MoviePlayerHeader = dynamic(() => import("./Header"));
 
 interface MoviePlayerProps {
@@ -56,8 +56,11 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
       <Card shadow="md" radius="none" className="relative h-screen">
         <Skeleton className="absolute h-full w-full" />
         
-        {/* Subtitle Overlay with AI */}
-        <SubtitleOverlay tmdbId={movie.id} type="movie" />
+        {/* Subtitle Guide Button */}
+        <SubtitleGuide className={cn(
+          "absolute top-20 right-4 z-50 transition-opacity duration-300",
+          idle && !mobile ? "opacity-0" : "opacity-100"
+        )} />
         
         <iframe
           allowFullScreen
