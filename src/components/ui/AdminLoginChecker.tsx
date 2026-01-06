@@ -6,11 +6,6 @@ import { createClient } from "@/utils/supabase/client";
 // Key for storing admin login flag
 const ADMIN_LOGIN_KEY = "admin_login_pending";
 
-// Admin email whitelist
-const ADMIN_EMAILS = [
-  "stressgue934@gmail.com",
-];
-
 export default function AdminLoginChecker() {
   useEffect(() => {
     const checkAdminLogin = async () => {
@@ -21,34 +16,51 @@ export default function AdminLoginChecker() {
         return; // No admin login pending
       }
 
-      console.log("Admin login flag detected, checking user...");
+      console.log("[ADMIN LOGIN CHECK] Admin login flag detected, checking user...");
 
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-          console.log("No user found, clearing flag");
+          console.log("[ADMIN LOGIN CHECK] No user found, clearing flag");
           localStorage.removeItem(ADMIN_LOGIN_KEY);
           return;
         }
 
         const userEmail = user.email || "";
-        const isAdmin = ADMIN_EMAILS.includes(userEmail);
+        console.log("[ADMIN LOGIN CHECK] Checking if user is admin:", userEmail);
 
-        console.log("Admin check:", { email: userEmail, isAdmin });
+        // Check is_admin field from database
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+
+        if (error) {
+          console.error("[ADMIN LOGIN CHECK] Error fetching profile:", error);
+          localStorage.removeItem(ADMIN_LOGIN_KEY);
+          window.location.href = "/auth/admin?error=unauthorized";
+          return;
+        }
+
+        console.log("[ADMIN LOGIN CHECK] Profile is_admin status:", profile?.is_admin);
+
+        const isAdmin = profile?.is_admin === true;
 
         if (isAdmin) {
           // Redirect to admin callback page
-          console.log("Redirecting to admin callback...");
+          console.log("[ADMIN LOGIN CHECK] User is admin, redirecting to admin callback...");
           window.location.href = "/auth/admin/callback";
         } else {
           // Not admin, clear flag and show error
+          console.log("[ADMIN LOGIN CHECK] User is not admin, showing unauthorized error");
           localStorage.removeItem(ADMIN_LOGIN_KEY);
           window.location.href = "/auth/admin?error=unauthorized";
         }
       } catch (err) {
-        console.error("Admin login check error:", err);
+        console.error("[ADMIN LOGIN CHECK] Admin login check error:", err);
         localStorage.removeItem(ADMIN_LOGIN_KEY);
       }
     };
