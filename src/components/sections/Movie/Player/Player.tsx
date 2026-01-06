@@ -39,7 +39,7 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
   useEffect(() => {
     if (!hasRecorded.current) {
       hasRecorded.current = true;
-      recordMovieView(movie.id, title, movie.poster_path);
+      recordMovieView(movie.id, title, movie.poster_path ?? null);
     }
   }, [movie.id, title, movie.poster_path]);
 
