@@ -6,13 +6,17 @@ export async function GET(request: NextRequest) {
     // Always use service role for admin stats (bypass RLS)
     const supabase = await createClient(true);
 
+    console.log("[ADMIN STATS] Starting stats fetch...");
+
     // Get total users count
     const { count: totalUsers, error: usersError } = await supabase
       .from("profiles")
       .select("*", { count: "exact", head: true });
 
     if (usersError) {
-      console.error("Error fetching total users:", usersError);
+      console.error("[ADMIN STATS] Error fetching total users:", usersError);
+    } else {
+      console.log("[ADMIN STATS] Total users:", totalUsers);
     }
 
     // Get watch histories count
@@ -21,13 +25,16 @@ export async function GET(request: NextRequest) {
       .select("*", { count: "exact", head: true });
 
     if (historiesError) {
-      console.error("Error fetching total histories:", historiesError);
+      console.error("[ADMIN STATS] Error fetching total histories:", historiesError);
+    } else {
+      console.log("[ADMIN STATS] Total histories:", totalHistories);
     }
 
     // Get today's date range
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayISO = today.toISOString();
+    console.log("[ADMIN STATS] Today ISO:", todayISO);
 
     // Get this week's start
     const weekStart = new Date(today);
@@ -45,7 +52,9 @@ export async function GET(request: NextRequest) {
       .gte("created_at", todayISO);
 
     if (todayError) {
-      console.error("Error fetching today watches:", todayError);
+      console.error("[ADMIN STATS] Error fetching today watches:", todayError);
+    } else {
+      console.log("[ADMIN STATS] Today watches:", todayWatches);
     }
 
     // Get this week's watch activity (use created_at, not updated_at)
@@ -55,7 +64,9 @@ export async function GET(request: NextRequest) {
       .gte("created_at", weekStartISO);
 
     if (weekError) {
-      console.error("Error fetching week watches:", weekError);
+      console.error("[ADMIN STATS] Error fetching week watches:", weekError);
+    } else {
+      console.log("[ADMIN STATS] Week watches:", weekWatches);
     }
 
     // Get this month's watch activity (use created_at, not updated_at)
@@ -65,7 +76,9 @@ export async function GET(request: NextRequest) {
       .gte("created_at", monthStartISO);
 
     if (monthError) {
-      console.error("Error fetching month watches:", monthError);
+      console.error("[ADMIN STATS] Error fetching month watches:", monthError);
+    } else {
+      console.log("[ADMIN STATS] Month watches:", monthWatches);
     }
 
     // Get recent watch histories for "Currently Watching"
@@ -76,7 +89,9 @@ export async function GET(request: NextRequest) {
       .limit(10);
 
     if (recentError) {
-      console.error("Error fetching recent histories:", recentError);
+      console.error("[ADMIN STATS] Error fetching recent histories:", recentError);
+    } else {
+      console.log("[ADMIN STATS] Recent histories count:", recentHistories?.length);
     }
 
     // Get weekly activity (last 7 days) - use created_at
@@ -97,13 +112,14 @@ export async function GET(request: NextRequest) {
         .lt("created_at", nextDate.toISOString());
 
       if (dayError) {
-        console.error(`Error fetching data for ${days[date.getDay()]}:`, dayError);
+        console.error(`[ADMIN STATS] Error fetching data for ${days[date.getDay()]}:`, dayError);
       }
 
       weeklyData.push({
         day: days[date.getDay()],
         visitors: count || 0,
       });
+      console.log(`[ADMIN STATS] ${days[date.getDay()]}: ${count || 0} watches`);
     }
 
     // Get hourly distribution (simplified - based on existing data timestamps)
@@ -119,7 +135,9 @@ export async function GET(request: NextRequest) {
       .gte("created_at", monthStartISO);
 
     if (hourlyError) {
-      console.error("Error fetching hourly data:", hourlyError);
+      console.error("[ADMIN STATS] Error fetching hourly data:", hourlyError);
+    } else {
+      console.log("[ADMIN STATS] All histories in this month:", allHistories?.length);
     }
 
     if (allHistories) {
@@ -129,14 +147,34 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Get unique content watched
-    const { data: uniqueContent, error: contentError } = await supabase
+    // Get unique content watched - try both column names (tmdb_id and media_id, content_type and type)
+    let uniqueContent = null;
+    const { data: contentData1, error: contentError1 } = await supabase
       .from("histories")
       .select("tmdb_id, content_type");
 
-    if (contentError) {
-      console.error("Error fetching unique content:", contentError);
+    if (contentError1) {
+      console.warn("[ADMIN STATS] Error with tmdb_id/content_type, trying media_id/type:", contentError1);
+      // Fallback to old column names
+      const { data: contentData2, error: contentError2 } = await supabase
+        .from("histories")
+        .select("media_id, type");
+
+      if (contentError2) {
+        console.error("[ADMIN STATS] Error fetching unique content with both column sets:", contentError2);
+      } else {
+        uniqueContent = contentData2?.map((c: any) => ({
+          tmdb_id: c.media_id,
+          content_type: c.type
+        }));
+        console.log("[ADMIN STATS] Using old column names (media_id/type)");
+      }
+    } else {
+      uniqueContent = contentData1;
+      console.log("[ADMIN STATS] Using new column names (tmdb_id/content_type)");
     }
+
+    console.log("[ADMIN STATS] Unique content found:", uniqueContent?.length);
 
     const uniqueMovies = new Set(
       (uniqueContent as { tmdb_id: number; content_type: string }[] | null)
@@ -149,14 +187,20 @@ export async function GET(request: NextRequest) {
         .map((c) => c.tmdb_id)
     ).size;
 
+    console.log("[ADMIN STATS] Unique movies:", uniqueMovies);
+    console.log("[ADMIN STATS] Unique TV shows:", uniqueTvShows);
+
     // Format current watchers from recent histories
-    const currentWatchers = (recentHistories || []).map((h, i) => ({
+    const currentWatchers = (recentHistories || []).slice(0, 6).map((h, i) => ({
       id: `watcher-${i}`,
       title: h.title || "Unknown Title",
-      type: h.content_type || "movie",
+      type: (h as any).content_type || (h as any).type || "movie",
       country: "Indonesia", // Default since we don't track location
       startedAt: new Date(h.updated_at),
     }));
+
+    console.log("[ADMIN STATS] Response prepared successfully");
+    console.log("[ADMIN STATS] Summary: Today=" + todayWatches + ", Week=" + weekWatches + ", Month=" + monthWatches);
 
     // Note: Device distribution is not available because we don't track device info
     // This can be implemented later with proper analytics tracking
@@ -184,9 +228,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching visitor stats:", error);
+    console.error("[ADMIN STATS] FATAL ERROR:", error);
+    console.error("[ADMIN STATS] Error details:", JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { success: false, message: "Failed to fetch stats" },
+      { success: false, message: "Failed to fetch stats", error: String(error) },
       { status: 500 }
     );
   }
