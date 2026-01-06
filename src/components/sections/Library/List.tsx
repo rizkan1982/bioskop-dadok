@@ -68,7 +68,7 @@ const LibraryList = () => {
         throw new Error(result.error || "Failed to clear watchlist");
       }
       const allItems = data?.pages.flatMap((page) => page.data || []) || [];
-      const count = allItems.filter((item) => item.type === type).length;
+      const count = allItems.filter((item) => item.content_type === type).length;
       return { type, count };
     },
     onSuccess: ({ type, count }) => {
