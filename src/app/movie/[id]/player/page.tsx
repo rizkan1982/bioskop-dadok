@@ -15,6 +15,8 @@ import { use } from "react";
 const MoviePlayerPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   const { id } = use(params);
 
+  console.log("Movie Player Page - ID:", id);
+
   const {
     data: movie,
     isPending,
@@ -32,6 +34,8 @@ const MoviePlayerPage: NextPage<Params<{ id: number }>> = ({ params }) => {
     queryKey: ["movie-player-start-at", id],
     retry: 1,
   });
+
+  console.log("Movie data:", { movie, isPending, error, isEmpty: isEmpty(movie) });
 
   if (isPending || isPendingStartAt) {
     return <Spinner size="lg" className="absolute-center" variant="simple" />;
@@ -59,8 +63,12 @@ const MoviePlayerPage: NextPage<Params<{ id: number }>> = ({ params }) => {
     );
   }
 
-  if (isEmpty(movie)) return notFound();
+  if (isEmpty(movie)) {
+    console.error("Movie is empty, calling notFound()");
+    return notFound();
+  }
 
+  console.log("Rendering MoviePlayer with movie:", movie.title);
   return <MoviePlayer movie={movie} startAt={startAt} />;
 };
 

@@ -21,6 +21,8 @@ interface MoviePlayerProps {
 }
 
 const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
+  console.log("MoviePlayer component rendering:", { movieId: movie.id, title: movie.title, startAt });
+  
   const players = getMoviePlayers(movie.id, startAt);
   const title = mutateMovieTitle(movie);
   const idle = useIdle(3000);
