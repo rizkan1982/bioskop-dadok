@@ -250,10 +250,11 @@ export const recordMovieView = async (
       .maybeSingle();
 
     if (existing) {
-      // Update watched_at only (don't reset progress)
+      // Update watched_at and updated_at (don't reset progress)
+      const now = new Date().toISOString();
       await supabase
         .from("histories")
-        .update({ watched_at: new Date().toISOString() })
+        .update({ watched_at: now, updated_at: now })
         .eq("id", existing.id);
     } else {
       // Insert new history with progress 0
@@ -310,10 +311,11 @@ export const recordTvShowView = async (
       .maybeSingle();
 
     if (existing) {
-      // Update watched_at only
+      // Update watched_at and updated_at
+      const now = new Date().toISOString();
       await supabase
         .from("histories")
-        .update({ watched_at: new Date().toISOString() })
+        .update({ watched_at: now, updated_at: now })
         .eq("id", existing.id);
     } else {
       // Insert new history with progress 0

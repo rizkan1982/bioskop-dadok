@@ -3,7 +3,14 @@ import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient(true); // Use service role
+    // Try to use service role, fallback to regular client
+    let supabase;
+    try {
+      supabase = await createClient(true);
+    } catch {
+      console.warn("Service role not available, using regular client");
+      supabase = await createClient();
+    }
 
     // Get total users count
     const { count: totalUsers } = await supabase
