@@ -68,6 +68,9 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
         setIsTryingAltSource(true);
         setTimeout(() => {
           setSelectedSource(nextIndex);
+        }, 1000);
+      }
+    }, 15000);
 
     return () => {
       if (autoSwitchTimeoutRef.current) {
