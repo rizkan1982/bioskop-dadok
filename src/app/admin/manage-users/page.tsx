@@ -86,24 +86,24 @@ export default function AdminUsersManagement() {
   };
 
   const handleDelete = async (id: string, userEmail: string) => {
-    if (!confirm(`Yakin ingin menghapus admin ${userEmail}?`)) return;
+    if (!confirm(`Yakin ingin menghapus admin ${userEmail}? Akses admin mereka akan langsung dicabut.`)) return;
 
     try {
-      const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/users/${id}`, { 
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
       const data = await res.json();
 
       if (data.success) {
-        setSuccessMessage(`Admin ${userEmail} berhasil dihapus`);
-        setTimeout(() => {
-          fetchUsers();
-          setSuccessMessage("");
-        }, 500);
+        await fetchUsers();
+        alert(`Admin ${userEmail} berhasil dihapus. Akses mereka telah dicabut.`);
       } else {
         alert(data.message || "Gagal menghapus admin");
       }
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert("Terjadi kesalahan");
+      alert("Terjadi kesalahan saat menghapus admin");
     }
   };
 

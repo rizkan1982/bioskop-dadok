@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, Chip, Progress, Spinner } from "@heroui/react";
 import { TrendUp, Users, Eye, BarChart } from "@/utils/icons";
 import { HiFilm, HiTv, HiArrowTrendingUp, HiArrowTrendingDown } from "react-icons/hi2";
@@ -24,11 +24,15 @@ interface VisitorStats {
 export default function AdminDashboard() {
   const [stats, setStats] = useState<VisitorStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
-    return () => clearInterval(interval);
+    // Real-time updates every 5 seconds instead of 30 seconds
+    intervalRef.current = setInterval(fetchStats, 5000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
   const fetchStats = async () => {
