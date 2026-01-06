@@ -22,12 +22,15 @@ interface MoviePlayerProps {
 const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
   console.log("MoviePlayer component rendering:", { movieId: movie.id, title: movie.title, startAt });
   
-  const players = getMoviePlayers(movie.id, startAt);
   const title = mutateMovieTitle(movie);
   const idle = useIdle(3000);
   const { mobile } = useBreakpoints();
   const hasRecorded = useRef(false);
   const [selectedSubtitle, setSelectedSubtitle] = useState<string>('id');
+
+  // Get players with current subtitle language
+  const players = getMoviePlayers(movie.id, startAt, selectedSubtitle);
+  const PLAYER = players[0];
 
   useVidlinkPlayer({ saveHistory: true });
   useDocumentTitle(`Play ${title} | ${siteConfig.name}`);
@@ -42,13 +45,10 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
     }
   }, [movie.id, title, movie.poster_path]);
 
-  const PLAYER = players[0]; // Always use first (and only) source
-
   const handleSubtitleChange = (languageCode: string) => {
     setSelectedSubtitle(languageCode);
     console.log('Subtitle changed to:', languageCode);
-    // Note: Embedded players (2Embed, AutoEmbed) handle subtitles internally
-    // This selector provides UI for user preference
+    // Player will reload with new subtitle language in URL
   };
 
   return (
@@ -76,7 +76,7 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
         <iframe
           allowFullScreen
           allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-          key={PLAYER.title}
+          key={`${PLAYER.title}-${selectedSubtitle}`}
           src={PLAYER.source}
           className="z-10 h-full w-full"
           style={{ border: 'none' }}

@@ -9,18 +9,19 @@ import { PlayersProps } from "@/types";
  * @returns {PlayersProps[]} - An array of objects, each containing
  * the title of the player and the corresponding source URL.
  */
-export const getMoviePlayers = (id: string | number, startAt?: number): PlayersProps[] => {
+export const getMoviePlayers = (id: string | number, startAt?: number, subLang?: string): PlayersProps[] => {
+  const subtitleParam = subLang ? `?sub_lang=${subLang}` : '';
   return [
+    {
+      title: "VidSrc",
+      source: `https://vidsrc.xyz/embed/movie/${id}${subtitleParam}`,
+      recommended: true,
+      fast: true,
+      ads: false,
+    },
     {
       title: "2Embed",
       source: `https://www.2embed.cc/embed/${id}`,
-      recommended: true,
-      fast: true,
-      ads: true,
-    },
-    {
-      title: "AutoEmbed",
-      source: `https://autoembed.co/movie/tmdb/${id}`,
       recommended: false,
       fast: true,
       ads: true,
@@ -44,18 +45,20 @@ export const getTvShowPlayers = (
   season: number,
   episode: number,
   startAt?: number,
+  subLang?: string,
 ): PlayersProps[] => {
+  const subtitleParam = subLang ? `?sub_lang=${subLang}` : '';
   return [
+    {
+      title: "VidSrc",
+      source: `https://vidsrc.xyz/embed/tv/${id}/${season}/${episode}${subtitleParam}`,
+      recommended: true,
+      fast: true,
+      ads: false,
+    },
     {
       title: "2Embed",
       source: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
-      recommended: true,
-      fast: true,
-      ads: true,
-    },
-    {
-      title: "AutoEmbed",
-      source: `https://autoembed.co/tv/tmdb/${id}-${season}-${episode}`,
       recommended: false,
       fast: true,
       ads: true,

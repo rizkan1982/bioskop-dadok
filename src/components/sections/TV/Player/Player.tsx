@@ -34,10 +34,13 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
   ...props
 }) => {
   const { mobile } = useBreakpoints();
-  const players = getTvShowPlayers(id, episode.season_number, episode.episode_number, startAt);
   const idle = useIdle(3000);
   const hasRecorded = useRef(false);
   const [selectedSubtitle, setSelectedSubtitle] = useState<string>('id');
+
+  // Get players with current subtitle language
+  const players = getTvShowPlayers(id, episode.season_number, episode.episode_number, startAt, selectedSubtitle);
+  const PLAYER = players[0];
 
   useVidlinkPlayer({
     saveHistory: true,
@@ -58,11 +61,10 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
     }
   }, [id, episode.season_number, episode.episode_number, props.seriesName, props.seasonName, tv.poster_path]);
 
-  const PLAYER = players[0]; // Always use first (and only) source
-
   const handleSubtitleChange = (languageCode: string) => {
     setSelectedSubtitle(languageCode);
     console.log('Subtitle changed to:', languageCode);
+    // Player will reload with new subtitle language in URL
   };
 
   return (
@@ -94,7 +96,7 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
         <Skeleton className="absolute h-full w-full" />
         <iframe
           allowFullScreen
-          key={PLAYER.title}
+          key={`${PLAYER.title}-${selectedSubtitle}`}
           src={PLAYER.source}
           allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
           className="z-10 h-full w-full"
