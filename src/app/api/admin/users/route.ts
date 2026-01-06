@@ -69,6 +69,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient(true); // Use service role
 
+    console.log("[ADMIN API] Executing query: SELECT * FROM profiles WHERE is_admin = true");
+
     // Get all users with is_admin = true
     const { data: profiles, error } = await supabase
       .from("profiles")
@@ -76,7 +78,12 @@ export async function GET(request: NextRequest) {
       .eq("is_admin", true)
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error("[ADMIN API] Query error:", error);
+      throw error;
+    }
+
+    console.log("[ADMIN API] Query result - profiles count:", profiles?.length, "profiles:", profiles);
 
     // Format data for frontend
     const admins = profiles?.map((profile) => ({

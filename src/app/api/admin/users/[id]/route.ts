@@ -99,12 +99,28 @@ export async function DELETE(
     console.log("[ADMIN API DELETE] Found user to delete:", existingUser.email);
 
     // Update is_admin to false (don't delete the profile)
-    const { error } = await supabase
+    console.log("[ADMIN API DELETE] Executing update query...");
+    const { data: updateData, error } = await supabase
       .from("profiles")
       .update({ is_admin: false })
       .eq("id", id);
 
-    if (error) throw error;
+    console.log("[ADMIN API DELETE] Update result - Data:", updateData, "Error:", error);
+
+    if (error) {
+      console.error("[ADMIN API DELETE] Update failed with error:", error);
+      throw error;
+    }
+    
+    // Verify the update was successful
+    console.log("[ADMIN API DELETE] Verifying update...");
+    const { data: verifyUser, error: verifyError } = await supabase
+      .from("profiles")
+      .select("id, email, is_admin")
+      .eq("id", id)
+      .single();
+
+    console.log("[ADMIN API DELETE] Verification result - User:", verifyUser, "Error:", verifyError);
     
     console.log(`[ADMIN API DELETE] Admin ${existingUser.email} (${id}) removed successfully`);
     
