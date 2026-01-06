@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { isAdmin } from "@/actions/admin";
 
 export async function adminMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -26,14 +27,10 @@ export async function adminMiddleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
     
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", user.id)
-      .single();
+    // Check if user is admin using isAdmin() function
+    const adminStatus = await isAdmin();
     
-    if (!profile?.is_admin) {
+    if (!adminStatus) {
       // Redirect to home if not admin
       const url = request.nextUrl.clone();
       url.pathname = "/";

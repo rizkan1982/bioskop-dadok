@@ -1,11 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "../env";
+import { isAdmin } from "@/actions/admin";
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = [
   "/auth",
   "/api/auth/callback",
+  "/api/auth/callback/admin",
 ];
 
 // Admin paths (require authentication + admin role)
@@ -83,13 +85,10 @@ export async function updateSession(request: NextRequest) {
 
   // If user is trying to access admin area, check admin role
   if (user && isAdminPath) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile?.is_admin) {
+    // Use isAdmin() function which checks email whitelist
+    const adminStatus = await isAdmin();
+    
+    if (!adminStatus) {
       // User is not admin, redirect to home
       const url = request.nextUrl.clone();
       url.pathname = "/";

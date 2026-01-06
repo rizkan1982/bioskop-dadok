@@ -1,11 +1,30 @@
 "use client";
 
-
 import { Card, CardBody, CardHeader } from "@heroui/react";
 import Image from "next/image";
-import GoogleLoginButton from "@/components/ui/button/GoogleLoginButton";
+import AdminGoogleLoginButton from "@/components/ui/button/AdminGoogleLoginButton";
+import { useSearchParams } from "next/navigation";
+import { Alert } from "@heroui/react";
 
 export default function AdminLoginPage() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  
+  const getErrorMessage = () => {
+    switch (error) {
+      case "unauthorized":
+        return "Anda tidak memiliki akses admin. Hanya email yang terdaftar yang dapat mengakses dashboard admin.";
+      case "auth_failed":
+        return "Autentikasi gagal. Silakan coba lagi.";
+      case "no_code":
+        return "Kode autentikasi tidak ditemukan. Silakan coba lagi.";
+      default:
+        return null;
+    }
+  };
+  
+  const errorMessage = getErrorMessage();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-4">
       {/* Background Effects */}
@@ -30,8 +49,18 @@ export default function AdminLoginPage() {
             <p className="text-sm text-default-400 mt-1">Admin Panel Login</p>
           </div>
         </CardHeader>
-        <CardBody className="p-6 flex flex-col items-center">
-          <GoogleLoginButton variant="solid" className="w-full" />
+        <CardBody className="p-6 flex flex-col items-center gap-4">
+          {errorMessage && (
+            <Alert
+              color="danger"
+              variant="flat"
+              className="w-full"
+              title="Error"
+            >
+              {errorMessage}
+            </Alert>
+          )}
+          <AdminGoogleLoginButton variant="solid" className="w-full" />
         </CardBody>
       </Card>
     </div>

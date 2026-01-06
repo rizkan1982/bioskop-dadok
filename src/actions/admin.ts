@@ -9,7 +9,6 @@ import { unstable_noStore as noStore } from "next/cache";
 // ============================================
 const ADMIN_EMAILS = [
   "stressgue934@gmail.com",
-  "zflixid@gmail.com",
 ];
 
 // Check if current user is admin
