@@ -47,12 +47,6 @@ export const getMoviePlayers = (id: string | number, startAt?: number): PlayersP
       resumable: true,
     },
     {
-      title: "Embed.su",
-      source: `https://embed.su/embed/movie/${id}`,
-      fast: true,
-      ads: true,
-    },
-    {
       title: "VidSrc.cc V2",
       source: `https://vidsrc.cc/v2/embed/movie/${id}?autoPlay=false`,
       ads: true,
@@ -160,12 +154,6 @@ export const getTvShowPlayers = (
       fast: true,
       ads: true,
       resumable: true,
-    },
-    {
-      title: "Embed.su",
-      source: `https://embed.su/embed/tv/${id}/${season}/${episode}`,
-      fast: true,
-      ads: true,
     },
     {
       title: "VidSrc.cc V2",

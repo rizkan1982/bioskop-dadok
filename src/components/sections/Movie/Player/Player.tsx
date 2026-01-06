@@ -58,7 +58,7 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
       clearTimeout(autoSwitchTimeoutRef.current);
     }
 
-    // Set timeout to try next source after 8 seconds
+    // Set timeout to try next source after 15 seconds (give more time to load)
     setIsTryingAltSource(false);
     autoSwitchTimeoutRef.current = setTimeout(() => {
       const currentIndex = selectedSource ?? 0;
@@ -68,9 +68,6 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
         setIsTryingAltSource(true);
         setTimeout(() => {
           setSelectedSource(nextIndex);
-        }, 1000);
-      }
-    }, 8000);
 
     return () => {
       if (autoSwitchTimeoutRef.current) {
@@ -121,10 +118,11 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
           <Skeleton className="absolute h-full w-full" />
           <iframe
             allowFullScreen
+            allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
             key={PLAYER.title}
             src={PLAYER.source}
-            className={cn("z-10 h-full", { "pointer-events-none": idle && !mobile })}
-            sandbox="allow-same-origin allow-scripts allow-forms allow-presentation allow-top-navigation"
+            className="z-10 h-full w-full"
+            style={{ border: 'none' }}
             onError={(e) => {
               console.error("Iframe error:", e);
             }}
