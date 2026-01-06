@@ -4,11 +4,11 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/utils/helpers";
 import { mutateMovieTitle } from "@/utils/movies";
 import { getMoviePlayers } from "@/utils/players";
-import { Card, Skeleton } from "@heroui/react";
+import { Card, Skeleton, Chip } from "@heroui/react";
 import { useDisclosure, useDocumentTitle, useIdle } from "@mantine/hooks";
 import dynamic from "next/dynamic";
 import { parseAsInteger, useQueryState } from "nuqs";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MovieDetails } from "tmdb-ts/dist/types/movies";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
 import { recordMovieView } from "@/actions/histories";
@@ -31,6 +31,8 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
     parseAsInteger.withDefault(0),
   );
   const hasRecorded = useRef(false);
+  const [isTryingAltSource, setIsTryingAltSource] = useState(false);
+  const autoSwitchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useVidlinkPlayer({ saveHistory: true });
   useDocumentTitle(`Play ${title} | ${siteConfig.name}`);
@@ -46,7 +48,35 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
     }
   }, [movie.id, title, movie.poster_path]);
 
-  const PLAYER = useMemo(() => players[selectedSource] || players[0], [players, selectedSource]);
+  // Auto-switch to next source if current one seems to fail
+  useEffect(() => {
+    // Clear any existing timeout
+    if (autoSwitchTimeoutRef.current) {
+      clearTimeout(autoSwitchTimeoutRef.current);
+    }
+
+    // Set timeout to try next source after 8 seconds
+    setIsTryingAltSource(false);
+    autoSwitchTimeoutRef.current = setTimeout(() => {
+      const currentIndex = selectedSource ?? 0;
+      const nextIndex = currentIndex + 1;
+      
+      if (nextIndex < players.length) {
+        setIsTryingAltSource(true);
+        setTimeout(() => {
+          setSelectedSource(nextIndex);
+        }, 1000);
+      }
+    }, 8000);
+
+    return () => {
+      if (autoSwitchTimeoutRef.current) {
+        clearTimeout(autoSwitchTimeoutRef.current);
+      }
+    };
+  }, [selectedSource, players.length, setSelectedSource]);
+
+  const PLAYER = useMemo(() => players[selectedSource ?? 0] || players[0], [players, selectedSource]);
 
   return (
     <>
@@ -57,6 +87,33 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
           onOpenSource={handlers.open}
           hidden={idle && !mobile}
         />
+        
+        {/* Show indicator when trying alternative source */}
+        {isTryingAltSource && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+            <Chip
+              color="warning"
+              variant="flat"
+              className="animate-pulse"
+            >
+              Mencoba sumber video lain...
+            </Chip>
+          </div>
+        )}
+
+        {/* Show current source info */}
+        {!idle && (
+          <div className="absolute bottom-4 left-4 z-50">
+            <Chip
+              size="sm"
+              variant="flat"
+              className="bg-black/60 text-white"
+            >
+              {PLAYER.title} {selectedSource !== null && selectedSource > 0 && `(${selectedSource + 1}/${players.length})`}
+            </Chip>
+          </div>
+        )}
+        
         <Card shadow="md" radius="none" className="relative h-screen">
           <Skeleton className="absolute h-full w-full" />
           <iframe
@@ -72,7 +129,7 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
         opened={opened}
         onClose={handlers.close}
         players={players}
-        selectedSource={selectedSource}
+        selectedSource={selectedSource ?? 0}
         setSelectedSource={setSelectedSource}
       />
     </>
