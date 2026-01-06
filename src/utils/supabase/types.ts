@@ -150,6 +150,45 @@ export type Database = {
         }
         Relationships: []
       }
+      watchlist: {
+        Row: {
+          user_id: string
+          id: number
+          type: string
+          adult: boolean
+          backdrop_path: string | null
+          poster_path: string | null
+          release_date: string
+          title: string
+          vote_average: number
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          id: number
+          type: string
+          adult: boolean
+          backdrop_path?: string | null
+          poster_path?: string | null
+          release_date: string
+          title: string
+          vote_average: number
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          id?: number
+          type?: string
+          adult?: boolean
+          backdrop_path?: string | null
+          poster_path?: string | null
+          release_date?: string
+          title?: string
+          vote_average?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
