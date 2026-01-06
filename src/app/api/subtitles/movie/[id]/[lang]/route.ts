@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { translateWebVTT } from '@/api/groq';
 
 /**
  * API endpoint to fetch and translate subtitles
@@ -7,10 +6,10 @@ import { translateWebVTT } from '@/api/groq';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string; lang: string } }
+  { params }: { params: Promise<{ id: string; lang: string }> }
 ) {
   try {
-    const { id, lang } = params;
+    const { id, lang } = await params;
     
     // Fetch subtitles from OpenSubtitles API or other subtitle service
     // For now, we'll use a proxy to fetch from the embedded player
