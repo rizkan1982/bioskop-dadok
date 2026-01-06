@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, Chip, Progress, Spinner } from "@heroui/react";
 import { TrendUp, Users, Eye, BarChart } from "@/utils/icons";
-import { HiGlobeAlt, HiDevicePhoneMobile, HiComputerDesktop, HiDeviceTablet, HiFilm, HiTv } from "react-icons/hi2";
+import { HiFilm, HiTv } from "react-icons/hi2";
 
 interface VisitorStats {
   today: number;
@@ -55,12 +55,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-  const deviceIcons: Record<string, React.ReactNode> = {
-    Mobile: <HiDevicePhoneMobile className="text-xl sm:text-2xl text-primary" />,
-    Desktop: <HiComputerDesktop className="text-xl sm:text-2xl text-secondary" />,
-    Tablet: <HiDeviceTablet className="text-xl sm:text-2xl text-warning" />,
-  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -161,31 +155,39 @@ export default function AdminDashboard() {
           </div>
         </Card>
 
-        {/* Device Distribution */}
+        {/* Summary Stats */}
         <Card className="p-4 sm:p-6 bg-black/40 backdrop-blur-xl border border-white/10">
           <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
-            📱 Distribusi Device
+            📊 Ringkasan Bulan Ini
           </h3>
           <div className="space-y-4">
-            {stats?.deviceDistribution.map((device) => (
-              <div key={device.device} className="flex items-center gap-3 sm:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
-                  {deviceIcons[device.device]}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium truncate">{device.device}</span>
-                    <span className="text-xs sm:text-sm text-default-400">{device.percentage}%</span>
-                  </div>
-                  <Progress
-                    value={device.percentage}
-                    color={device.device === "Mobile" ? "primary" : device.device === "Desktop" ? "secondary" : "warning"}
-                    size="sm"
-                  />
-                </div>
-                <span className="text-xs sm:text-sm text-default-400 w-12 text-right flex-shrink-0">{device.count}</span>
+            <div className="flex items-center gap-3 sm:gap-4 p-3 rounded-xl bg-white/5">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Eye className="text-xl sm:text-2xl text-primary" />
               </div>
-            ))}
+              <div className="flex-1 min-w-0">
+                <p className="text-lg sm:text-xl font-bold">{stats?.thisMonth || 0}</p>
+                <p className="text-xs sm:text-sm text-default-400">Total Aktivitas Bulan Ini</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4 p-3 rounded-xl bg-white/5">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-success/20 flex items-center justify-center flex-shrink-0">
+                <Users className="text-xl sm:text-2xl text-success" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-lg sm:text-xl font-bold">{stats?.totalUsers || 0}</p>
+                <p className="text-xs sm:text-sm text-default-400">Total User Terdaftar</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4 p-3 rounded-xl bg-white/5">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-warning/20 flex items-center justify-center flex-shrink-0">
+                <BarChart className="text-xl sm:text-2xl text-warning" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-lg sm:text-xl font-bold">{(stats?.uniqueMovies || 0) + (stats?.uniqueTvShows || 0)}</p>
+                <p className="text-xs sm:text-sm text-default-400">Total Konten Ditonton</p>
+              </div>
+            </div>
           </div>
         </Card>
       </div>

@@ -99,31 +99,34 @@ export async function GET(request: NextRequest) {
     // Get unique content watched
     const { data: uniqueContent } = await supabase
       .from("histories")
-      .select("tmdb_id, type");
+      .select("tmdb_id, content_type");
 
-    const uniqueMovies = new Set(uniqueContent?.filter(c => c.type === "movie").map(c => c.tmdb_id)).size;
-    const uniqueTvShows = new Set(uniqueContent?.filter(c => c.type === "tv").map(c => c.tmdb_id)).size;
+    const uniqueMovies = new Set(
+      (uniqueContent as { tmdb_id: number; content_type: string }[] | null)
+        ?.filter((c) => c.content_type === "movie")
+        .map((c) => c.tmdb_id)
+    ).size;
+    const uniqueTvShows = new Set(
+      (uniqueContent as { tmdb_id: number; content_type: string }[] | null)
+        ?.filter((c) => c.content_type === "tv")
+        .map((c) => c.tmdb_id)
+    ).size;
 
     // Format current watchers from recent histories
     const currentWatchers = (recentHistories || []).map((h, i) => ({
       id: `watcher-${i}`,
       title: h.title || "Unknown Title",
-      type: h.type || "movie",
+      type: h.content_type || "movie",
       country: "Indonesia", // Default since we don't track location
       startedAt: new Date(h.updated_at),
     }));
 
-    // Device distribution estimation (based on common patterns)
-    const deviceDistribution = [
-      { device: "Mobile", percentage: 68, count: Math.floor((totalHistories || 0) * 0.68) },
-      { device: "Desktop", percentage: 28, count: Math.floor((totalHistories || 0) * 0.28) },
-      { device: "Tablet", percentage: 4, count: Math.floor((totalHistories || 0) * 0.04) },
-    ];
+    // Note: Device distribution is not available because we don't track device info
+    // This can be implemented later with proper analytics tracking
+    const deviceDistribution: { device: string; percentage: number; count: number }[] = [];
 
-    // Country data (simplified - mainly Indonesia since that's the target audience)
-    const countryData = [
-      { country: "Indonesia", code: "ID", flag: "🇮🇩", visitors: totalHistories || 0, peakHour: "20:00" },
-    ];
+    // Country data - based on actual data if we track it, otherwise empty
+    const countryData: { country: string; code: string; flag: string; visitors: number; peakHour: string }[] = [];
 
     return NextResponse.json({
       success: true,
