@@ -40,13 +40,19 @@ export default function AdminUsersManagement() {
 
   const fetchUsers = async () => {
     try {
+      console.log("[MANAGE USERS] Fetching admin users list");
       const res = await fetch("/api/admin/users");
       const data = await res.json();
+      console.log("[MANAGE USERS] Fetch response:", data);
+      
       if (data.success) {
+        console.log("[MANAGE USERS] Users loaded:", data.data?.length || 0);
         setUsers(data.data || []);
+      } else {
+        console.warn("[MANAGE USERS] Fetch failed:", data.message);
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("[MANAGE USERS] Error fetching users:", error);
     } finally {
       setLoading(false);
     }
@@ -88,22 +94,30 @@ export default function AdminUsersManagement() {
   const handleDelete = async (id: string, userEmail: string) => {
     if (!confirm(`Yakin ingin menghapus admin ${userEmail}? Akses admin mereka akan langsung dicabut.`)) return;
 
+    console.log("[MANAGE USERS] Starting delete for ID:", id, "Email:", userEmail);
+
     try {
       const res = await fetch(`/api/admin/users/${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" }
       });
+      
+      console.log("[MANAGE USERS] Delete response status:", res.status);
+      
       const data = await res.json();
+      console.log("[MANAGE USERS] Delete response data:", data);
 
       if (data.success) {
+        console.log("[MANAGE USERS] Delete successful, fetching updated list");
         await fetchUsers();
         alert(`Admin ${userEmail} berhasil dihapus. Akses mereka telah dicabut.`);
       } else {
+        console.warn("[MANAGE USERS] Delete failed:", data.message);
         alert(data.message || "Gagal menghapus admin");
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
-      alert("Terjadi kesalahan saat menghapus admin");
+      console.error("[MANAGE USERS] Error deleting user:", error);
+      alert("Terjadi kesalahan saat menghapus admin: " + String(error));
     }
   };
 
