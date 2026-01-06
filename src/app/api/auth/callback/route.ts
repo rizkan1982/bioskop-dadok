@@ -1,20 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { IS_DEVELOPMENT } from "@/utils/constants";
-import { cookies } from "next/headers";
-
-// ============================================
-// WHITELIST EMAIL ADMIN
-// Hanya email ini yang bisa akses admin panel
-// ============================================
-const ADMIN_EMAILS = [
-  "stressgue934@gmail.com",
-];
 
 export const GET = async (request: Request) => {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const isAdminLogin = searchParams.get("admin_login") === "true";
 
   let next = searchParams.get("next") ?? "/";
   if (!next.startsWith("/")) {
@@ -41,48 +31,9 @@ export const GET = async (request: Request) => {
     } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && user) {
-      console.info("Auth callback user:", { email: user.email, isAdminLogin });
+      console.info("Auth callback user:", { email: user.email });
 
-      // Handle admin login
-      if (isAdminLogin) {
-        const userEmail = user.email || "";
-        const isAdmin = ADMIN_EMAILS.includes(userEmail);
-        
-        console.log("Admin login check:", { email: userEmail, isAdmin });
-        
-        if (!isAdmin) {
-          // Not admin, redirect to admin login with error
-          return NextResponse.redirect(getRedirectUrl("/auth/admin?error=unauthorized"));
-        }
-        
-        // Create admin session cookie
-        const username = user.email?.split("@")[0] || user.user_metadata?.full_name || user.user_metadata?.name || "Admin";
-        
-        const sessionData = {
-          username,
-          role: "admin",
-          email: user.email || "",
-          exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-        };
-        
-        const cookieStore = await cookies();
-        const encodedSession = Buffer.from(JSON.stringify(sessionData)).toString("base64");
-        
-        cookieStore.set("admin_session", encodedSession, {
-          httpOnly: true,
-          secure: !IS_DEVELOPMENT,
-          sameSite: "lax",
-          maxAge: 24 * 60 * 60, // 24 hours
-          path: "/",
-        });
-        
-        console.log("Admin session created for:", userEmail);
-        
-        // Redirect to admin dashboard
-        return NextResponse.redirect(getRedirectUrl("/admin"));
-      }
-
-      // Regular user login - create profile if needed
+      // Create profile if needed
       const { data: profile } = await supabase
         .from("profiles")
         .select("username")
@@ -98,10 +49,9 @@ export const GET = async (request: Request) => {
         const generateUniqueUsername = async (base: string) => {
           let username = base;
           let attempts = 0;
-          const maxAttempts = 5; // Prevent infinite loop
+          const maxAttempts = 5;
 
           while (attempts < maxAttempts) {
-            // Check if username exists
             const { data: existing } = await supabase
               .from("profiles")
               .select("username")
@@ -109,24 +59,19 @@ export const GET = async (request: Request) => {
               .single();
 
             if (!existing) {
-              // Username available!
               return username;
             }
 
-            // Username taken, add random 4 digits
-            const randomNum = Math.floor(1000 + Math.random() * 9000); // 1000-9999
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
             username = `${base}#${randomNum}`;
             attempts++;
           }
 
-          // Fallback: use timestamp if still can't find unique
           return `${base}${Date.now()}`;
         };
 
-        // Generate unique username
         const uniqueUsername = await generateUniqueUsername(baseUsername);
 
-        // Insert profile with unique username
         const { error: profileError } = await supabase.from("profiles").insert({
           id: user.id,
           username: uniqueUsername,
@@ -139,6 +84,8 @@ export const GET = async (request: Request) => {
         }
       }
 
+      // Redirect to next or homepage
+      // AdminLoginChecker component will handle admin redirect if needed
       return NextResponse.redirect(getRedirectUrl(next));
     }
   }

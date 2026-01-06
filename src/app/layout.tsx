@@ -17,6 +17,7 @@ import { Suspense } from "react";
 const Disclaimer = dynamic(() => import("@/components/ui/overlay/Disclaimer"));
 const PopCashAd = dynamic(() => import("@/components/ui/ads/PopCashAd"));
 const LayoutWithAds = dynamic(() => import("@/components/ui/layout/LayoutWithAds"));
+const AdminLoginChecker = dynamic(() => import("@/components/ui/AdminLoginChecker"));
 
 export const metadata: Metadata = {
   title: siteConfig.name,
@@ -101,6 +102,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <NuqsAdapter>
             <Providers>
               {IS_PRODUCTION && <Disclaimer />}
+              <AdminLoginChecker />
               <TopNavbar />
               <Sidebar>
                 <LayoutWithAds>

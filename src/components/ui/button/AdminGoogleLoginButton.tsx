@@ -12,15 +12,20 @@ type AdminGoogleLoginButtonProps = Omit<
 
 const supabase = createClient();
 
+// Key for storing admin login flag
+const ADMIN_LOGIN_KEY = "admin_login_pending";
+
 const AdminGoogleLoginButton: React.FC<AdminGoogleLoginButtonProps> = ({ variant = "solid", ...props }) => {
   const handleGoogleLogin = useCallback(async () => {
     try {
-      // Use regular callback with admin_login parameter
-      // This works because Supabase only allows whitelisted redirect URLs
+      // Set flag in localStorage before redirect
+      // This will be checked in the callback route
+      localStorage.setItem(ADMIN_LOGIN_KEY, "true");
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${location.origin}/api/auth/callback?admin_login=true`,
+          redirectTo: `${location.origin}/api/auth/callback`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -28,12 +33,15 @@ const AdminGoogleLoginButton: React.FC<AdminGoogleLoginButtonProps> = ({ variant
         },
       });
       if (error) {
+        // Clear flag if error
+        localStorage.removeItem(ADMIN_LOGIN_KEY);
         addToast({
           title: error.message,
           color: "danger",
         });
       }
     } catch (error) {
+      localStorage.removeItem(ADMIN_LOGIN_KEY);
       console.error("Google login error:", error);
       addToast({
         title: error instanceof Error ? error.message : "An error occurred. Please try again.",
