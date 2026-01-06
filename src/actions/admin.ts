@@ -234,7 +234,6 @@ export async function getAllWatchlist() {
       const profile = profiles?.find((p) => p.id === item.user_id);
       return {
         ...item,
-        content_type: item.type, // Map 'type' to 'content_type' for UI
         profiles: { email: profile?.email || "Unknown" }
       };
     }) || [];
