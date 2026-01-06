@@ -22,7 +22,7 @@ export const GET = async (request: NextRequest) => {
     
     const { data: profile, error: profileError } = await supabaseServiceRole
       .from("profiles")
-      .select("id, email, is_admin")
+      .select("id, email, is_admin, username")
       .eq("id", user.id)
       .single();
     
@@ -38,8 +38,29 @@ export const GET = async (request: NextRequest) => {
       return NextResponse.redirect(new URL("/auth/admin?error=unauthorized", request.url));
     }
     
-    console.log("[ADMIN CALLBACK] Admin verified, redirecting to dashboard...");
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    console.log("[ADMIN CALLBACK] Admin verified, setting session cookie and redirecting...");
+    
+    // Create admin session cookie
+    const sessionData = {
+      id: user.id,
+      email: user.email,
+      username: profile?.username || user.email?.split("@")[0] || "admin",
+      role: "admin",
+      exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+    };
+    
+    const sessionCookie = Buffer.from(JSON.stringify(sessionData)).toString("base64");
+    
+    const response = NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    response.cookies.set("admin_session", sessionCookie, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60, // 24 hours
+      path: "/",
+    });
+    
+    return response;
     
   } catch (error) {
     console.error("[ADMIN CALLBACK] Error:", error);
