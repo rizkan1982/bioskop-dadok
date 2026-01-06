@@ -10,13 +10,15 @@ interface History {
   id: string;
   user_id: string;
   tmdb_id: number;
-  type: string;
+  content_type: string;
   title: string;
   poster_path: string | null;
   progress: number;
   duration: number;
   season_number: number | null;
   episode_number: number | null;
+  watched_at: string;
+  created_at: string;
   updated_at: string;
   profiles?: { email: string };
 }
@@ -148,7 +150,7 @@ export default function AdminHistoryPage() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          {history.type === "movie" ? (
+                          {history.content_type === "movie" ? (
                             <HiFilm className="text-2xl text-default-300" />
                           ) : (
                             <HiTv className="text-2xl text-default-300" />
@@ -165,15 +167,15 @@ export default function AdminHistoryPage() {
                         </h4>
                         <Chip 
                           size="sm" 
-                          color={history.type === "movie" ? "primary" : "secondary"} 
+                          color={history.content_type === "movie" ? "primary" : "secondary"} 
                           variant="flat"
                           className="flex-shrink-0"
                         >
-                          {history.type === "movie" ? "🎬 Film" : "📺 TV"}
+                          {history.content_type === "movie" ? "🎬 Film" : "📺 TV"}
                         </Chip>
                       </div>
 
-                      {history.type === "tv" && history.season_number && (
+                      {history.content_type === "tv" && history.season_number && (
                         <p className="text-xs sm:text-sm text-default-400 mb-2">
                           Season {history.season_number}, Episode {history.episode_number}
                         </p>
