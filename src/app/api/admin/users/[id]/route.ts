@@ -109,31 +109,24 @@ export async function DELETE(
 
     console.log("[ADMIN API DELETE] Found user to delete:", existingUser.email);
 
-    // Update is_admin to false (don't delete the profile)
-    console.log("[ADMIN API DELETE] Executing update query...");
-    const { data: updateData, error } = await supabase
-      .from("profiles")
-      .update({ is_admin: false })
-      .eq("id", id);
+    // Use stored procedure to remove admin access (SECURITY DEFINER bypasses RLS)
+    console.log("[ADMIN API DELETE] Calling remove_admin_access() stored procedure...");
+    const { data: procResult, error: procError } = await supabase
+      .rpc("remove_admin_access", { user_id: id });
 
-    console.log("[ADMIN API DELETE] Update result - Data:", updateData, "Error:", error);
+    console.log("[ADMIN API DELETE] Procedure result:", procResult, "Error:", procError);
 
-    if (error) {
-      console.error("[ADMIN API DELETE] Update failed with error:", error);
-      throw error;
+    if (procError) {
+      console.error("[ADMIN API DELETE] Procedure failed:", procError);
+      throw procError;
     }
-    
-    // Verify the update was successful
-    console.log("[ADMIN API DELETE] Verifying update...");
-    const { data: verifyUser, error: verifyError } = await supabase
-      .from("profiles")
-      .select("id, email, is_admin")
-      .eq("id", id)
-      .single();
 
-    console.log("[ADMIN API DELETE] Verification result - User:", verifyUser, "Error:", verifyError);
-    
-    console.log(`[ADMIN API DELETE] Admin ${existingUser.email} (${id}) removed successfully`);
+    if (!procResult?.success) {
+      console.warn("[ADMIN API DELETE] Procedure returned success=false:", procResult);
+      throw new Error(procResult?.message || "Failed to remove admin access");
+    }
+
+    console.log(`[ADMIN API DELETE] Admin ${existingUser.email} (${id}) removed successfully via procedure`);
     
     return NextResponse.json({ 
       success: true, 
