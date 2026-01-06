@@ -1,18 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { isAdmin } from "@/actions/admin";
+
+// Admin email whitelist (must match ADMIN_EMAILS in actions/admin.ts)
+const ADMIN_EMAILS = [
+  "stressgue934@gmail.com",
+];
+
+// Helper to check if user is admin in API context
+async function checkAdminAccess(request: NextRequest): Promise<{ isAdmin: boolean; userId?: string }> {
+  try {
+    const supabase = await createClient();
+    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.log("[ADMIN API] No authenticated user");
+      return { isAdmin: false };
+    }
+
+    console.log("[ADMIN API] Checking admin for user:", user.email);
+
+    // Check 1: Email whitelist (priority tertinggi)
+    if (ADMIN_EMAILS.includes(user.email || "")) {
+      console.log("[ADMIN API] User is in email whitelist");
+      return { isAdmin: true, userId: user.id };
+    }
+    
+    // Check 2: Database is_admin field (fallback)
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      console.warn("[ADMIN API] Error checking profile:", error);
+      return { isAdmin: false };
+    }
+
+    const isAdmin = profile?.is_admin === true;
+    console.log("[ADMIN API] Admin status from DB:", isAdmin);
+    
+    return { isAdmin, userId: user.id };
+  } catch (error) {
+    console.error("[ADMIN API] Error checking admin access:", error);
+    return { isAdmin: false };
+  }
+}
 
 // GET - Fetch all admin users from database
 export async function GET(request: NextRequest) {
   try {
+    console.log("[ADMIN API] GET /api/admin/users called");
+    
     // Check if current user is admin
-    const adminCheck = await isAdmin();
-    if (!adminCheck) {
+    const { isAdmin, userId } = await checkAdminAccess(request);
+    if (!isAdmin) {
+      console.log("[ADMIN API] Unauthorized access attempt");
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 403 }
       );
     }
+
+    console.log("[ADMIN API] Admin user", userId, "fetching admin list");
 
     const supabase = await createClient(true); // Use service role
 
@@ -34,11 +87,12 @@ export async function GET(request: NextRequest) {
       createdAt: profile.created_at,
     })) || [];
 
+    console.log("[ADMIN API] Returning", admins.length, "admins");
     return NextResponse.json({ success: true, data: admins });
   } catch (error) {
-    console.error("Error fetching admin users:", error);
+    console.error("[ADMIN API] Error fetching admin users:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch admin users" },
+      { success: false, message: "Failed to fetch admin users", error: String(error) },
       { status: 500 }
     );
   }
@@ -47,9 +101,12 @@ export async function GET(request: NextRequest) {
 // POST - Add new admin user (by email only)
 export async function POST(request: NextRequest) {
   try {
+    console.log("[ADMIN API] POST /api/admin/users called");
+    
     // Check if current user is admin
-    const adminCheck = await isAdmin();
-    if (!adminCheck) {
+    const { isAdmin } = await checkAdminAccess(request);
+    if (!isAdmin) {
+      console.log("[ADMIN API] Unauthorized POST attempt");
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 403 }

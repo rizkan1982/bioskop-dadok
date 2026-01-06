@@ -1,8 +1,66 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 
+// Admin email whitelist (must match ADMIN_EMAILS in actions/admin.ts)
+const ADMIN_EMAILS = [
+  "stressgue934@gmail.com",
+];
+
+// Helper to check if user is admin in API context
+async function checkAdminAccess(request: NextRequest): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.log("[ADMIN STATS] No authenticated user");
+      return false;
+    }
+
+    console.log("[ADMIN STATS] Checking admin for user:", user.email);
+
+    // Check 1: Email whitelist (priority tertinggi)
+    if (ADMIN_EMAILS.includes(user.email || "")) {
+      console.log("[ADMIN STATS] User is in email whitelist");
+      return true;
+    }
+    
+    // Check 2: Database is_admin field (fallback)
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      console.warn("[ADMIN STATS] Error checking profile:", error);
+      return false;
+    }
+
+    const isAdmin = profile?.is_admin === true;
+    console.log("[ADMIN STATS] Admin status from DB:", isAdmin);
+    return isAdmin;
+  } catch (error) {
+    console.error("[ADMIN STATS] Error checking admin access:", error);
+    return false;
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
+    // Check if current user is admin
+    const isAdmin = await checkAdminAccess(request);
+    if (!isAdmin) {
+      console.log("[ADMIN STATS] Unauthorized access attempt");
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+
     // Always use service role for admin stats (bypass RLS)
     const supabase = await createClient(true);
 
