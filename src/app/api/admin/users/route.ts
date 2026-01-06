@@ -196,15 +196,20 @@ export async function POST(request: NextRequest) {
       }
 
       console.log("[ADMIN API POST] Updating is_admin flag for user:", existingProfile.id);
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ is_admin: true })
-        .eq("id", existingProfile.id);
+      
+      // Use stored procedure to set admin access (SECURITY DEFINER bypasses RLS)
+      console.log("[ADMIN API POST] Calling add_admin_access() stored procedure...");
+      const { data: procResult, error: procError } = await (supabase.rpc as any)(
+        "add_admin_access",
+        { user_id: existingProfile.id }
+      );
 
-      if (updateError) {
-        console.error("[ADMIN API POST] Update error:", updateError);
-        throw updateError;
+      if (procError) {
+        console.error("[ADMIN API POST] Procedure error:", procError);
+        throw procError;
       }
+
+      console.log("[ADMIN API POST] Procedure result:", procResult);
 
       // Verify the update worked by reading back the data
       console.log("[ADMIN API POST] Verifying update by reading data back...");
