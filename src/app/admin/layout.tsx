@@ -2,9 +2,14 @@ import AdminSidebar from "@/components/sections/Admin/Sidebar";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { cookies } from "next/headers";
-import { isAdmin } from "@/actions/admin";
-import { createClient } from "@/utils/supabase/server";
-import { IS_DEVELOPMENT } from "@/utils/constants";
+
+// ============================================
+// WHITELIST EMAIL ADMIN
+// Hanya email ini yang bisa akses admin panel
+// ============================================
+const ADMIN_EMAILS = [
+  "stressgue934@gmail.com",
+];
 
 interface AdminSession {
   username: string;
@@ -29,6 +34,11 @@ async function getAdminSession(): Promise<AdminSession | null> {
       return null;
     }
     
+    // Verify email is still in admin whitelist
+    if (!ADMIN_EMAILS.includes(session.email)) {
+      return null;
+    }
+    
     return session;
   } catch {
     return null;
@@ -36,59 +46,14 @@ async function getAdminSession(): Promise<AdminSession | null> {
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  let session = await getAdminSession();
+  const session = await getAdminSession();
   
-  // If no session cookie, check if user is admin and create session
+  // If no valid admin session, redirect to admin login
   if (!session) {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    
-    if (!user) {
-      redirect("/auth/admin");
-    }
-    
-    // Check if user is admin
-    const adminStatus = await isAdmin();
-    
-    if (!adminStatus) {
-      redirect("/auth/admin?error=unauthorized");
-    }
-    
-    // Get username from email or use default
-    // Note: profiles table may not have username column in production
-    const username = user.email?.split("@")[0] || user.user_metadata?.full_name || user.user_metadata?.name || "Admin";
-    
-    // Create admin session cookie
-    const sessionData: AdminSession = {
-      username,
-      role: "admin",
-      email: user.email || "",
-      exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-    };
-    
-    const cookieStore = await cookies();
-    const encodedSession = Buffer.from(JSON.stringify(sessionData)).toString("base64");
-    
-    cookieStore.set("admin_session", encodedSession, {
-      httpOnly: true,
-      secure: !IS_DEVELOPMENT,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60, // 24 hours
-      path: "/",
-    });
-    
-    session = sessionData;
-  }
-  
-  // Double check admin status even if session exists
-  const adminStatus = await isAdmin();
-  if (!adminStatus) {
-    // Clear invalid session
+    // Clear any invalid session cookie
     const cookieStore = await cookies();
     cookieStore.delete("admin_session");
-    redirect("/auth/admin?error=unauthorized");
+    redirect("/auth/admin");
   }
   
   return (

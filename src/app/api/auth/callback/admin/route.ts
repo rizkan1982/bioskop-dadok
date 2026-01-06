@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { isAdmin } from "@/actions/admin";
 import { IS_DEVELOPMENT } from "@/utils/constants";
 import { cookies } from "next/headers";
+
+// ============================================
+// WHITELIST EMAIL ADMIN
+// Hanya email ini yang bisa akses admin panel
+// ============================================
+const ADMIN_EMAILS = [
+  "stressgue934@gmail.com",
+];
 
 export const GET = async (request: Request) => {
   const { searchParams, origin } = new URL(request.url);
@@ -20,19 +27,22 @@ export const GET = async (request: Request) => {
   } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !user) {
+    console.error("Auth error:", error);
     return NextResponse.redirect(`${origin}/auth/admin?error=auth_failed`);
   }
 
-  // Check if user is admin using isAdmin() function
-  const adminStatus = await isAdmin();
+  // Check if user email is in admin whitelist
+  const userEmail = user.email || "";
+  const isAdminEmail = ADMIN_EMAILS.includes(userEmail);
   
-  if (!adminStatus) {
+  console.log("Admin login attempt:", { email: userEmail, isAdmin: isAdminEmail });
+  
+  if (!isAdminEmail) {
     // User is not admin, redirect back to admin login with error
     return NextResponse.redirect(`${origin}/auth/admin?error=unauthorized`);
   }
 
   // Get username from email or user metadata
-  // Note: profiles table may not have username column in production
   const username = user.email?.split("@")[0] || user.user_metadata?.full_name || user.user_metadata?.name || "Admin";
 
   // Create admin session cookie
