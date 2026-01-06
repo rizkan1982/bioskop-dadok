@@ -58,7 +58,7 @@ export async function addToWatchlist(item: WatchlistItem): Promise<ActionRespons
       .insert({
         user_id: user.id,
         id: item.id,
-        type: item.type,
+        content_type: item.type,
         adult: item.adult,
         backdrop_path: item.backdrop_path,
         poster_path: item.poster_path,
@@ -109,7 +109,7 @@ export async function removeFromWatchlist(id: number, type: ContentType): Promis
       .delete()
       .eq("user_id", user.id)
       .eq("id", id)
-      .eq("type", type);
+      .eq("content_type", type);
 
     if (error) throw error;
 
@@ -140,7 +140,7 @@ export const removeAllWatchlist = async (type: ContentType): Promise<ActionRespo
       .from("watchlist")
       .delete()
       .eq("user_id", user.id)
-      .eq("type", type);
+      .eq("content_type", type);
 
     if (error) throw error;
 
@@ -175,7 +175,7 @@ export async function checkInWatchlist(
       .select("id")
       .eq("user_id", user.id)
       .eq("id", id)
-      .eq("type", type)
+      .eq("content_type", type)
       .maybeSingle();
 
     if (error) throw error;
@@ -218,7 +218,7 @@ export async function getWatchlist(
 
     // Apply filter
     if (filterType !== "all") {
-      query = query.eq("type", filterType);
+      query = query.eq("content_type", filterType);
     }
 
     // Apply pagination
