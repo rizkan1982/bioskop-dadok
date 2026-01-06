@@ -32,11 +32,6 @@ const MoviePlayerPage: NextPage<Params<{ id: number }>> = ({ params }) => {
     };
   }, []);
 
-const MoviePlayerPage: NextPage<Params<{ id: number }>> = ({ params }) => {
-  const { id } = use(params);
-
-  console.log("Movie Player Page - ID:", id);
-
   const {
     data: movie,
     isPending,
