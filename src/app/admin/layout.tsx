@@ -56,14 +56,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       redirect("/auth/admin?error=unauthorized");
     }
     
-    // Get user profile for username
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id", user.id)
-      .single();
-    
-    const username = profile?.username || user.email?.split("@")[0] || "Admin";
+    // Get username from email or use default
+    // Note: profiles table may not have username column in production
+    const username = user.email?.split("@")[0] || user.user_metadata?.full_name || user.user_metadata?.name || "Admin";
     
     // Create admin session cookie
     const sessionData: AdminSession = {
