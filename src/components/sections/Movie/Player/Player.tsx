@@ -7,10 +7,11 @@ import { getMoviePlayers } from "@/utils/players";
 import { Card, Skeleton } from "@heroui/react";
 import { useDocumentTitle, useIdle } from "@mantine/hooks";
 import dynamic from "next/dynamic";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MovieDetails } from "tmdb-ts/dist/types/movies";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
 import { recordMovieView } from "@/actions/histories";
+import SubtitleSelector from "@/components/ui/other/SubtitleSelector";
 const MoviePlayerHeader = dynamic(() => import("./Header"));
 
 interface MoviePlayerProps {
@@ -26,6 +27,7 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
   const idle = useIdle(3000);
   const { mobile } = useBreakpoints();
   const hasRecorded = useRef(false);
+  const [selectedSubtitle, setSelectedSubtitle] = useState<string>('id');
 
   useVidlinkPlayer({ saveHistory: true });
   useDocumentTitle(`Play ${title} | ${siteConfig.name}`);
@@ -42,6 +44,13 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
 
   const PLAYER = players[0]; // Always use first (and only) source
 
+  const handleSubtitleChange = (languageCode: string) => {
+    setSelectedSubtitle(languageCode);
+    console.log('Subtitle changed to:', languageCode);
+    // Note: Embedded players (2Embed, AutoEmbed) handle subtitles internally
+    // This selector provides UI for user preference
+  };
+
   return (
     <div className={cn("relative", SpacingClasses.reset)}>
       <MoviePlayerHeader
@@ -50,6 +59,17 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
         onOpenSource={() => {}}
         hidden={idle && !mobile}
       />
+      
+      {/* Subtitle Selector */}
+      <div className={cn(
+        "absolute top-20 right-4 z-50 transition-opacity duration-300",
+        idle && !mobile ? "opacity-0" : "opacity-100"
+      )}>
+        <SubtitleSelector
+          movieId={movie.id}
+          onSubtitleChange={handleSubtitleChange}
+        />
+      </div>
       
       <Card shadow="md" radius="none" className="relative h-screen">
         <Skeleton className="absolute h-full w-full" />

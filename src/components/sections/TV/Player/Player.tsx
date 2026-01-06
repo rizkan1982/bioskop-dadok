@@ -4,12 +4,13 @@ import { getTvShowPlayers } from "@/utils/players";
 import { Card, Skeleton } from "@heroui/react";
 import { useDocumentTitle, useIdle } from "@mantine/hooks";
 import dynamic from "next/dynamic";
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { Episode, TvShowDetails } from "tmdb-ts";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { SpacingClasses } from "@/utils/constants";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
 import { recordTvShowView } from "@/actions/histories";
+import SubtitleSelector from "@/components/ui/other/SubtitleSelector";
 const TvShowPlayerHeader = dynamic(() => import("./Header"));
 
 export interface TvShowPlayerProps {
@@ -36,6 +37,7 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
   const players = getTvShowPlayers(id, episode.season_number, episode.episode_number, startAt);
   const idle = useIdle(3000);
   const hasRecorded = useRef(false);
+  const [selectedSubtitle, setSelectedSubtitle] = useState<string>('id');
 
   useVidlinkPlayer({
     saveHistory: true,
@@ -58,6 +60,11 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
 
   const PLAYER = players[0]; // Always use first (and only) source
 
+  const handleSubtitleChange = (languageCode: string) => {
+    setSelectedSubtitle(languageCode);
+    console.log('Subtitle changed to:', languageCode);
+  };
+
   return (
     <div className={cn("relative", SpacingClasses.reset)}>
       <TvShowPlayerHeader
@@ -69,6 +76,19 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
         onOpenEpisode={() => {}}
         {...props}
       />
+
+      {/* Subtitle Selector */}
+      <div className={cn(
+        "absolute top-20 right-4 z-50 transition-opacity duration-300",
+        idle && !mobile ? "opacity-0" : "opacity-100"
+      )}>
+        <SubtitleSelector
+          tvShowId={id}
+          season={episode.season_number}
+          episode={episode.episode_number}
+          onSubtitleChange={handleSubtitleChange}
+        />
+      </div>
 
       <Card shadow="md" radius="none" className="relative h-screen">
         <Skeleton className="absolute h-full w-full" />
