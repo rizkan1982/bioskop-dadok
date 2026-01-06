@@ -118,73 +118,70 @@ export default function AdminUsersManagement() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Spinner size="lg" color="primary" />
-          <p className="text-default-400 mt-4">Memuat data admin...</p>
+          <p className="text-slate-400 mt-4">Memuat data admin...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 select-text">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white via-primary-200 to-primary-400 bg-clip-text text-transparent flex items-center gap-2">
-            <HiShieldCheck className="text-primary" /> Admin Users
-          </h2>
-          <p className="text-default-400 text-sm mt-1">Kelola pengguna admin</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+            <HiShieldCheck className="text-amber-400" /> Admin Users
+          </h1>
+          <p className="text-slate-400 text-sm mt-0.5">Kelola pengguna admin</p>
         </div>
         <Button 
           color="primary" 
           startContent={<HiPlus className="text-lg" />}
           onPress={onOpen}
           size="md"
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto font-medium"
         >
           Tambah Admin
         </Button>
       </div>
 
       {/* Admin List */}
-      <Card className="p-4 sm:p-6 bg-black/40 backdrop-blur-xl border border-white/10">
-        <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
-          👥 Daftar Admin
-        </h3>
+      <Card className="p-4 bg-slate-800/50 border border-slate-700/50">
+        <h3 className="text-sm font-semibold text-white mb-4">Daftar Admin</h3>
 
         {users.length === 0 ? (
-          <div className="text-center py-12 text-default-400">
-            <Users className="text-4xl mx-auto mb-3 opacity-50" />
-            <p className="mb-2">Belum ada admin di database.</p>
-            <p className="text-sm text-default-500">
-              Klik tombol "Tambah Admin" untuk menambahkan admin baru.
+          <div className="text-center py-12">
+            <Users className="text-4xl mx-auto mb-3 text-slate-600" />
+            <p className="text-slate-400 text-sm mb-1">Belum ada admin di database.</p>
+            <p className="text-xs text-slate-500">
+              Klik "Tambah Admin" untuk menambahkan admin baru.
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {users.map((user) => (
               <div 
                 key={user.id} 
-                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10"
+                className="flex items-center gap-3 p-3 rounded-lg bg-slate-700/30 border border-slate-600/50"
               >
                 {/* Avatar */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center font-bold flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500/30 to-orange-500/30 flex items-center justify-center font-bold text-white flex-shrink-0">
                   {user.username.charAt(0).toUpperCase()}
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="font-medium text-sm sm:text-base truncate">{user.username}</span>
+                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                    <span className="font-medium text-sm text-white truncate">{user.username}</span>
                     <Chip 
-                      color={user.role === "admin" ? "primary" : "secondary"} 
-                      variant="flat" 
                       size="sm"
+                      className="bg-amber-500/20 text-amber-400 text-xs"
                     >
                       {user.role}
                     </Chip>
                   </div>
-                  <p className="text-xs sm:text-sm text-default-400 truncate flex items-center gap-1">
-                    <HiEnvelope className="flex-shrink-0" />
+                  <p className="text-xs text-slate-400 truncate flex items-center gap-1">
+                    <HiEnvelope className="flex-shrink-0 text-slate-500" />
                     {user.email}
                   </p>
                 </div>
@@ -192,10 +189,9 @@ export default function AdminUsersManagement() {
                 {/* Actions */}
                 <Button 
                   size="sm" 
-                  color="danger" 
                   variant="flat"
                   isIconOnly
-                  className="flex-shrink-0"
+                  className="bg-red-500/20 text-red-400 flex-shrink-0"
                   onPress={() => handleDelete(user.id)}
                 >
                   <Trash className="text-sm" />
@@ -207,14 +203,14 @@ export default function AdminUsersManagement() {
       </Card>
 
       {/* Info Card */}
-      <Card className="p-4 bg-gradient-to-r from-warning/10 to-warning/5 border border-warning/20">
+      <Card className="p-4 bg-amber-500/10 border border-amber-500/20">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
             🔐
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm sm:text-base">Informasi Keamanan</p>
-            <p className="text-xs sm:text-sm text-default-400 mt-1">
+            <p className="font-semibold text-sm text-white">Informasi Keamanan</p>
+            <p className="text-xs text-slate-400 mt-1">
               Admin memiliki akses penuh ke dashboard. Pastikan hanya memberikan akses kepada orang yang dipercaya.
             </p>
           </div>
@@ -227,17 +223,17 @@ export default function AdminUsersManagement() {
         onClose={onClose} 
         size="full"
         classNames={{
-          base: "sm:max-w-lg sm:mx-auto sm:my-auto sm:rounded-2xl",
+          base: "sm:max-w-md sm:mx-auto sm:my-auto sm:rounded-xl bg-slate-900",
           wrapper: "sm:items-center",
         }}
       >
-        <ModalContent>
+        <ModalContent className="select-text">
           {(onClose) => (
             <form onSubmit={handleSubmit}>
-              <ModalHeader className="flex flex-col gap-1 border-b border-white/10">
-                ➕ Tambah Admin Baru
+              <ModalHeader className="border-b border-slate-700/50 pb-4">
+                <span className="text-base font-semibold text-white">Tambah Admin Baru</span>
               </ModalHeader>
-              <ModalBody className="py-4 sm:py-6">
+              <ModalBody className="py-4">
                 <div className="space-y-4">
                   <Input
                     label="Username"
@@ -245,7 +241,10 @@ export default function AdminUsersManagement() {
                     value={formData.username}
                     onValueChange={(value) => setFormData({ ...formData, username: value })}
                     isRequired
-                    size="lg"
+                    size="md"
+                    classNames={{
+                      inputWrapper: "bg-slate-800 border-slate-700"
+                    }}
                   />
                   
                   <Input
@@ -255,7 +254,10 @@ export default function AdminUsersManagement() {
                     value={formData.email}
                     onValueChange={(value) => setFormData({ ...formData, email: value })}
                     isRequired
-                    size="lg"
+                    size="md"
+                    classNames={{
+                      inputWrapper: "bg-slate-800 border-slate-700"
+                    }}
                   />
                   
                   <Input
@@ -268,21 +270,33 @@ export default function AdminUsersManagement() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-default-400 hover:text-white"
+                        className="text-slate-400 hover:text-white"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     }
                     isRequired
-                    size="lg"
+                    size="md"
+                    classNames={{
+                      inputWrapper: "bg-slate-800 border-slate-700"
+                    }}
                   />
                 </div>
               </ModalBody>
-              <ModalFooter className="border-t border-white/10">
-                <Button color="danger" variant="flat" onPress={onClose} className="flex-1 sm:flex-none">
+              <ModalFooter className="border-t border-slate-700/50 pt-4">
+                <Button 
+                  variant="flat" 
+                  onPress={onClose} 
+                  className="bg-slate-700 text-slate-300 flex-1 sm:flex-none"
+                >
                   Batal
                 </Button>
-                <Button color="primary" type="submit" isLoading={saving} className="flex-1 sm:flex-none">
+                <Button 
+                  color="primary" 
+                  type="submit" 
+                  isLoading={saving} 
+                  className="flex-1 sm:flex-none"
+                >
                   Tambah Admin
                 </Button>
               </ModalFooter>

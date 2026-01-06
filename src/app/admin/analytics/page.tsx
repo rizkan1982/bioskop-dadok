@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Chip, Progress, Spinner, Select, SelectItem } from "@heroui/react";
+import { Card, Chip, Spinner } from "@heroui/react";
 import { TrendUp, Eye, BarChart } from "@/utils/icons";
-import { HiGlobeAlt, HiClock, HiCalendar, HiFilm, HiTv } from "react-icons/hi2";
+import { HiClock, HiCalendar, HiFilm, HiTv } from "react-icons/hi2";
 
 interface VisitorStats {
   today: number;
@@ -22,13 +22,12 @@ interface VisitorStats {
 export default function AnalyticsPage() {
   const [stats, setStats] = useState<VisitorStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState("7d");
 
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 60000); // Refresh every minute
+    const interval = setInterval(fetchStats, 60000);
     return () => clearInterval(interval);
-  }, [timeRange]);
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -49,109 +48,78 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Spinner size="lg" color="primary" />
-          <p className="text-default-400 mt-4">Memuat analytics...</p>
+          <p className="text-slate-400 mt-4">Memuat analytics...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Title */}
+    <div className="space-y-5 select-text">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white via-primary-200 to-primary-400 bg-clip-text text-transparent flex items-center gap-2">
-            <BarChart className="text-primary" /> Analytics
-          </h2>
-          <p className="text-default-400 text-sm mt-1">Analisis trafik & aktivitas pengguna</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+            <BarChart className="text-blue-400" /> Analytics
+          </h1>
+          <p className="text-slate-400 text-sm mt-0.5">Analisis trafik & aktivitas pengguna</p>
         </div>
-        <div className="flex items-center gap-3 self-start sm:self-auto">
-          <Chip color="success" variant="dot" size="sm" className="animate-pulse">
-            {stats?.activeNow || 0} Aktif
-          </Chip>
-          <Select
-            size="sm"
-            selectedKeys={[timeRange]}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="w-28"
-            classNames={{
-              trigger: "bg-white/5 border-white/10",
-            }}
-          >
-            <SelectItem key="24h">24 Jam</SelectItem>
-            <SelectItem key="7d">7 Hari</SelectItem>
-            <SelectItem key="30d">30 Hari</SelectItem>
-          </Select>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-sm text-slate-400">
+            <span className="font-semibold text-emerald-400">{stats?.activeNow || 0}</span> aktif
+          </span>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="p-3 sm:p-4 bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Eye className="text-primary text-lg" />
-            </div>
-            <div>
-              <p className="text-lg sm:text-xl font-bold">{stats?.today || 0}</p>
-              <p className="text-xs text-default-400">Hari Ini</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-3 sm:p-4 bg-gradient-to-br from-secondary/20 to-secondary/5 border border-secondary/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center">
-              <TrendUp className="text-secondary text-lg" />
-            </div>
-            <div>
-              <p className="text-lg sm:text-xl font-bold">{stats?.thisWeek || 0}</p>
-              <p className="text-xs text-default-400">Minggu Ini</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-3 sm:p-4 bg-gradient-to-br from-success/20 to-success/5 border border-success/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
-              <HiFilm className="text-success text-lg" />
-            </div>
-            <div>
-              <p className="text-lg sm:text-xl font-bold">{stats?.uniqueMovies || 0}</p>
-              <p className="text-xs text-default-400">Film Unik</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-3 sm:p-4 bg-gradient-to-br from-warning/20 to-warning/5 border border-warning/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center">
-              <HiTv className="text-warning text-lg" />
-            </div>
-            <div>
-              <p className="text-lg sm:text-xl font-bold">{stats?.uniqueTvShows || 0}</p>
-              <p className="text-xs text-default-400">TV Series</p>
-            </div>
-          </div>
-        </Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard
+          label="Hari Ini"
+          value={stats?.today || 0}
+          icon={<Eye className="text-lg" />}
+          color="blue"
+        />
+        <StatCard
+          label="Minggu Ini"
+          value={stats?.thisWeek || 0}
+          icon={<TrendUp className="text-lg" />}
+          color="purple"
+        />
+        <StatCard
+          label="Film Ditonton"
+          value={stats?.uniqueMovies || 0}
+          icon={<HiFilm className="text-lg" />}
+          color="green"
+        />
+        <StatCard
+          label="TV Series"
+          value={stats?.uniqueTvShows || 0}
+          icon={<HiTv className="text-lg" />}
+          color="amber"
+        />
       </div>
 
       {/* Hourly Traffic */}
-      <Card className="p-4 sm:p-6 bg-black/40 backdrop-blur-xl border border-white/10">
-        <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
-          <HiClock className="text-primary" /> Distribusi Per Jam
-        </h3>
-        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="flex gap-1 min-w-[600px] h-32 items-end">
+      <Card className="p-4 bg-slate-800/50 border border-slate-700/50">
+        <div className="flex items-center gap-2 mb-4">
+          <HiClock className="text-blue-400" />
+          <h3 className="text-sm font-semibold text-white">Distribusi Per Jam</h3>
+        </div>
+        <div className="overflow-x-auto -mx-4 px-4">
+          <div className="flex gap-1 min-w-[500px] h-28 items-end">
             {stats?.hourlyTraffic.map((hour) => {
               const maxVisitors = Math.max(...(stats?.hourlyTraffic.map(h => h.visitors) || [1]));
               const heightPercent = maxVisitors > 0 ? (hour.visitors / maxVisitors) * 100 : 0;
               return (
                 <div key={hour.hour} className="flex-1 flex flex-col items-center gap-1">
                   <div
-                    className="w-full bg-gradient-to-t from-primary to-primary/50 rounded-t transition-all hover:from-primary hover:to-primary/70"
+                    className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t transition-all hover:from-blue-400 hover:to-blue-300"
                     style={{ height: `${heightPercent}%`, minHeight: heightPercent > 0 ? '4px' : '2px' }}
                     title={`${hour.hour}:00 - ${hour.visitors} aktivitas`}
                   />
                   {hour.hour % 4 === 0 && (
-                    <span className="text-[9px] sm:text-[10px] text-default-400">{hour.hour}h</span>
+                    <span className="text-[9px] text-slate-500">{hour.hour}h</span>
                   )}
                 </div>
               );
@@ -160,79 +128,78 @@ export default function AnalyticsPage() {
         </div>
       </Card>
 
-      {/* Weekly Traffic Pattern */}
-      <Card className="p-4 sm:p-6 bg-black/40 backdrop-blur-xl border border-white/10">
-        <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
-          <HiCalendar className="text-secondary" /> Pola Aktivitas Mingguan
-        </h3>
-        <div className="grid grid-cols-7 gap-2 sm:gap-4">
+      {/* Weekly Pattern */}
+      <Card className="p-4 bg-slate-800/50 border border-slate-700/50">
+        <div className="flex items-center gap-2 mb-4">
+          <HiCalendar className="text-purple-400" />
+          <h3 className="text-sm font-semibold text-white">Pola Aktivitas Mingguan</h3>
+        </div>
+        <div className="grid grid-cols-7 gap-2">
           {stats?.weeklyTraffic.map((day) => {
             const maxVisitors = Math.max(...(stats?.weeklyTraffic.map(d => d.visitors) || [1]));
             const intensity = maxVisitors > 0 ? (day.visitors / maxVisitors) * 100 : 0;
             return (
               <div key={day.day} className="text-center">
                 <div 
-                  className="aspect-square sm:h-20 lg:h-24 rounded-lg sm:rounded-xl mb-1 sm:mb-2 flex items-center justify-center transition-all"
+                  className="aspect-square rounded-lg mb-1 flex items-center justify-center transition-all border border-slate-600/50"
                   style={{ 
-                    backgroundColor: `rgba(56, 189, 248, ${intensity / 100})`,
-                    border: `1px solid rgba(56, 189, 248, ${intensity / 200})`
+                    backgroundColor: `rgba(59, 130, 246, ${intensity / 100 * 0.6})`,
                   }}
                 >
-                  <span className="font-bold text-xs sm:text-sm lg:text-lg">{day.visitors}</span>
+                  <span className="font-bold text-xs sm:text-sm text-white">{day.visitors}</span>
                 </div>
-                <span className="text-[10px] sm:text-xs text-default-400">{day.day}</span>
+                <span className="text-[10px] text-slate-400">{day.day}</span>
               </div>
             );
           })}
         </div>
       </Card>
 
-      {/* Country Stats */}
-      <Card className="p-4 sm:p-6 bg-black/40 backdrop-blur-xl border border-white/10">
-        <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
-          <HiGlobeAlt className="text-primary" /> Distribusi Geografis
-        </h3>
-        {stats?.countryData && stats.countryData.length > 0 ? (
-          <div className="space-y-4">
-            {stats.countryData.map((country) => {
-              const maxVisitors = Math.max(...(stats?.countryData.map(c => c.visitors) || [1]));
-              return (
-                <div 
-                  key={country.code}
-                  className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-white/5 to-transparent border border-white/10"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl sm:text-3xl">{country.flag}</span>
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm sm:text-base">{country.country}</p>
-                      <p className="text-xs text-default-400">{country.code}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-primary text-lg sm:text-xl">{country.visitors}</p>
-                      <p className="text-xs text-default-400">aktivitas</p>
-                    </div>
-                  </div>
-                  <Progress
-                    value={maxVisitors > 0 ? (country.visitors / maxVisitors) * 100 : 0}
-                    color="primary"
-                    size="sm"
-                    className="mb-2"
-                  />
-                  <div className="flex justify-between text-xs text-default-400">
-                    <span>Peak: {country.peakHour}</span>
-                    <span>{stats?.thisMonth ? ((country.visitors / stats.thisMonth) * 100).toFixed(1) : 0}%</span>
-                  </div>
-                </div>
-              );
-            })}
+      {/* Monthly Summary */}
+      <Card className="p-4 bg-slate-800/50 border border-slate-700/50">
+        <h3 className="text-sm font-semibold text-white mb-4">Ringkasan Bulan Ini</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="p-4 rounded-lg bg-slate-700/30 text-center">
+            <p className="text-2xl font-bold text-white">{stats?.thisMonth || 0}</p>
+            <p className="text-xs text-slate-400 mt-1">Total Aktivitas</p>
           </div>
-        ) : (
-          <div className="text-center py-8 text-default-400">
-            <HiGlobeAlt className="text-4xl mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Belum ada data geografis</p>
+          <div className="p-4 rounded-lg bg-slate-700/30 text-center">
+            <p className="text-2xl font-bold text-white">{stats?.totalUsers || 0}</p>
+            <p className="text-xs text-slate-400 mt-1">Total User</p>
           </div>
-        )}
+          <div className="p-4 rounded-lg bg-slate-700/30 text-center">
+            <p className="text-2xl font-bold text-white">{stats?.totalHistories || 0}</p>
+            <p className="text-xs text-slate-400 mt-1">Total History</p>
+          </div>
+        </div>
       </Card>
     </div>
+  );
+}
+
+// Stat Card Component
+interface StatCardProps {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+  color: "blue" | "purple" | "green" | "amber";
+}
+
+function StatCard({ label, value, icon, color }: StatCardProps) {
+  const iconColors = {
+    blue: "bg-blue-500/20 text-blue-400",
+    purple: "bg-purple-500/20 text-purple-400",
+    green: "bg-emerald-500/20 text-emerald-400",
+    amber: "bg-amber-500/20 text-amber-400",
+  };
+
+  return (
+    <Card className="p-3 bg-slate-800/50 border border-slate-700/50">
+      <div className={`w-9 h-9 rounded-lg ${iconColors[color]} flex items-center justify-center mb-2`}>
+        {icon}
+      </div>
+      <p className="text-xl font-bold text-white">{value.toLocaleString()}</p>
+      <p className="text-xs text-slate-400">{label}</p>
+    </Card>
   );
 }

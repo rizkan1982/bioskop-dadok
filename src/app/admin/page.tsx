@@ -224,56 +224,52 @@ export default function AdsManagementPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Spinner size="lg" color="primary" />
-          <p className="text-default-400 mt-4">Memuat data iklan...</p>
+          <p className="text-slate-400 mt-4">Memuat data iklan...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header Card */}
-      <Card className="p-4 sm:p-6 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 border border-white/5">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white via-primary-200 to-primary-400 bg-clip-text text-transparent">
-              🎯 Manajemen Iklan
-            </h2>
-            <p className="text-default-400 text-sm mt-1">Kelola banner iklan kustom</p>
-            <div className="flex flex-wrap gap-2 sm:gap-4 mt-3 text-xs sm:text-sm">
-              <span className="text-default-500">
-                Total: <strong className="text-primary">{ads.length}</strong>
-              </span>
-              <span className="text-default-500">
-                Aktif: <strong className="text-success">{ads.filter(a => a.is_active).length}</strong>
-              </span>
-            </div>
+    <div className="space-y-4 select-text">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Ads Manager</h1>
+          <p className="text-slate-400 text-sm mt-0.5">Kelola banner iklan kustom</p>
+          <div className="flex gap-4 mt-2 text-xs">
+            <span className="text-slate-400">
+              Total: <span className="font-semibold text-white">{ads.length}</span>
+            </span>
+            <span className="text-slate-400">
+              Aktif: <span className="font-semibold text-emerald-400">{ads.filter(a => a.is_active).length}</span>
+            </span>
           </div>
-          <Button
-            color="primary"
-            startContent={<HiPlus className="text-lg sm:text-xl" />}
-            onPress={handleOpenNew}
-            size="md"
-            className="w-full sm:w-auto font-semibold"
-          >
-            Tambah Iklan
-          </Button>
         </div>
-      </Card>
+        <Button
+          color="primary"
+          startContent={<HiPlus className="text-lg" />}
+          onPress={handleOpenNew}
+          size="md"
+          className="w-full sm:w-auto font-medium"
+        >
+          Tambah Iklan
+        </Button>
+      </div>
 
       {/* Ads List */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {ads.length === 0 ? (
-          <Card className="p-8 sm:p-12 text-center border border-dashed border-default-300">
-            <HiPhoto className="text-4xl sm:text-5xl mx-auto mb-4 text-default-300" />
-            <p className="text-default-400 text-sm sm:text-base">Belum ada iklan. Tambahkan iklan pertama Anda!</p>
+          <Card className="p-8 text-center bg-slate-800/50 border border-slate-700/50 border-dashed">
+            <HiPhoto className="text-4xl mx-auto mb-3 text-slate-600" />
+            <p className="text-slate-400 text-sm">Belum ada iklan. Tambahkan iklan pertama Anda!</p>
           </Card>
         ) : (
           ads.map((ad) => (
-            <Card key={ad.id} className="p-4 sm:p-6 hover:shadow-lg transition-shadow border border-white/5">
-              <div className="flex flex-col gap-4">
+            <Card key={ad.id} className="p-4 bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 transition-all">
+              <div className="flex flex-col sm:flex-row gap-4">
                 {/* Image Preview */}
-                <div className="w-full h-32 sm:h-40 rounded-xl overflow-hidden bg-default-100">
+                <div className="w-full sm:w-40 h-24 sm:h-28 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0">
                   <img
                     src={ad.image_url}
                     alt={ad.title}
@@ -285,13 +281,19 @@ export default function AdsManagementPage() {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1">
-                  <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-lg font-bold truncate">{ad.title}</h3>
+                      <h3 className="text-sm sm:text-base font-semibold text-white truncate">{ad.title}</h3>
                       <div className="flex flex-wrap items-center gap-2 mt-1">
-                        <Chip size="sm" variant="flat" color="primary">{ad.position.toUpperCase()}</Chip>
-                        <Chip size="sm" color={ad.is_active ? "success" : "default"} variant="flat">
+                        <Chip size="sm" variant="flat" className="bg-slate-700 text-slate-300 text-xs">
+                          {ad.position.toUpperCase()}
+                        </Chip>
+                        <Chip 
+                          size="sm" 
+                          variant="flat"
+                          className={ad.is_active ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-600 text-slate-400"}
+                        >
                           {ad.is_active ? "Aktif" : "Nonaktif"}
                         </Chip>
                       </div>
@@ -299,18 +301,14 @@ export default function AdsManagementPage() {
                   </div>
 
                   {/* Stats */}
-                  <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 text-xs sm:text-sm">
-                    <div className="p-2 rounded-lg bg-white/5">
-                      <span className="text-default-400 block">Dibuat</span>
-                      <span className="font-medium">{new Date(ad.created_at).toLocaleDateString("id-ID")}</span>
-                    </div>
-                    <div className="p-2 rounded-lg bg-white/5">
-                      <span className="text-default-400 block">Klik</span>
-                      <span className="font-medium text-primary flex items-center gap-1">
-                        <TrendUp className="text-xs" />
-                        {ad.click_count}
-                      </span>
-                    </div>
+                  <div className="flex flex-wrap gap-3 mb-3 text-xs text-slate-400">
+                    <span>
+                      Dibuat: <span className="text-slate-300">{new Date(ad.created_at).toLocaleDateString("id-ID")}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <TrendUp className="text-xs text-blue-400" />
+                      Klik: <span className="text-slate-300">{ad.click_count}</span>
+                    </span>
                   </div>
 
                   {/* Actions */}
@@ -318,30 +316,27 @@ export default function AdsManagementPage() {
                     <Button
                       size="sm"
                       variant="flat"
-                      color={ad.is_active ? "default" : "success"}
+                      className={ad.is_active ? "bg-slate-700 text-slate-300" : "bg-emerald-500/20 text-emerald-400"}
                       startContent={ad.is_active ? <EyeOff className="text-sm" /> : <Eye className="text-sm" />}
                       onPress={() => handleToggleActive(ad)}
-                      className="flex-1 sm:flex-none"
                     >
                       {ad.is_active ? "Nonaktifkan" : "Aktifkan"}
                     </Button>
                     <Button
                       size="sm"
-                      color="primary"
                       variant="flat"
+                      className="bg-blue-500/20 text-blue-400"
                       startContent={<HiPencil className="text-sm" />}
                       onPress={() => handleEdit(ad)}
-                      className="flex-1 sm:flex-none"
                     >
                       Edit
                     </Button>
                     <Button
                       size="sm"
-                      color="danger"
                       variant="flat"
+                      className="bg-red-500/20 text-red-400"
                       startContent={<Trash className="text-sm" />}
                       onPress={() => handleDelete(ad.id)}
-                      className="flex-1 sm:flex-none"
                     >
                       Hapus
                     </Button>
@@ -360,20 +355,20 @@ export default function AdsManagementPage() {
         size="full" 
         scrollBehavior="inside"
         classNames={{
-          base: "sm:max-w-2xl sm:mx-auto sm:my-auto sm:rounded-2xl",
+          base: "sm:max-w-xl sm:mx-auto sm:my-auto sm:rounded-xl bg-slate-900",
           wrapper: "sm:items-center",
         }}
       >
-        <ModalContent>
+        <ModalContent className="select-text">
           {(onClose) => (
             <form onSubmit={handleSubmit}>
-              <ModalHeader className="flex flex-col gap-1 border-b border-white/10">
-                <span className="text-lg sm:text-xl">
-                  {editingAd ? "✏️ Edit Iklan" : "➕ Tambah Iklan Baru"}
+              <ModalHeader className="flex flex-col gap-1 border-b border-slate-700/50 pb-4">
+                <span className="text-base font-semibold text-white">
+                  {editingAd ? "Edit Iklan" : "Tambah Iklan Baru"}
                 </span>
               </ModalHeader>
-              <ModalBody className="py-4 sm:py-6">
-                <div className="space-y-4 sm:space-y-6">
+              <ModalBody className="py-4">
+                <div className="space-y-4">
                   {/* Title */}
                   <Input
                     label="Judul Iklan"
@@ -381,8 +376,11 @@ export default function AdsManagementPage() {
                     value={formData.title}
                     onValueChange={(value) => setFormData({ ...formData, title: value })}
                     isRequired
-                    size="lg"
-                    classNames={{ label: "text-sm font-medium" }}
+                    size="md"
+                    classNames={{ 
+                      label: "text-sm font-medium text-slate-300",
+                      inputWrapper: "bg-slate-800 border-slate-700"
+                    }}
                   />
 
                   {/* Position */}
