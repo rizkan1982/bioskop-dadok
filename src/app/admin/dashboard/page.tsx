@@ -3,13 +3,17 @@
 import { useState, useEffect } from "react";
 import { Card, Chip, Progress, Spinner } from "@heroui/react";
 import { TrendUp, Users, Eye, BarChart } from "@/utils/icons";
-import { HiGlobeAlt, HiDevicePhoneMobile, HiComputerDesktop, HiDeviceTablet } from "react-icons/hi2";
+import { HiGlobeAlt, HiDevicePhoneMobile, HiComputerDesktop, HiDeviceTablet, HiFilm, HiTv } from "react-icons/hi2";
 
 interface VisitorStats {
   today: number;
   thisWeek: number;
   thisMonth: number;
   activeNow: number;
+  totalUsers: number;
+  totalHistories: number;
+  uniqueMovies: number;
+  uniqueTvShows: number;
   hourlyTraffic: { hour: number; visitors: number }[];
   weeklyTraffic: { day: string; visitors: number }[];
   countryData: { country: string; code: string; flag: string; visitors: number; peakHour: string }[];
@@ -44,102 +48,134 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Spinner size="lg" color="primary" />
+        <div className="text-center">
+          <Spinner size="lg" color="primary" />
+          <p className="text-default-400 mt-4">Memuat dashboard...</p>
+        </div>
       </div>
     );
   }
 
   const deviceIcons: Record<string, React.ReactNode> = {
-    Mobile: <HiDevicePhoneMobile className="text-2xl text-primary" />,
-    Desktop: <HiComputerDesktop className="text-2xl text-secondary" />,
-    Tablet: <HiDeviceTablet className="text-2xl text-warning" />,
+    Mobile: <HiDevicePhoneMobile className="text-xl sm:text-2xl text-primary" />,
+    Desktop: <HiComputerDesktop className="text-xl sm:text-2xl text-secondary" />,
+    Tablet: <HiDeviceTablet className="text-xl sm:text-2xl text-warning" />,
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Title */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-primary-200 to-primary-400 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white via-primary-200 to-primary-400 bg-clip-text text-transparent">
             Dashboard
           </h2>
-          <p className="text-default-400 mt-1">Welcome to DADO CINEMA Admin Panel</p>
+          <p className="text-default-400 text-sm mt-1">Selamat datang di Admin Panel</p>
         </div>
-        <Chip color="success" variant="dot" size="lg" className="animate-pulse">
-          {stats?.activeNow || 0} Live
+        <Chip color="success" variant="dot" size="sm" className="animate-pulse self-start sm:self-auto">
+          {stats?.activeNow || 0} Aktif
         </Chip>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Cards - Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatsCard
-          title="Today Visitors"
+          title="Hari Ini"
           value={stats?.today || 0}
-          icon={<Eye className="text-2xl" />}
+          icon={<Eye className="text-lg sm:text-xl" />}
           color="primary"
-          trend="+12%"
+          subtitle="aktivitas"
         />
         <StatsCard
-          title="This Week"
+          title="Minggu Ini"
           value={stats?.thisWeek || 0}
-          icon={<TrendUp className="text-2xl" />}
+          icon={<TrendUp className="text-lg sm:text-xl" />}
           color="secondary"
-          trend="+8%"
+          subtitle="aktivitas"
         />
         <StatsCard
-          title="This Month"
-          value={stats?.thisMonth || 0}
-          icon={<BarChart className="text-2xl" />}
+          title="Total User"
+          value={stats?.totalUsers || 0}
+          icon={<Users className="text-lg sm:text-xl" />}
           color="success"
-          trend="+15%"
+          subtitle="terdaftar"
         />
         <StatsCard
-          title="Active Now"
-          value={stats?.activeNow || 0}
-          icon={<Users className="text-2xl" />}
+          title="Total Watch"
+          value={stats?.totalHistories || 0}
+          icon={<BarChart className="text-lg sm:text-xl" />}
           color="warning"
-          live
+          subtitle="history"
         />
       </div>
 
+      {/* Content Stats */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <Card className="p-4 sm:p-6 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <HiFilm className="text-xl sm:text-2xl text-primary" />
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold">{stats?.uniqueMovies || 0}</p>
+              <p className="text-xs sm:text-sm text-default-400">Film Ditonton</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4 sm:p-6 bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-secondary/20 flex items-center justify-center">
+              <HiTv className="text-xl sm:text-2xl text-secondary" />
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold">{stats?.uniqueTvShows || 0}</p>
+              <p className="text-xs sm:text-sm text-default-400">TV Series</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Weekly Traffic */}
-        <Card className="p-6 bg-black/40 backdrop-blur-xl border border-white/10">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            📈 Visitor Trend (7 Days)
+        <Card className="p-4 sm:p-6 bg-black/40 backdrop-blur-xl border border-white/10">
+          <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
+            📈 Trend Aktivitas (7 Hari)
           </h3>
           <div className="space-y-3">
-            {stats?.weeklyTraffic.map((day) => (
-              <div key={day.day} className="flex items-center gap-4">
-                <span className="w-10 text-sm text-default-400">{day.day}</span>
-                <Progress
-                  value={(day.visitors / Math.max(...stats.weeklyTraffic.map(d => d.visitors))) * 100}
-                  color="primary"
-                  className="flex-1"
-                  size="sm"
-                />
-                <span className="w-12 text-sm text-right">{day.visitors}</span>
-              </div>
-            ))}
+            {stats?.weeklyTraffic.map((day) => {
+              const maxVal = Math.max(...(stats?.weeklyTraffic.map(d => d.visitors) || [1]));
+              return (
+                <div key={day.day} className="flex items-center gap-3">
+                  <span className="w-8 text-xs sm:text-sm text-default-400 font-medium">{day.day}</span>
+                  <Progress
+                    value={maxVal > 0 ? (day.visitors / maxVal) * 100 : 0}
+                    color="primary"
+                    className="flex-1"
+                    size="sm"
+                  />
+                  <span className="w-10 text-xs sm:text-sm text-right font-medium">{day.visitors}</span>
+                </div>
+              );
+            })}
           </div>
         </Card>
 
         {/* Device Distribution */}
-        <Card className="p-6 bg-black/40 backdrop-blur-xl border border-white/10">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            📱 Device Distribution
+        <Card className="p-4 sm:p-6 bg-black/40 backdrop-blur-xl border border-white/10">
+          <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
+            📱 Distribusi Device
           </h3>
           <div className="space-y-4">
             {stats?.deviceDistribution.map((device) => (
-              <div key={device.device} className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+              <div key={device.device} className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
                   {deviceIcons[device.device]}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex justify-between mb-1">
-                    <span className="font-medium">{device.device}</span>
-                    <span className="text-sm text-default-400">{device.percentage}%</span>
+                    <span className="text-sm font-medium truncate">{device.device}</span>
+                    <span className="text-xs sm:text-sm text-default-400">{device.percentage}%</span>
                   </div>
                   <Progress
                     value={device.percentage}
@@ -147,7 +183,7 @@ export default function AdminDashboard() {
                     size="sm"
                   />
                 </div>
-                <span className="text-sm text-default-400">{device.count}</span>
+                <span className="text-xs sm:text-sm text-default-400 w-12 text-right flex-shrink-0">{device.count}</span>
               </div>
             ))}
           </div>
@@ -155,30 +191,29 @@ export default function AdminDashboard() {
       </div>
 
       {/* Currently Watching */}
-      <Card className="p-6 bg-black/40 backdrop-blur-xl border border-white/10">
+      <Card className="p-4 sm:p-6 bg-black/40 backdrop-blur-xl border border-white/10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            👁️ Currently Watching
+          <h3 className="text-base sm:text-lg font-bold flex items-center gap-2">
+            👁️ Sedang Ditonton
           </h3>
           <Chip color="success" variant="flat" size="sm">
-            {stats?.currentWatchers?.length || 0} active
+            {stats?.currentWatchers?.length || 0} aktif
           </Chip>
         </div>
         {stats?.currentWatchers && stats.currentWatchers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stats.currentWatchers.map((watcher) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {stats.currentWatchers.slice(0, 6).map((watcher) => (
               <div
                 key={watcher.id}
                 className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
-                  <Eye className="text-lg" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center flex-shrink-0">
+                  {watcher.type === "movie" ? <HiFilm className="text-lg" /> : <HiTv className="text-lg" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{watcher.title}</p>
+                  <p className="font-medium text-sm truncate">{watcher.title}</p>
                   <div className="flex items-center gap-2 text-xs text-default-400">
-                    <span>{watcher.type === "movie" ? "🎬" : "📺"}</span>
-                    <span>{watcher.country}</span>
+                    <span>{watcher.type === "movie" ? "🎬 Film" : "📺 TV"}</span>
                   </div>
                 </div>
               </div>
@@ -186,50 +221,10 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="text-center py-8 text-default-400">
-            <Eye className="text-4xl mx-auto mb-2 opacity-50" />
-            <p>No active watchers</p>
+            <Eye className="text-3xl sm:text-4xl mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Tidak ada yang menonton saat ini</p>
           </div>
         )}
-      </Card>
-
-      {/* Country Stats */}
-      <Card className="p-6 bg-black/40 backdrop-blur-xl border border-white/10">
-        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <HiGlobeAlt className="text-primary" /> Top Countries
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-default-400 text-sm">
-                <th className="pb-3">Country</th>
-                <th className="pb-3">Visitors</th>
-                <th className="pb-3">Peak Hour</th>
-                <th className="pb-3">Traffic</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats?.countryData.map((country) => (
-                <tr key={country.code} className="border-t border-white/5">
-                  <td className="py-3">
-                    <span className="text-xl mr-2">{country.flag}</span>
-                    {country.country}
-                  </td>
-                  <td className="py-3 font-medium">{country.visitors}</td>
-                  <td className="py-3">
-                    <Chip size="sm" variant="flat">🕐 {country.peakHour}</Chip>
-                  </td>
-                  <td className="py-3 w-48">
-                    <Progress
-                      value={(country.visitors / Math.max(...stats.countryData.map(c => c.visitors))) * 100}
-                      color="primary"
-                      size="sm"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </Card>
     </div>
   );
@@ -240,11 +235,10 @@ interface StatsCardProps {
   value: number;
   icon: React.ReactNode;
   color: "primary" | "secondary" | "success" | "warning" | "danger";
-  trend?: string;
-  live?: boolean;
+  subtitle?: string;
 }
 
-function StatsCard({ title, value, icon, color, trend, live }: StatsCardProps) {
+function StatsCard({ title, value, icon, color, subtitle }: StatsCardProps) {
   const colorClasses = {
     primary: "from-primary/20 to-primary/5 border-primary/30",
     secondary: "from-secondary/20 to-secondary/5 border-secondary/30",
@@ -253,27 +247,22 @@ function StatsCard({ title, value, icon, color, trend, live }: StatsCardProps) {
     danger: "from-danger/20 to-danger/5 border-danger/30",
   };
 
+  const iconColorClasses = {
+    primary: "bg-primary/20 text-primary",
+    secondary: "bg-secondary/20 text-secondary",
+    success: "bg-success/20 text-success",
+    warning: "bg-warning/20 text-warning",
+    danger: "bg-danger/20 text-danger",
+  };
+
   return (
-    <Card className={`p-6 bg-gradient-to-br ${colorClasses[color]} border backdrop-blur-xl`}>
-      <div className="flex items-start justify-between">
-        <div className={`w-12 h-12 rounded-xl bg-${color}/20 flex items-center justify-center text-${color}`}>
-          {icon}
-        </div>
-        {live && (
-          <Chip color="success" variant="dot" size="sm" className="animate-pulse">
-            Live
-          </Chip>
-        )}
-        {trend && (
-          <Chip color="success" variant="flat" size="sm">
-            {trend}
-          </Chip>
-        )}
+    <Card className={`p-3 sm:p-4 lg:p-6 bg-gradient-to-br ${colorClasses[color]} border backdrop-blur-xl`}>
+      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${iconColorClasses[color]} flex items-center justify-center mb-3`}>
+        {icon}
       </div>
-      <div className="mt-4">
-        <p className="text-3xl font-bold">{value.toLocaleString()}</p>
-        <p className="text-sm text-default-400 mt-1">{title}</p>
-      </div>
+      <p className="text-lg sm:text-xl lg:text-2xl font-bold">{value.toLocaleString()}</p>
+      <p className="text-xs sm:text-sm text-default-400 truncate">{title}</p>
+      {subtitle && <p className="text-[10px] sm:text-xs text-default-500">{subtitle}</p>}
     </Card>
   );
 }
