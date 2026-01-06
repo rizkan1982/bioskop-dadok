@@ -93,12 +93,17 @@ export default function AdminUsersManagement() {
       const data = await res.json();
 
       if (data.success) {
-        await fetchUsers();
+        setSuccessMessage(`Admin ${userEmail} berhasil dihapus`);
+        setTimeout(() => {
+          fetchUsers();
+          setSuccessMessage("");
+        }, 500);
       } else {
         alert(data.message || "Gagal menghapus admin");
       }
     } catch (error) {
       console.error("Error deleting user:", error);
+      alert("Terjadi kesalahan");
     }
   };
 

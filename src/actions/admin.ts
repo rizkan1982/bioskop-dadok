@@ -29,13 +29,15 @@ export async function isAdmin(): Promise<boolean> {
       return true;
     }
     
-    // Check 2: Database is_admin field (fallback)
+    // Check 2: Database is_admin field (lebih reliable)
     const { data: profile } = await supabase
       .from("profiles")
       .select("is_admin")
       .eq("id", user.id)
       .single();
     
+    // Return true ONLY if database says is_admin is true
+    // If is_admin is false or null, return false
     return profile?.is_admin === true;
   } catch (error) {
     console.error("Error checking admin status:", error);
