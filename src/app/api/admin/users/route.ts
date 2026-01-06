@@ -80,24 +80,38 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient(true); // Use service role
 
-    console.log("[ADMIN API] Executing query: SELECT * FROM profiles WHERE is_admin = true");
-
-    // Get all users with is_admin = true
-    const { data: profiles, error } = await supabase
+    // First, check how many rows exist with is_admin = true
+    const { data: allAdmins, error: adminError } = await supabase
       .from("profiles")
       .select("id, email, is_admin, created_at")
       .eq("is_admin", true)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("[ADMIN API] Query error:", error);
-      throw error;
+    if (adminError) {
+      console.error("[ADMIN API] Error querying is_admin=true:", adminError);
     }
 
-    console.log("[ADMIN API] Query result - profiles count:", profiles?.length, "profiles:", profiles);
+    console.log("[ADMIN API] Query is_admin=true returned:", allAdmins?.length, "rows");
+    console.log("[ADMIN API] Profiles with is_admin=true:", allAdmins?.map(p => ({ email: p.email, is_admin: p.is_admin })));
+
+    // Also check if there are any NULL is_admin values (might be old profiles)
+    const { data: nullAdmins, error: nullError } = await supabase
+      .from("profiles")
+      .select("id, email, is_admin, created_at")
+      .is("is_admin", null)
+      .order("created_at", { ascending: false });
+
+    if (nullError) {
+      console.warn("[ADMIN API] Error checking null is_admin:", nullError);
+    } else if (nullAdmins && nullAdmins.length > 0) {
+      console.warn("[ADMIN API] Found", nullAdmins.length, "profiles with NULL is_admin:", nullAdmins.map(p => p.email));
+    }
+
+    const profiles = allAdmins || [];
+    console.log("[ADMIN API] Final result - profiles count:", profiles.length);
 
     // Format data for frontend
-    const admins = profiles?.map((profile) => ({
+    const admins = profiles.map((profile) => ({
       id: profile.id,
       username: profile.email?.split("@")[0] || "admin",
       email: profile.email || "",
@@ -105,9 +119,8 @@ export async function GET(request: NextRequest) {
       createdAt: profile.created_at,
     })) || [];
 
-    console.log("[ADMIN API] Returning", admins.length, "admins");
+    console.log("[ADMIN API] Returning", admins.length, "admins:", admins.map(a => a.email));
     return NextResponse.json({ success: true, data: admins });
-  } catch (error) {
     console.error("[ADMIN API] Error fetching admin users:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch admin users", error: String(error) },
