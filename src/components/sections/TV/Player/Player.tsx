@@ -5,11 +5,12 @@ import { Card, Skeleton } from "@heroui/react";
 import { useDisclosure, useDocumentTitle, useIdle } from "@mantine/hooks";
 import dynamic from "next/dynamic";
 import { parseAsInteger, useQueryState } from "nuqs";
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import { Episode, TvShowDetails } from "tmdb-ts";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { SpacingClasses } from "@/utils/constants";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
+import { recordTvShowView } from "@/actions/histories";
 const TvShowPlayerHeader = dynamic(() => import("./Header"));
 const TvShowPlayerEpisodeSelection = dynamic(() => import("./EpisodeSelection"));
 
@@ -42,6 +43,7 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
     "src",
     parseAsInteger.withDefault(0),
   );
+  const hasRecorded = useRef(false);
 
   useVidlinkPlayer({
     saveHistory: true,
@@ -50,6 +52,15 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
   useDocumentTitle(
     `Play ${props.seriesName} - ${props.seasonName} - ${episode.name} | ${siteConfig.name}`,
   );
+
+  // Record TV show view when player opens (regardless of video source)
+  useEffect(() => {
+    if (!hasRecorded.current) {
+      hasRecorded.current = true;
+      const title = `${props.seriesName} - ${props.seasonName} E${episode.episode_number}`;
+      recordTvShowView(id, episode.season_number, episode.episode_number, title, tv.poster_path);
+    }
+  }, [id, episode.season_number, episode.episode_number, props.seriesName, props.seasonName, tv.poster_path]);
 
   const PLAYER = useMemo(() => players[selectedSource] || players[0], [players, selectedSource]);
 

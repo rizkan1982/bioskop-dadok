@@ -8,9 +8,10 @@ import { Card, Skeleton } from "@heroui/react";
 import { useDisclosure, useDocumentTitle, useIdle } from "@mantine/hooks";
 import dynamic from "next/dynamic";
 import { parseAsInteger, useQueryState } from "nuqs";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { MovieDetails } from "tmdb-ts/dist/types/movies";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
+import { recordMovieView } from "@/actions/histories";
 const MoviePlayerHeader = dynamic(() => import("./Header"));
 const MoviePlayerSourceSelection = dynamic(() => import("./SourceSelection"));
 
@@ -29,9 +30,18 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
     "src",
     parseAsInteger.withDefault(0),
   );
+  const hasRecorded = useRef(false);
 
   useVidlinkPlayer({ saveHistory: true });
   useDocumentTitle(`Play ${title} | ${siteConfig.name}`);
+
+  // Record movie view when player opens (regardless of video source)
+  useEffect(() => {
+    if (!hasRecorded.current) {
+      hasRecorded.current = true;
+      recordMovieView(movie.id, title, movie.poster_path);
+    }
+  }, [movie.id, title, movie.poster_path]);
 
   const PLAYER = useMemo(() => players[selectedSource] || players[0], [players, selectedSource]);
 

@@ -78,13 +78,14 @@ export async function getAllUsers() {
   noStore();
   
   try {
-    const supabase = await createClient(true); // Use service role
-    
-    // Check if current user is admin
+    // Check if current user is admin first
     const adminCheck = await isAdmin();
     if (!adminCheck) {
       return { success: false, message: "Unauthorized access", data: null };
     }
+
+    // Use regular client for profiles (no service role needed)
+    const supabase = await createClient();
     
     const { data: profiles, error } = await supabase
       .from("profiles")
@@ -101,15 +102,16 @@ export async function getAllUsers() {
       throw error;
     }
     
-    // Try to get auth users data, but don't fail if it doesn't work
+    // Try to get auth users data with service role, but don't fail if it doesn't work
     let users: { id: string; email?: string; last_sign_in_at?: string | null; email_confirmed_at?: string | null }[] = [];
     try {
-      const { data: authData, error: usersError } = await supabase.auth.admin.listUsers();
+      const supabaseAdmin = await createClient(true); // Use service role
+      const { data: authData, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
       if (!usersError && authData?.users) {
         users = authData.users;
       }
     } catch (authError) {
-      console.warn("Could not fetch auth users, using profiles only:", authError);
+      console.warn("Could not fetch auth users (service role may not be configured), using profiles only:", authError);
     }
     
     // Merge profile and auth data
@@ -119,7 +121,7 @@ export async function getAllUsers() {
         ...profile,
         email: profile.email || authUser?.email || "N/A",
         last_sign_in: authUser?.last_sign_in_at || null,
-        email_confirmed: authUser?.email_confirmed_at ? true : false,
+        email_confirmed: authUser?.email_confirmed_at ? true : (profile.email ? true : false),
       };
     }) || [];
     
@@ -139,12 +141,19 @@ export async function getAllHistories() {
   noStore();
   
   try {
-    const supabase = await createClient(true); // Use service role
-    
-    // Check if current user is admin
+    // Check if current user is admin first
     const adminCheck = await isAdmin();
     if (!adminCheck) {
       return { success: false, message: "Unauthorized access", data: null };
+    }
+
+    // Try to use service role to bypass RLS, fallback to regular client
+    let supabase;
+    try {
+      supabase = await createClient(true); // Use service role for admin access
+    } catch {
+      console.warn("Service role not available, using regular client");
+      supabase = await createClient();
     }
     
     const { data: histories, error } = await supabase
@@ -185,12 +194,19 @@ export async function getAllWatchlist() {
   noStore();
   
   try {
-    const supabase = await createClient(true); // Use service role
-    
-    // Check if current user is admin
+    // Check if current user is admin first
     const adminCheck = await isAdmin();
     if (!adminCheck) {
       return { success: false, message: "Unauthorized access", data: null };
+    }
+
+    // Try to use service role to bypass RLS, fallback to regular client
+    let supabase;
+    try {
+      supabase = await createClient(true); // Use service role for admin access
+    } catch {
+      console.warn("Service role not available, using regular client");
+      supabase = await createClient();
     }
     
     const { data: watchlist, error } = await supabase

@@ -217,3 +217,123 @@ export const getTvShowLastPosition = async (
     return 0;
   }
 };
+
+/**
+ * Record a movie view when user opens the player
+ * This is called regardless of which video source is used
+ * Creates or updates a history entry with progress 0 if not exists
+ */
+export const recordMovieView = async (
+  movieId: number,
+  title: string,
+  posterPath: string | null
+): ActionResponse => {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, message: "User not authenticated" };
+    }
+
+    // Check if history already exists
+    const { data: existing } = await supabase
+      .from("histories")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("tmdb_id", movieId)
+      .eq("content_type", "movie")
+      .maybeSingle();
+
+    if (existing) {
+      // Update watched_at only (don't reset progress)
+      await supabase
+        .from("histories")
+        .update({ watched_at: new Date().toISOString() })
+        .eq("id", existing.id);
+    } else {
+      // Insert new history with progress 0
+      await supabase.from("histories").insert({
+        user_id: user.id,
+        tmdb_id: movieId,
+        content_type: "movie",
+        title,
+        poster_path: posterPath,
+        progress: 0,
+        duration: 0,
+        watched_at: new Date().toISOString(),
+      });
+    }
+
+    return { success: true, message: "View recorded" };
+  } catch (error) {
+    console.info("Record view error:", error);
+    return { success: false, message: "Failed to record view" };
+  }
+};
+
+/**
+ * Record a TV show episode view when user opens the player
+ */
+export const recordTvShowView = async (
+  tvId: number,
+  season: number,
+  episode: number,
+  title: string,
+  posterPath: string | null
+): ActionResponse => {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, message: "User not authenticated" };
+    }
+
+    // Check if history already exists
+    const { data: existing } = await supabase
+      .from("histories")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("tmdb_id", tvId)
+      .eq("content_type", "tv")
+      .eq("season_number", season)
+      .eq("episode_number", episode)
+      .maybeSingle();
+
+    if (existing) {
+      // Update watched_at only
+      await supabase
+        .from("histories")
+        .update({ watched_at: new Date().toISOString() })
+        .eq("id", existing.id);
+    } else {
+      // Insert new history with progress 0
+      await supabase.from("histories").insert({
+        user_id: user.id,
+        tmdb_id: tvId,
+        content_type: "tv",
+        season_number: season,
+        episode_number: episode,
+        title,
+        poster_path: posterPath,
+        progress: 0,
+        duration: 0,
+        watched_at: new Date().toISOString(),
+      });
+    }
+
+    return { success: true, message: "View recorded" };
+  } catch (error) {
+    console.info("Record view error:", error);
+    return { success: false, message: "Failed to record view" };
+  }
+};
