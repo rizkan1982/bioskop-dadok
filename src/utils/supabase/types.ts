@@ -154,7 +154,7 @@ export type Database = {
         Row: {
           user_id: string
           id: number
-          type: string
+          content_type: string
           adult: boolean
           backdrop_path: string | null
           poster_path: string | null
@@ -166,7 +166,7 @@ export type Database = {
         Insert: {
           user_id: string
           id: number
-          type: string
+          content_type: string
           adult: boolean
           backdrop_path?: string | null
           poster_path?: string | null
@@ -178,7 +178,7 @@ export type Database = {
         Update: {
           user_id?: string
           id?: number
-          type?: string
+          content_type?: string
           adult?: boolean
           backdrop_path?: string | null
           poster_path?: string | null
