@@ -121,6 +121,7 @@ export async function GET(request: NextRequest) {
 
     console.log("[ADMIN API] Returning", admins.length, "admins:", admins.map(a => a.email));
     return NextResponse.json({ success: true, data: admins });
+  } catch (error) {
     console.error("[ADMIN API] Error fetching admin users:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch admin users", error: String(error) },
