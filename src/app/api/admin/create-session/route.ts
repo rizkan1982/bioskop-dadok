@@ -3,10 +3,31 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { IS_DEVELOPMENT } from "@/utils/constants";
 
-// Admin email whitelist
-const ADMIN_EMAILS = [
+// Super Admin email whitelist (always allowed)
+const SUPER_ADMIN_EMAILS = [
   "stressgue934@gmail.com",
 ];
+
+// Check if email is admin (from whitelist OR database)
+async function isEmailAdmin(email: string, supabase: Awaited<ReturnType<typeof createClient>>): Promise<boolean> {
+  // Super admin from whitelist - always allowed
+  if (SUPER_ADMIN_EMAILS.includes(email)) {
+    return true;
+  }
+  
+  // Check database for is_admin flag
+  try {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("email", email)
+      .single();
+    
+    return profile?.is_admin === true;
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -23,8 +44,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify email matches and is admin
-    if (user.email !== email || !ADMIN_EMAILS.includes(email)) {
+    // Verify email matches and check admin status
+    const adminCheck = await isEmailAdmin(email, supabase);
+    if (user.email !== email || !adminCheck) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 403 }

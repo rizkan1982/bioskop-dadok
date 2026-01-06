@@ -60,15 +60,25 @@ export default function AdminHistoryPage() {
     }
   }, [searchQuery, histories]);
 
-  const formatProgress = (progress: number, duration: number) => {
-    if (duration === 0) return "0%";
-    const percentage = Math.round((progress / duration) * 100);
+  const formatProgress = (progress: number | null | undefined, duration: number | null | undefined) => {
+    // Handle null/undefined values
+    const safeProgress = progress ?? 0;
+    const safeDuration = duration ?? 0;
+    
+    if (safeDuration === 0 || safeProgress === 0) return "0%";
+    const percentage = Math.round((safeProgress / safeDuration) * 100);
+    if (isNaN(percentage)) return "0%";
     return `${Math.min(percentage, 100)}%`;
   };
 
-  const getProgressValue = (progress: number, duration: number) => {
-    if (duration === 0) return 0;
-    return Math.min(Math.round((progress / duration) * 100), 100);
+  const getProgressValue = (progress: number | null | undefined, duration: number | null | undefined) => {
+    // Handle null/undefined values
+    const safeProgress = progress ?? 0;
+    const safeDuration = duration ?? 0;
+    
+    if (safeDuration === 0 || safeProgress === 0) return 0;
+    const value = Math.min(Math.round((safeProgress / safeDuration) * 100), 100);
+    return isNaN(value) ? 0 : value;
   };
 
   if (loading) {

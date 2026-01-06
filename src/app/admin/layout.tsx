@@ -3,12 +3,13 @@ import MobileAdminNav from "@/components/sections/Admin/MobileNav";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 
 // ============================================
-// WHITELIST EMAIL ADMIN
-// Hanya email ini yang bisa akses admin panel
+// WHITELIST EMAIL ADMIN (Super Admin)
+// Email ini selalu punya akses admin
 // ============================================
-const ADMIN_EMAILS = [
+const SUPER_ADMIN_EMAILS = [
   "stressgue934@gmail.com",
 ];
 
@@ -17,6 +18,28 @@ interface AdminSession {
   role: string;
   email: string;
   exp: number;
+}
+
+// Check if email is admin (from whitelist OR database)
+async function isEmailAdmin(email: string): Promise<boolean> {
+  // Super admin from whitelist - always allowed
+  if (SUPER_ADMIN_EMAILS.includes(email)) {
+    return true;
+  }
+  
+  // Check database for is_admin flag
+  try {
+    const supabase = await createClient();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("email", email)
+      .single();
+    
+    return profile?.is_admin === true;
+  } catch {
+    return false;
+  }
 }
 
 async function getAdminSession(): Promise<AdminSession | null> {
@@ -35,8 +58,9 @@ async function getAdminSession(): Promise<AdminSession | null> {
       return null;
     }
 
-    // Verify email is still in admin whitelist
-    if (!ADMIN_EMAILS.includes(session.email)) {
+    // Verify email is still admin (whitelist OR database)
+    const adminCheck = await isEmailAdmin(session.email);
+    if (!adminCheck) {
       return null;
     }
 

@@ -14,8 +14,8 @@ import {
   useDisclosure,
   Spinner,
 } from "@heroui/react";
-import { Users, Eye, EyeOff, Trash } from "@/utils/icons";
-import { HiPlus, HiShieldCheck, HiEnvelope } from "react-icons/hi2";
+import { Users, Trash } from "@/utils/icons";
+import { HiPlus, HiShieldCheck, HiEnvelope, HiCheckCircle } from "react-icons/hi2";
 
 interface AdminUser {
   id: string;
@@ -23,22 +23,16 @@ interface AdminUser {
   email: string;
   role: string;
   createdAt: string;
-  lastLogin?: string;
 }
 
 export default function AdminUsersManagement() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [successMessage, setSuccessMessage] = useState("");
   
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    role: "admin",
-  });
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     fetchUsers();
@@ -61,20 +55,25 @@ export default function AdminUsersManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setSuccessMessage("");
 
     try {
       const res = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       });
 
       const data = await res.json();
 
       if (data.success) {
         await fetchUsers();
-        resetForm();
-        onClose();
+        setEmail("");
+        setSuccessMessage(data.message || "Admin berhasil ditambahkan");
+        setTimeout(() => {
+          onClose();
+          setSuccessMessage("");
+        }, 1500);
       } else {
         alert(data.message || "Gagal menambah admin");
       }
@@ -86,8 +85,8 @@ export default function AdminUsersManagement() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus admin ini?")) return;
+  const handleDelete = async (id: string, userEmail: string) => {
+    if (!confirm(`Yakin ingin menghapus admin ${userEmail}?`)) return;
 
     try {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
@@ -101,16 +100,6 @@ export default function AdminUsersManagement() {
     } catch (error) {
       console.error("Error deleting user:", error);
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      username: "",
-      email: "",
-      password: "",
-      role: "admin",
-    });
-    setShowPassword(false);
   };
 
   if (loading) {
@@ -192,7 +181,7 @@ export default function AdminUsersManagement() {
                   variant="flat"
                   isIconOnly
                   className="bg-red-500/20 text-red-400 flex-shrink-0"
-                  onPress={() => handleDelete(user.id)}
+                  onPress={() => handleDelete(user.id, user.email)}
                 >
                   <Trash className="text-sm" />
                 </Button>
@@ -212,6 +201,7 @@ export default function AdminUsersManagement() {
             <p className="font-semibold text-sm text-white">Informasi Keamanan</p>
             <p className="text-xs text-slate-400 mt-1">
               Admin memiliki akses penuh ke dashboard. Pastikan hanya memberikan akses kepada orang yang dipercaya.
+              User yang ditambahkan sebagai admin bisa login dengan akun Google menggunakan email yang sama.
             </p>
           </div>
         </div>
@@ -220,7 +210,11 @@ export default function AdminUsersManagement() {
       {/* Add Admin Modal */}
       <Modal 
         isOpen={isOpen} 
-        onClose={onClose} 
+        onClose={() => {
+          onClose();
+          setEmail("");
+          setSuccessMessage("");
+        }} 
         size="full"
         classNames={{
           base: "sm:max-w-md sm:mx-auto sm:my-auto sm:rounded-xl bg-slate-900",
@@ -233,73 +227,60 @@ export default function AdminUsersManagement() {
               <ModalHeader className="border-b border-slate-700/50 pb-4">
                 <span className="text-base font-semibold text-white">Tambah Admin Baru</span>
               </ModalHeader>
-              <ModalBody className="py-4">
-                <div className="space-y-4">
-                  <Input
-                    label="Username"
-                    placeholder="admin"
-                    value={formData.username}
-                    onValueChange={(value) => setFormData({ ...formData, username: value })}
-                    isRequired
-                    size="md"
-                    classNames={{
-                      inputWrapper: "bg-slate-800 border-slate-700"
-                    }}
-                  />
-                  
-                  <Input
-                    label="Email"
-                    type="email"
-                    placeholder="admin@example.com"
-                    value={formData.email}
-                    onValueChange={(value) => setFormData({ ...formData, email: value })}
-                    isRequired
-                    size="md"
-                    classNames={{
-                      inputWrapper: "bg-slate-800 border-slate-700"
-                    }}
-                  />
-                  
-                  <Input
-                    label="Password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onValueChange={(value) => setFormData({ ...formData, password: value })}
-                    endContent={
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-slate-400 hover:text-white"
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    }
-                    isRequired
-                    size="md"
-                    classNames={{
-                      inputWrapper: "bg-slate-800 border-slate-700"
-                    }}
-                  />
-                </div>
+              <ModalBody className="py-6">
+                {successMessage ? (
+                  <div className="text-center py-6">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                      <HiCheckCircle className="text-4xl text-emerald-400" />
+                    </div>
+                    <p className="text-white font-medium">{successMessage}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-center mb-4">
+                      <p className="text-sm text-slate-400">
+                        Masukkan alamat email Google yang akan dijadikan admin.
+                        User dapat login menggunakan "Continue with Google" di halaman admin login.
+                      </p>
+                    </div>
+                    
+                    <Input
+                      label="Email Google"
+                      type="email"
+                      placeholder="contoh@gmail.com"
+                      value={email}
+                      onValueChange={setEmail}
+                      isRequired
+                      size="lg"
+                      startContent={<HiEnvelope className="text-slate-400" />}
+                      classNames={{
+                        inputWrapper: "bg-slate-800 border-slate-700",
+                        label: "text-slate-300"
+                      }}
+                    />
+                  </div>
+                )}
               </ModalBody>
-              <ModalFooter className="border-t border-slate-700/50 pt-4">
-                <Button 
-                  variant="flat" 
-                  onPress={onClose} 
-                  className="bg-slate-700 text-slate-300 flex-1 sm:flex-none"
-                >
-                  Batal
-                </Button>
-                <Button 
-                  color="primary" 
-                  type="submit" 
-                  isLoading={saving} 
-                  className="flex-1 sm:flex-none"
-                >
-                  Tambah Admin
-                </Button>
-              </ModalFooter>
+              {!successMessage && (
+                <ModalFooter className="border-t border-slate-700/50 pt-4">
+                  <Button 
+                    variant="flat" 
+                    onPress={onClose} 
+                    className="bg-slate-700 text-slate-300 flex-1 sm:flex-none"
+                  >
+                    Batal
+                  </Button>
+                  <Button 
+                    color="primary" 
+                    type="submit" 
+                    isLoading={saving}
+                    isDisabled={!email.includes("@")}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Tambah Admin
+                  </Button>
+                </ModalFooter>
+              )}
             </form>
           )}
         </ModalContent>

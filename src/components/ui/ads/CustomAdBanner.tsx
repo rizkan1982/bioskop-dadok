@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Card } from "@heroui/react";
 
 interface CustomAdBannerProps {
@@ -16,11 +17,15 @@ interface Ad {
 }
 
 export default function CustomAdBanner({ position, className = "" }: CustomAdBannerProps) {
+  const pathname = usePathname();
   const [ads, setAds] = useState<Ad[]>([]);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  // Don't show ads on admin pages
+  const isAdminPage = pathname?.startsWith("/admin") || pathname?.startsWith("/auth/admin");
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -28,8 +33,13 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
   }, []);
 
   useEffect(() => {
+    // Skip fetching if on admin page
+    if (isAdminPage) {
+      setLoading(false);
+      return;
+    }
     fetchAds();
-  }, [position]);
+  }, [position, isAdminPage]);
 
   const fetchAds = async () => {
     try {
@@ -102,6 +112,11 @@ export default function CustomAdBanner({ position, className = "" }: CustomAdBan
 
   // Don't render until mounted (prevents hydration mismatch)
   if (!isMounted) {
+    return null;
+  }
+
+  // Don't render on admin pages
+  if (isAdminPage) {
     return null;
   }
 

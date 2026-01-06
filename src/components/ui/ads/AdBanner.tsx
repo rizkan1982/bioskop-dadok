@@ -2,6 +2,7 @@
 
 import { Card } from "@heroui/react";
 import { IS_PRODUCTION } from "@/utils/constants";
+import { usePathname } from "next/navigation";
 import AdSenseAd from "./AdSenseAd";
 import PropellerAd from "./PropellerAd";
 import AdsterraAd from "./AdsterraAd";
@@ -51,8 +52,12 @@ const AdBanner: React.FC<AdBannerProps> = ({
   variant = "native",
   className = "",
 }) => {
+  const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  // Don't show ads on admin pages
+  const isAdminPage = pathname?.startsWith("/admin") || pathname?.startsWith("/auth/admin");
 
   useEffect(() => {
     // Detect mobile device
@@ -73,6 +78,11 @@ const AdBanner: React.FC<AdBannerProps> = ({
     window.addEventListener('error', handleError);
     return () => window.removeEventListener('error', handleError);
   }, []);
+
+  // Don't show ads on admin pages
+  if (isAdminPage) {
+    return null;
+  }
 
   // Hide ad if error detected
   if (hasError) {
