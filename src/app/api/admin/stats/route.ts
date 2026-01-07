@@ -161,17 +161,27 @@ export async function GET(request: NextRequest) {
     }
     console.log("[ADMIN STATS] Week watches (auth):", weekWatches, "anonymous:", weekAnonWatches, "total:", weekTotal);
 
-    // Get this month's watch activity (use created_at, not updated_at)
+    // Get this month's watch activity (both auth and anonymous)
     const { count: monthWatches, error: monthError } = await supabase
       .from("histories")
       .select("*", { count: "exact", head: true })
       .gte("created_at", monthStartISO);
 
+    // Get this month's anonymous watches
+    const { count: monthAnonWatches, error: monthAnonError } = await (supabase
+      .from("anonymous_sessions" as any)
+      .select("*", { count: "exact", head: true }) as any)
+      .gte("created_at", monthStartISO);
+
+    const monthTotal = (monthWatches || 0) + (monthAnonWatches || 0);
+
     if (monthError) {
       console.error("[ADMIN STATS] Error fetching month watches:", monthError);
-    } else {
-      console.log("[ADMIN STATS] Month watches:", monthWatches);
     }
+    if (monthAnonError) {
+      console.error("[ADMIN STATS] Error fetching month anonymous watches:", monthAnonError);
+    }
+    console.log("[ADMIN STATS] Month watches (auth):", monthWatches, "anonymous:", monthAnonWatches, "total:", monthTotal);
 
     // Get recent watch histories for "Currently Watching"
     const { data: recentHistories, error: recentError } = await supabase
@@ -378,6 +388,13 @@ export async function GET(request: NextRequest) {
     let moviesWatchedToday = 0;
     let tvShowsWatchedToday = 0;
 
+    // Get today's date in UTC for proper comparison
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0);
+    const tomorrowUTC = new Date(todayUTC);
+    tomorrowUTC.setUTCDate(tomorrowUTC.getUTCDate() + 1);
+
+    console.log("[ADMIN STATS] Today UTC range:", todayUTC.toISOString(), "to", tomorrowUTC.toISOString());
     console.log("[ADMIN STATS] allHistories available?", !!allHistories, "length:", allHistories?.length);
     console.log("[ADMIN STATS] allAnonSessions available?", !!allAnonSessions, "length:", allAnonSessions?.length);
 
@@ -385,10 +402,11 @@ export async function GET(request: NextRequest) {
     if (allHistories) {
       console.log("[ADMIN STATS] Processing authenticated histories...");
       allHistories.forEach((h) => {
-        const isToday = new Date(h.created_at).toDateString() === new Date().toDateString();
+        const entryDate = new Date(h.created_at);
+        const isToday = entryDate >= todayUTC && entryDate < tomorrowUTC;
         if (isToday) {
           const contentType = (h as any).content_type || (h as any).type;
-          console.log("[ADMIN STATS] Auth entry - content_type:", contentType, "isToday:", isToday);
+          console.log("[ADMIN STATS] Auth entry - created_at:", h.created_at, "content_type:", contentType, "isToday:", isToday);
           if ((h as any).content_type === "movie" || (h as any).type === "movie") {
             moviesWatchedToday++;
           } else if ((h as any).content_type === "tv" || (h as any).type === "tv") {
@@ -402,8 +420,9 @@ export async function GET(request: NextRequest) {
     if (allAnonSessions) {
       console.log("[ADMIN STATS] Processing anonymous sessions...");
       allAnonSessions.forEach((a: any) => {
-        const isToday = new Date(a.created_at).toDateString() === new Date().toDateString();
-        console.log("[ADMIN STATS] Anon entry - media_type:", a.media_type, "isToday:", isToday);
+        const entryDate = new Date(a.created_at);
+        const isToday = entryDate >= todayUTC && entryDate < tomorrowUTC;
+        console.log("[ADMIN STATS] Anon entry - created_at:", a.created_at, "media_type:", a.media_type, "isToday:", isToday);
         if (isToday) {
           if (a.media_type === "movie") {
             moviesWatchedToday++;
@@ -417,7 +436,7 @@ export async function GET(request: NextRequest) {
     console.log("[ADMIN STATS] Movies watched today:", moviesWatchedToday, "TV shows:", tvShowsWatchedToday);
 
     console.log("[ADMIN STATS] Response prepared successfully");
-    console.log("[ADMIN STATS] Summary: Today=" + todayTotal + ", Week=" + weekTotal + ", Month=" + monthWatches);
+    console.log("[ADMIN STATS] Summary: Today=" + todayTotal + ", Week=" + weekTotal + ", Month=" + monthTotal);
 
     // Note: Device distribution is not available because we don't track device info
     // This can be implemented later with proper analytics tracking
@@ -431,7 +450,7 @@ export async function GET(request: NextRequest) {
       data: {
         today: todayTotal || 0,
         thisWeek: weekTotal || 0,
-        thisMonth: monthWatches || 0,
+        thisMonth: monthTotal || 0,
         activeNow: currentWatchers.length,
         totalUsers: totalUsers || 0,
         totalHistories: totalHistories || 0,
