@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 /**
  * Adsterra Native Banner Ad Component
@@ -8,25 +8,42 @@ import { useEffect } from "react";
  * Ideal for placing in sidebars or between content sections
  */
 const AdsterraNativeBanner: React.FC = () => {
-  useEffect(() => {
-    // Load native banner script
-    if (typeof window !== "undefined" && !(window as any).adsterraNativeBannerLoaded) {
-      const script = document.createElement("script");
-      script.src = "https://pl28422553.effectivegatecpm.com/2084724fb93c971a86b3e8890fddb40e/invoke.js";
-      script.async = true;
-      script.defer = true;
-      script.setAttribute("data-cfasync", "false");
+  const containerRef = useRef<HTMLDivElement>(null);
 
-      document.body.appendChild(script);
-      (window as any).adsterraNativeBannerLoaded = true;
-    }
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Load native banner script with proper timing
+    const loadScript = async () => {
+      try {
+        if (typeof window !== "undefined") {
+          const script = document.createElement("script");
+          script.src = "https://pl28422553.effectivegatecpm.com/2084724fb93c971a86b3e8890fddb40e/invoke.js";
+          script.async = true;
+          script.setAttribute("data-cfasync", "false");
+
+          script.onload = () => {
+            console.log("✅ Adsterra Native Banner script loaded");
+          };
+          script.onerror = () => {
+            console.error("❌ Failed to load Adsterra Native Banner");
+          };
+
+          document.body.appendChild(script);
+        }
+      } catch (error) {
+        console.error("Error loading Adsterra Native Banner:", error);
+      }
+    };
+
+    loadScript();
   }, []);
 
   return (
-    <div className="w-full my-4 px-2">
+    <div ref={containerRef} className="w-full my-6 px-2">
       <div 
         id="container-2084724fb93c971a86b3e8890fddb40e"
-        className="flex justify-center min-h-[100px]"
+        className="flex justify-center min-h-[120px] bg-gradient-to-b from-background to-background/50 rounded-lg overflow-hidden"
       />
     </div>
   );
