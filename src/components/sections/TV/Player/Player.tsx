@@ -9,6 +9,7 @@ import { Episode, TvShowDetails } from "tmdb-ts";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { SpacingClasses } from "@/utils/constants";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
+import { useAnonymousTracking } from "@/hooks/useAnonymousTracking";
 import { recordTvShowView } from "@/actions/histories";
 import SubtitleGuide from "@/components/ui/other/SubtitleGuide";
 const TvShowPlayerHeader = dynamic(() => import("./Header"));
@@ -49,11 +50,18 @@ const TvShowPlayer: React.FC<TvShowPlayerProps> = ({
     `Play ${props.seriesName} - ${props.seasonName} - ${episode.name} | ${siteConfig.name}`,
   );
 
+  // Initialize anonymous tracking for non-authenticated users
+  const title = `${props.seriesName} - ${props.seasonName} E${episode.episode_number}`;
+  useAnonymousTracking({
+    mediaId: id,
+    mediaType: 'tv',
+    title,
+  });
+
   // Record TV show view when player opens
   useEffect(() => {
     if (!hasRecorded.current) {
       hasRecorded.current = true;
-      const title = `${props.seriesName} - ${props.seasonName} E${episode.episode_number}`;
       recordTvShowView(id, episode.season_number, episode.episode_number, title, tv.poster_path).catch(err => {
         console.log('Failed to record view:', err);
       });

@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef } from "react";
 import { MovieDetails } from "tmdb-ts/dist/types/movies";
 import { useVidlinkPlayer } from "@/hooks/useVidlinkPlayer";
+import { useAnonymousTracking } from "@/hooks/useAnonymousTracking";
 import { recordMovieView } from "@/actions/histories";
 import SubtitleGuide from "@/components/ui/other/SubtitleGuide";
 const MoviePlayerHeader = dynamic(() => import("./Header"));
@@ -33,6 +34,13 @@ const MoviePlayer: React.FC<MoviePlayerProps> = ({ movie, startAt }) => {
 
   useVidlinkPlayer({ saveHistory: true });
   useDocumentTitle(`Play ${title} | ${siteConfig.name}`);
+
+  // Initialize anonymous tracking for non-authenticated users
+  useAnonymousTracking({
+    mediaId: movie.id,
+    mediaType: 'movie',
+    title,
+  });
 
   // Record movie view when player opens
   useEffect(() => {

@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient(true);
 
     // Try to find existing session
-    const { data: existingSession, error: findError } = await supabase
-      .from("anonymous_sessions")
+    const { data: existingSession, error: findError } = await (supabase
+      .from("anonymous_sessions" as any) as any)
       .select("id")
       .eq("session_id", sessionId)
       .eq("media_id", mediaId)
@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
     if (existingSession) {
       // Update existing session
       console.log("[ANONYMOUS WATCH] Updating existing session");
-      const { error: updateError } = await supabase
-        .from("anonymous_sessions")
+      const { error: updateError } = await (supabase
+        .from("anonymous_sessions" as any) as any)
         .update({
           duration_watched: durationWatched || 0,
           updated_at: new Date().toISOString(),
@@ -60,8 +60,8 @@ export async function POST(request: NextRequest) {
     } else {
       // Create new session
       console.log("[ANONYMOUS WATCH] Creating new session");
-      const { error: insertError } = await supabase
-        .from("anonymous_sessions")
+      const { error: insertError } = await (supabase
+        .from("anonymous_sessions" as any) as any)
         .insert({
           session_id: sessionId,
           media_id: mediaId,

@@ -122,9 +122,9 @@ export async function GET(request: NextRequest) {
       .gte("created_at", todayISO);
 
     // Get today's anonymous watches
-    const { count: todayAnonWatches, error: todayAnonError } = await supabase
-      .from("anonymous_sessions")
-      .select("*", { count: "exact", head: true })
+    const { count: todayAnonWatches, error: todayAnonError } = await (supabase
+      .from("anonymous_sessions" as any)
+      .select("*", { count: "exact", head: true }) as any)
       .gte("created_at", todayISO);
 
     const todayTotal = (todayWatches || 0) + (todayAnonWatches || 0);
@@ -144,9 +144,9 @@ export async function GET(request: NextRequest) {
       .gte("created_at", weekStartISO);
 
     // Get this week's anonymous watches
-    const { count: weekAnonWatches, error: weekAnonError } = await supabase
-      .from("anonymous_sessions")
-      .select("*", { count: "exact", head: true })
+    const { count: weekAnonWatches, error: weekAnonError } = await (supabase
+      .from("anonymous_sessions" as any)
+      .select("*", { count: "exact", head: true }) as any)
       .gte("created_at", weekStartISO);
 
     const weekTotal = (weekWatches || 0) + (weekAnonWatches || 0);
