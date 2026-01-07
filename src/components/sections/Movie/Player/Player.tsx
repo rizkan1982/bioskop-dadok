@@ -1,3 +1,5 @@
+'use client';
+
 import { SpacingClasses } from "@/utils/constants";
 import { siteConfig } from "@/config/site";
 import useBreakpoints from "@/hooks/useBreakpoints";

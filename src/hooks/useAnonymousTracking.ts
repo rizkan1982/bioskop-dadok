@@ -4,14 +4,26 @@ const SESSION_ID_KEY = 'anon_session_id';
 
 // Generate or retrieve anonymous session ID
 const getSessionId = (): string => {
-  if (typeof window === 'undefined') return '';
-  
-  let sessionId = localStorage.getItem(SESSION_ID_KEY);
-  if (!sessionId) {
-    sessionId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem(SESSION_ID_KEY, sessionId);
+  if (typeof window === 'undefined') {
+    console.log('[Anonymous Tracking] window is undefined, returning empty string');
+    return '';
   }
-  return sessionId;
+  
+  try {
+    let sessionId = localStorage.getItem(SESSION_ID_KEY);
+    console.log('[Anonymous Tracking] Retrieved from localStorage:', sessionId);
+    
+    if (!sessionId) {
+      sessionId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem(SESSION_ID_KEY, sessionId);
+      console.log('[Anonymous Tracking] Generated new session ID:', sessionId);
+    }
+    return sessionId;
+  } catch (error) {
+    console.error('[Anonymous Tracking] Error accessing localStorage:', error);
+    // Fallback: generate session ID in memory
+    return `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
 };
 
 interface UseAnonymousTrackingProps {
