@@ -115,29 +115,49 @@ export async function GET(request: NextRequest) {
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
     const monthStartISO = monthStart.toISOString();
 
-    // Get today's watch activity (use created_at, not updated_at)
+    // Get today's watch activity (authenticated users)
     const { count: todayWatches, error: todayError } = await supabase
       .from("histories")
       .select("*", { count: "exact", head: true })
       .gte("created_at", todayISO);
 
+    // Get today's anonymous watches
+    const { count: todayAnonWatches, error: todayAnonError } = await supabase
+      .from("anonymous_sessions")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", todayISO);
+
+    const todayTotal = (todayWatches || 0) + (todayAnonWatches || 0);
+
     if (todayError) {
       console.error("[ADMIN STATS] Error fetching today watches:", todayError);
-    } else {
-      console.log("[ADMIN STATS] Today watches:", todayWatches);
     }
+    if (todayAnonError) {
+      console.error("[ADMIN STATS] Error fetching today anonymous watches:", todayAnonError);
+    }
+    console.log("[ADMIN STATS] Today watches (auth):", todayWatches, "anonymous:", todayAnonWatches, "total:", todayTotal);
 
-    // Get this week's watch activity (use created_at, not updated_at)
+    // Get this week's watch activity (authenticated users)
     const { count: weekWatches, error: weekError } = await supabase
       .from("histories")
       .select("*", { count: "exact", head: true })
       .gte("created_at", weekStartISO);
 
+    // Get this week's anonymous watches
+    const { count: weekAnonWatches, error: weekAnonError } = await supabase
+      .from("anonymous_sessions")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", weekStartISO);
+
+    const weekTotal = (weekWatches || 0) + (weekAnonWatches || 0);
+
     if (weekError) {
       console.error("[ADMIN STATS] Error fetching week watches:", weekError);
-    } else {
-      console.log("[ADMIN STATS] Week watches:", weekWatches);
     }
+    if (weekAnonError) {
+      console.error("[ADMIN STATS] Error fetching week anonymous watches:", weekAnonError);
+    }
+    console.log("[ADMIN STATS] Week watches (auth):", weekWatches, "anonymous:", weekAnonWatches, "total:", weekTotal);
 
     // Get this month's watch activity (use created_at, not updated_at)
     const { count: monthWatches, error: monthError } = await supabase
@@ -270,7 +290,7 @@ export async function GET(request: NextRequest) {
     }));
 
     console.log("[ADMIN STATS] Response prepared successfully");
-    console.log("[ADMIN STATS] Summary: Today=" + todayWatches + ", Week=" + weekWatches + ", Month=" + monthWatches);
+    console.log("[ADMIN STATS] Summary: Today=" + todayTotal + ", Week=" + weekTotal + ", Month=" + monthWatches);
 
     // Note: Device distribution is not available because we don't track device info
     // This can be implemented later with proper analytics tracking
@@ -282,8 +302,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        today: todayWatches || 0,
-        thisWeek: weekWatches || 0,
+        today: todayTotal || 0,
+        thisWeek: weekTotal || 0,
         thisMonth: monthWatches || 0,
         activeNow: currentWatchers.length,
         totalUsers: totalUsers || 0,
