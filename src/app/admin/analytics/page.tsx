@@ -35,13 +35,19 @@ export default function AnalyticsPage() {
 
   const fetchStats = async () => {
     try {
+      console.log("[ANALYTICS] Fetching stats...");
       const res = await fetch("/api/admin/stats");
       const data = await res.json();
-      if (data.success) {
+      console.log("[ANALYTICS] Stats received:", data);
+      console.log("[ANALYTICS] Stats breakdown - today:", data.data?.today, "thisWeek:", data.data?.thisWeek, "hourlyTraffic:", data.data?.hourlyTraffic?.length);
+      
+      if (data.success && data.data) {
         setStats(data.data);
+      } else {
+        console.warn("[ANALYTICS] Invalid response structure");
       }
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error("[ANALYTICS] Error fetching stats:", error);
     } finally {
       setLoading(false);
     }

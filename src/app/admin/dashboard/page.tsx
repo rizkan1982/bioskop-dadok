@@ -53,6 +53,7 @@ export default function AdminDashboard() {
       
       const data = await res.json();
       console.log("[DASHBOARD] Stats data received:", data);
+      console.log("[DASHBOARD] Stats breakdown - today:", data.data?.today, "thisWeek:", data.data?.thisWeek, "activeNow:", data.data?.activeNow);
       
       if (data.success && data.data) {
         setStats(data.data);
