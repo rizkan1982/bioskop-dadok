@@ -122,6 +122,7 @@ export async function GET(request: NextRequest) {
       .gte("created_at", todayISO);
 
     // Get today's anonymous watches
+    console.log("[ADMIN STATS] Attempting to fetch anonymous_sessions...");
     const { count: todayAnonWatches, error: todayAnonError } = await (supabase
       .from("anonymous_sessions" as any)
       .select("*", { count: "exact", head: true }) as any)
@@ -134,6 +135,7 @@ export async function GET(request: NextRequest) {
     }
     if (todayAnonError) {
       console.error("[ADMIN STATS] Error fetching today anonymous watches:", todayAnonError);
+      console.error("[ADMIN STATS] Anonymous error details:", JSON.stringify(todayAnonError));
     }
     console.log("[ADMIN STATS] Today watches (auth):", todayWatches, "anonymous:", todayAnonWatches, "total:", todayTotal);
 
@@ -275,6 +277,7 @@ export async function GET(request: NextRequest) {
 
     if (anonHourlyError) {
       console.error("[ADMIN STATS] Error fetching anonymous hourly data:", anonHourlyError);
+      console.error("[ADMIN STATS] Anonymous hourly error details:", JSON.stringify(anonHourlyError));
     } else {
       console.log("[ADMIN STATS] Anonymous sessions in this month:", allAnonSessions?.length);
       
@@ -375,11 +378,17 @@ export async function GET(request: NextRequest) {
     let moviesWatchedToday = 0;
     let tvShowsWatchedToday = 0;
 
+    console.log("[ADMIN STATS] allHistories available?", !!allHistories, "length:", allHistories?.length);
+    console.log("[ADMIN STATS] allAnonSessions available?", !!allAnonSessions, "length:", allAnonSessions?.length);
+
     // Count from authenticated histories
     if (allHistories) {
+      console.log("[ADMIN STATS] Processing authenticated histories...");
       allHistories.forEach((h) => {
         const isToday = new Date(h.created_at).toDateString() === new Date().toDateString();
         if (isToday) {
+          const contentType = (h as any).content_type || (h as any).type;
+          console.log("[ADMIN STATS] Auth entry - content_type:", contentType, "isToday:", isToday);
           if ((h as any).content_type === "movie" || (h as any).type === "movie") {
             moviesWatchedToday++;
           } else if ((h as any).content_type === "tv" || (h as any).type === "tv") {
@@ -391,8 +400,10 @@ export async function GET(request: NextRequest) {
 
     // Count from anonymous sessions
     if (allAnonSessions) {
+      console.log("[ADMIN STATS] Processing anonymous sessions...");
       allAnonSessions.forEach((a: any) => {
         const isToday = new Date(a.created_at).toDateString() === new Date().toDateString();
+        console.log("[ADMIN STATS] Anon entry - media_type:", a.media_type, "isToday:", isToday);
         if (isToday) {
           if (a.media_type === "movie") {
             moviesWatchedToday++;
