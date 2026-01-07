@@ -14,35 +14,54 @@ const BottomNavbar = () => {
   return (
     show && (
       <>
-        <div className="pt-20 md:hidden" />
-        <div className="fixed bottom-0 left-0 z-50 block h-fit w-full translate-y-px border-t border-secondary-background bg-background py-2 md:hidden">
-          <div className="mx-auto grid h-full max-w-lg grid-cols-5">
+        {/* Spacer to prevent content from being hidden behind fixed navbar */}
+        <div className="pt-24 md:hidden" />
+        
+        {/* Fixed Bottom Navigation - Mobile Only */}
+        <nav 
+          className="fixed bottom-0 left-0 z-50 block w-full border-t border-secondary-background/50 bg-background/95 backdrop-blur-lg pb-safe md:hidden"
+          role="navigation"
+          aria-label="Main navigation"
+        >
+          <div className="mx-auto grid h-full max-w-lg grid-cols-5 px-1">
             {siteConfig.navItems.map((item) => {
               const isActive = pathName === item.href;
               return (
                 <Link
                   href={item.href}
                   key={item.href}
-                  className="flex items-center justify-center text-foreground"
+                  className="flex items-center justify-center py-2 text-foreground transition-transform active:scale-95"
+                  aria-current={isActive ? "page" : undefined}
                 >
-                  <div className="flex max-h-[50px] flex-col items-center justify-center">
+                  {/* Touch-friendly target area with min 44px height (iOS HIG) */}
+                  <div className="flex min-h-[52px] min-w-[52px] flex-col items-center justify-center gap-1">
                     <Chip
                       size="lg"
                       variant={isActive ? "solid" : "light"}
                       classNames={{
-                        base: "py-[2px] transition-all",
-                        content: "size-full",
+                        base: clsx(
+                          "py-1 px-3 transition-all duration-200",
+                          isActive && "shadow-md"
+                        ),
+                        content: "size-full flex items-center justify-center",
                       }}
                     >
                       {isActive ? item.activeIcon : item.icon}
                     </Chip>
-                    <p className={clsx("text-[10px]", { "font-bold": isActive })}>{item.label}</p>
+                    <span 
+                      className={clsx(
+                        "text-[11px] leading-tight transition-colors",
+                        isActive ? "font-semibold text-primary" : "font-medium text-foreground/70"
+                      )}
+                    >
+                      {item.label}
+                    </span>
                   </div>
                 </Link>
               );
             })}
           </div>
-        </div>
+        </nav>
       </>
     )
   );

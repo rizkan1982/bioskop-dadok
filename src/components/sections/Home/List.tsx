@@ -19,9 +19,9 @@ const HomePageList: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col gap-10 md:gap-12">
-      <ContentTypeSelection className="justify-center" />
-      <div className="relative flex min-h-32 flex-col gap-8 md:gap-10">
+    <div className="flex flex-col gap-6 sm:gap-8 md:gap-10 lg:gap-12">
+      <ContentTypeSelection className="justify-center px-3 sm:px-4 md:px-0" />
+      <div className="relative flex min-h-32 flex-col gap-6 sm:gap-8 md:gap-10">
         <Suspense
           fallback={
             <Spinner

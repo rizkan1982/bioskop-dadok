@@ -31,7 +31,10 @@ const TopNavbar = () => {
       isBlurred={false}
       position="sticky"
       maxWidth="full"
-      classNames={{ wrapper: "px-2 md:px-4" }}
+      classNames={{ 
+        wrapper: "px-3 py-2 sm:px-4 md:px-6",
+        base: "h-14 sm:h-16",
+      }}
       className={cn("inset-0 h-min bg-transparent", {
         "bg-background": show,
       })}
@@ -57,8 +60,8 @@ const TopNavbar = () => {
           </NavbarItem>
         </NavbarContent>
       )}
-      <NavbarContent justify="end">
-        <NavbarItem className="flex gap-1">
+      <NavbarContent justify="end" className="gap-0.5 sm:gap-1">
+        <NavbarItem className="flex gap-0.5 sm:gap-1">
           <ThemeSwitchDropdown />
           <FullscreenToggleButton />
           <UserProfileButton />

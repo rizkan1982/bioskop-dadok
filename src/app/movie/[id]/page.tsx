@@ -49,9 +49,9 @@ const MovieDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-5xl px-0 sm:px-4 md:px-6">
       <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
-        <div className="flex flex-col gap-6 md:gap-8">
+        <div className="flex flex-col gap-5 sm:gap-6 md:gap-8">
           <BackdropSection movie={movie} />
           <OverviewSection movie={movie} />
           

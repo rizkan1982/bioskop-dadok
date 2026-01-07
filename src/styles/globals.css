@@ -40,28 +40,50 @@
     border-color: var(--color-gray-200, currentcolor);
   }
 
+  /* Improved base typography with better readability */
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply leading-relaxed;
+  }
+
   h1 {
-    @apply text-3xl font-black md:text-4xl;
+    @apply text-2xl font-black leading-tight tracking-tight sm:text-3xl md:text-4xl;
   }
 
   h2 {
-    @apply text-2xl font-bold md:text-3xl;
+    @apply text-xl font-bold leading-tight tracking-tight sm:text-2xl md:text-3xl;
   }
 
   h3 {
-    @apply text-xl font-bold md:text-2xl;
+    @apply text-lg font-bold leading-snug tracking-tight sm:text-xl md:text-2xl;
   }
 
   h4 {
-    @apply text-lg font-semibold md:text-xl;
+    @apply text-base font-semibold leading-snug sm:text-lg md:text-xl;
   }
 
   h5 {
-    @apply text-base font-medium md:text-lg;
+    @apply text-sm font-medium leading-normal sm:text-base md:text-lg;
   }
 
   h6 {
-    @apply text-sm font-normal md:text-base;
+    @apply text-xs font-normal leading-normal sm:text-sm md:text-base;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+
+  /* Touch-friendly tap targets */
+  button,
+  [role="button"],
+  a {
+    @apply touch-manipulation;
   }
 
   iframe {
@@ -78,15 +100,34 @@
 }
 
 @utility embla__slide {
-  @apply min-w-0 flex-[0_0_100%];
+  @apply min-w-0 flex-[0_0_auto];
 }
 
 @utility absolute-center {
   @apply absolute! top-1/2! left-1/2! float-none! -translate-x-1/2! -translate-y-1/2!;
 }
 
+/* Safe area utilities for notched devices */
+@utility pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+}
+
+@utility pt-safe {
+  padding-top: max(env(safe-area-inset-top), 0.5rem);
+}
+
+/* Touch-friendly minimum size */
+@utility min-touch {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Responsive container padding */
+@utility container-padding {
+  @apply px-3 sm:px-4 md:px-6 lg:px-8;
+}
+
 @utility movie-grid {
-  @apply grid size-full max-w-6xl grid-cols-2 justify-center gap-2 sm:grid-cols-3 md:gap-4 lg:grid-cols-[repeat(auto-fit,minmax(200px,50px))];
+  @apply grid size-full max-w-6xl grid-cols-2 justify-center gap-2 sm:grid-cols-3 sm:gap-3 md:gap-4 lg:grid-cols-[repeat(auto-fit,minmax(200px,50px))];
 }
 /* Mobile-safe ad styling */
 .ad-banner-container {

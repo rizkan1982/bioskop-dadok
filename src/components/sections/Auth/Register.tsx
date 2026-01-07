@@ -68,9 +68,9 @@ const AuthRegisterForm: React.FC<AuthFormProps> = ({ setForm }) => {
   }, [isSubmitting, isVerifying]);
 
   return (
-    <div className="flex flex-col gap-5">
-      <form className="flex flex-col gap-3" onSubmit={onSubmit}>
-        <p className="text-small text-foreground-500 mb-4 text-center">
+    <div className="flex flex-col gap-4 sm:gap-5">
+      <form className="flex flex-col gap-3 sm:gap-4" onSubmit={onSubmit}>
+        <p className="text-small text-foreground-500 mb-2 text-center sm:mb-4">
           Join to track your favorites and watch history
         </p>
         <Input
@@ -81,8 +81,14 @@ const AuthRegisterForm: React.FC<AuthFormProps> = ({ setForm }) => {
           label="Username"
           placeholder="Enter your username"
           variant="underlined"
-          startContent={<User className="text-xl" />}
+          size="lg"
+          startContent={<User className="text-lg sm:text-xl" />}
           isDisabled={isSubmitting || isVerifying}
+          classNames={{
+            inputWrapper: "min-h-[52px] sm:min-h-[56px]",
+            input: "text-base",
+            label: "text-sm sm:text-base",
+          }}
         />
         <Input
           {...register("email")}
@@ -93,8 +99,14 @@ const AuthRegisterForm: React.FC<AuthFormProps> = ({ setForm }) => {
           placeholder="Enter your email"
           type="email"
           variant="underlined"
-          startContent={<Mail className="text-xl" />}
+          size="lg"
+          startContent={<Mail className="text-lg sm:text-xl" />}
           isDisabled={isSubmitting || isVerifying}
+          classNames={{
+            inputWrapper: "min-h-[52px] sm:min-h-[56px]",
+            input: "text-base",
+            label: "text-sm sm:text-base",
+          }}
         />
         <PasswordInput
           value={watch("password")}
@@ -103,10 +115,16 @@ const AuthRegisterForm: React.FC<AuthFormProps> = ({ setForm }) => {
           errorMessage={errors.password?.message}
           isRequired
           variant="underlined"
+          size="lg"
           label="Password"
           placeholder="Enter your password"
-          startContent={<LockPassword className="text-xl" />}
+          startContent={<LockPassword className="text-lg sm:text-xl" />}
           isDisabled={isSubmitting || isVerifying}
+          classNames={{
+            inputWrapper: "min-h-[52px] sm:min-h-[56px]",
+            input: "text-base",
+            label: "text-sm sm:text-base",
+          }}
         />
         <PasswordInput
           {...register("confirm")}
@@ -114,10 +132,16 @@ const AuthRegisterForm: React.FC<AuthFormProps> = ({ setForm }) => {
           errorMessage={errors.confirm?.message}
           isRequired
           variant="underlined"
+          size="lg"
           label="Confirm Password"
           placeholder="Confirm your password"
-          startContent={<LockPassword className="text-xl" />}
+          startContent={<LockPassword className="text-lg sm:text-xl" />}
           isDisabled={isSubmitting || isVerifying}
+          classNames={{
+            inputWrapper: "min-h-[52px] sm:min-h-[56px]",
+            input: "text-base",
+            label: "text-sm sm:text-base",
+          }}
         />
         {isVerifying && (
           <Turnstile
@@ -127,7 +151,7 @@ const AuthRegisterForm: React.FC<AuthFormProps> = ({ setForm }) => {
           />
         )}
         <Button
-          className="mt-3 w-full"
+          className="mt-3 min-h-[48px] w-full text-base font-semibold sm:min-h-[52px]"
           color="primary"
           type="submit"
           variant="shadow"
@@ -136,13 +160,13 @@ const AuthRegisterForm: React.FC<AuthFormProps> = ({ setForm }) => {
           {getButtonText()}
         </Button>
       </form>
-      <div className="flex items-center gap-4 py-2">
+      <div className="flex items-center gap-3 py-2 sm:gap-4">
         <Divider className="flex-1" />
         <p className="text-tiny text-default-500 shrink-0">OR</p>
         <Divider className="flex-1" />
       </div>
       <GoogleLoginButton isDisabled={isSubmitting || isVerifying} />
-      <p className="text-small text-center">
+      <p className="text-small py-2 text-center">
         Already have an account?
         <Link
           isBlock

@@ -43,7 +43,7 @@ const TVShowDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
 
   if (isPending) {
     return (
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-5xl px-0 sm:px-4 md:px-6">
         <Spinner size="lg" className="absolute-center" color="warning" variant="simple" />
       </div>
     );
@@ -52,13 +52,13 @@ const TVShowDetailPage: NextPage<Params<{ id: number }>> = ({ params }) => {
   if (error) notFound();
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-5xl px-0 sm:px-4 md:px-6">
       <Suspense
         fallback={
           <Spinner size="lg" className="absolute-center" color="warning" variant="simple" />
         }
       >
-        <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
           <TvShowBackdropSection tv={tv} />
           <TvShowOverviewSection
             onViewEpisodesClick={() => scrollIntoView({ alignment: "center" })}

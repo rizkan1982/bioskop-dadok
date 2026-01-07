@@ -97,14 +97,14 @@ const SearchList = () => {
   }, [content, data?.pages, submittedSearchQuery]);
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-6 px-3 sm:gap-8 sm:px-4 md:px-6">
       <SearchFilter
         isLoading={isFetching}
         onSearchSubmit={(value) => setSubmittedSearchQuery(value.trim())}
       />
       {triggered && (
         <>
-          <div className="relative flex flex-col items-center gap-8">
+          <div className="relative flex w-full flex-col items-center gap-6 sm:gap-8">
             {isPending ? (
               <Spinner
                 size="lg"
@@ -116,7 +116,7 @@ const SearchList = () => {
               renderSearchResults()
             )}
           </div>
-          <div ref={ref} className="flex h-24 items-center justify-center">
+          <div ref={ref} className="flex h-20 items-center justify-center sm:h-24">
             {isFetchingNextPage && (
               <Spinner
                 color={content === "movie" ? "primary" : "warning"}
@@ -126,7 +126,7 @@ const SearchList = () => {
               />
             )}
             {!isEmpty(data?.pages[0].results) && !hasNextPage && !isPending && (
-              <p className="text-muted-foreground text-center text-base">
+              <p className="text-muted-foreground text-center text-sm sm:text-base">
                 You have reached the end of the list.
               </p>
             )}
