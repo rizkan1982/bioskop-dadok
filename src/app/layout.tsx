@@ -18,8 +18,7 @@ const Disclaimer = dynamic(() => import("@/components/ui/overlay/Disclaimer"));
 const PopCashAd = dynamic(() => import("@/components/ui/ads/PopCashAd"));
 const LayoutWithAds = dynamic(() => import("@/components/ui/layout/LayoutWithAds"));
 const AdminLoginChecker = dynamic(() => import("@/components/ui/AdminLoginChecker"));
-const AdsterraPopunder = dynamic(() => import("@/components/ui/ads/AdsterrPopunder"));
-const AdsterraBanner728x90 = dynamic(() => import("@/components/ui/ads/AdsterraBanner728x90"));
+const ConditionalAds = dynamic(() => import("@/components/ui/ads/ConditionalAds"));
 
 export const metadata: Metadata = {
   title: siteConfig.name,
@@ -98,8 +97,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         {/* PopCash Site Verification */}
         <meta name="ppck-ver" content="20e8554e142282e76e4c2621f556d78c" />
-        {/* Adsterra Popunder Ad */}
-        <AdsterraPopunder />
       </head>
       <body className={cn("bg-background min-h-dvh antialiased select-none", Poppins.className)}>
         <Suspense fallback={<div className="text-white text-2xl p-8 absolute-center">Loading app...</div>}>
@@ -123,8 +120,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {process.env.NEXT_PUBLIC_POPCASH_SITE_ID && (
           <PopCashAd siteId={process.env.NEXT_PUBLIC_POPCASH_SITE_ID} />
         )}
-        {/* Adsterra Banner 728x90 (Footer) */}
-        <AdsterraBanner728x90 />
+        {/* Conditional Adsterra Ads (disabled on admin routes) */}
+        <ConditionalAds />
         <SpeedInsights debug={false} />
         <Analytics debug={false} />
       </body>

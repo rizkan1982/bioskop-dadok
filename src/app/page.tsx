@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 const ContinueWatching = dynamic(() => import("@/components/sections/Home/ContinueWatching"));
 const HomePageList = dynamic(() => import("@/components/sections/Home/List"));
 const CustomAdBanner = dynamic(() => import("@/components/ui/ads/CustomAdBanner"));
-const AdsterraNativeBanner = dynamic(() => import("@/components/ui/ads/AdsterraNativeBanner"));
+const ConditionalNativeBanner = dynamic(() => import("@/components/ui/ads/ConditionalNativeBanner"));
 
 const HomePage: NextPage = () => {
   return (
@@ -22,8 +22,8 @@ const HomePage: NextPage = () => {
         {/* TODAY'S TRENDING MOVIES */}
         <HomePageList />
         
-        {/* NATIVE BANNER ADS (SIDEBAR) */}
-        <AdsterraNativeBanner />
+        {/* NATIVE BANNER ADS (SIDEBAR) - Only on public pages */}
+        <ConditionalNativeBanner />
         
         {/* MIDDLE BANNER ADS */}
         <CustomAdBanner position="middle" />
