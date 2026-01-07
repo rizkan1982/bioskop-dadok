@@ -35,39 +35,47 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const timestamp = Date.now();
-    const extension = file.name.split(".").pop();
-    const filename = `banner_${timestamp}.${extension}`;
+    const random = Math.random().toString(36).substring(7);
+    const extension = file.name.split(".").pop() || "jpg";
+    const filename = `banner_${timestamp}_${random}.${extension}`;
     const filePath = `banners/${filename}`;
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    // Upload to Supabase Storage with retry logic
+    let uploadError: any = null;
+    let uploadData: any = null;
+
+    // First attempt
+    const { data: firstData, error: firstError } = await supabase.storage
       .from("ads")
       .upload(filePath, buffer, {
         contentType: file.type,
         upsert: true,
       });
 
-    if (error) {
-      console.error("Upload error:", error);
-      
-      // If bucket doesn't exist, try to create it
-      if (error.message.includes("Bucket not found")) {
-        // Create the bucket
-        const { error: createError } = await supabase.storage.createBucket("ads", {
-          public: true,
-          fileSizeLimit: 5242880, // 5MB
-          allowedMimeTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
-        });
+    if (firstError) {
+      // Log error details
+      console.error("First upload attempt failed:", firstError);
+
+      // Try to create bucket if it doesn't exist
+      if (firstError.message?.includes("not found") || firstError.message?.includes("404")) {
+        console.log("Attempting to create ads bucket...");
         
-        if (createError) {
-          return NextResponse.json(
-            { success: false, message: "Failed to create storage bucket" },
-            { status: 500 }
-          );
+        try {
+          const { error: createError } = await supabase.storage.createBucket("ads", {
+            public: true,
+            fileSizeLimit: 5242880, // 5MB
+          });
+          
+          if (createError) {
+            console.warn("Failed to create bucket:", createError);
+            // Continue anyway, bucket might already exist
+          }
+        } catch (e) {
+          console.warn("Error creating bucket:", e);
         }
 
         // Retry upload
@@ -79,23 +87,40 @@ export async function POST(request: NextRequest) {
           });
 
         if (retryError) {
-          return NextResponse.json(
-            { success: false, message: retryError.message },
-            { status: 500 }
-          );
+          uploadError = retryError;
+          console.error("Retry upload failed:", retryError);
+        } else {
+          uploadData = retryData;
         }
       } else {
-        return NextResponse.json(
-          { success: false, message: error.message },
-          { status: 500 }
-        );
+        uploadError = firstError;
       }
+    } else {
+      uploadData = firstData;
+    }
+
+    // If still failed, return error
+    if (uploadError) {
+      console.error("Final upload error:", uploadError);
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: uploadError?.message || "Failed to upload file. Please try again.",
+          error: process.env.NODE_ENV === "development" ? uploadError : undefined
+        },
+        { status: 500 }
+      );
     }
 
     // Get public URL
     const { data: urlData } = supabase.storage
       .from("ads")
       .getPublicUrl(filePath);
+
+    console.log("Upload successful:", {
+      path: filePath,
+      url: urlData.publicUrl,
+    });
 
     return NextResponse.json({
       success: true,
@@ -105,9 +130,13 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error("Upload API error:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to upload file" },
+      { 
+        success: false, 
+        message: "Failed to process upload",
+        error: process.env.NODE_ENV === "development" ? String(error) : undefined
+      },
       { status: 500 }
     );
   }
