@@ -14,6 +14,8 @@ interface VisitorStats {
   totalHistories: number;
   uniqueMovies: number;
   uniqueTvShows: number;
+  moviesWatchedToday?: number;
+  tvShowsWatchedToday?: number;
   hourlyTraffic: { hour: number; visitors: number }[];
   weeklyTraffic: { day: string; visitors: number }[];
   countryData: { country: string; code: string; flag: string; visitors: number; peakHour: string }[];
@@ -69,6 +71,8 @@ export default function AdminDashboard() {
           totalHistories: 0,
           uniqueMovies: 0,
           uniqueTvShows: 0,
+          moviesWatchedToday: 0,
+          tvShowsWatchedToday: 0,
           hourlyTraffic: [],
           weeklyTraffic: [],
           countryData: [],
@@ -88,6 +92,8 @@ export default function AdminDashboard() {
         totalHistories: 0,
         uniqueMovies: 0,
         uniqueTvShows: 0,
+        moviesWatchedToday: 0,
+        tvShowsWatchedToday: 0,
         hourlyTraffic: [],
         weeklyTraffic: [],
         countryData: [],

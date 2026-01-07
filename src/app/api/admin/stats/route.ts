@@ -237,6 +237,25 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Also count anonymous sessions by hour
+    const { data: allAnonSessions, error: anonHourlyError } = await (supabase
+      .from("anonymous_sessions" as any) as any)
+      .select("created_at")
+      .gte("created_at", monthStartISO);
+
+    if (anonHourlyError) {
+      console.error("[ADMIN STATS] Error fetching anonymous hourly data:", anonHourlyError);
+    } else {
+      console.log("[ADMIN STATS] Anonymous sessions in this month:", allAnonSessions?.length);
+      
+      if (allAnonSessions) {
+        allAnonSessions.forEach((a: any) => {
+          const hour = new Date(a.created_at).getHours();
+          hourlyTraffic[hour].visitors++;
+        });
+      }
+    }
+
     // Get unique content watched - try both column names (tmdb_id and media_id, content_type and type)
     let uniqueContent = null;
     const { data: contentData1, error: contentError1 } = await supabase
@@ -310,6 +329,13 @@ export async function GET(request: NextRequest) {
         totalHistories: totalHistories || 0,
         uniqueMovies,
         uniqueTvShows,
+        // Breakdown by content type
+        moviesWatchedToday: (uniqueContent as { tmdb_id: number; content_type: string }[] | null)
+          ?.filter((c) => c.content_type === "movie")
+          .length || 0,
+        tvShowsWatchedToday: (uniqueContent as { tmdb_id: number; content_type: string }[] | null)
+          ?.filter((c) => c.content_type === "tv")
+          .length || 0,
         hourlyTraffic,
         weeklyTraffic: weeklyData,
         countryData,

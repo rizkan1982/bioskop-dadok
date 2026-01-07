@@ -14,6 +14,8 @@ interface VisitorStats {
   totalHistories: number;
   uniqueMovies: number;
   uniqueTvShows: number;
+  moviesWatchedToday?: number;
+  tvShowsWatchedToday?: number;
   hourlyTraffic: { hour: number; visitors: number }[];
   weeklyTraffic: { day: string; visitors: number }[];
   countryData: { country: string; code: string; flag: string; visitors: number; peakHour: string }[];
