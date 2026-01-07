@@ -68,9 +68,7 @@ export async function POST(request: NextRequest) {
       // Log error details
       console.error("❌ First upload attempt failed:", {
         message: firstError.message,
-        status: firstError.status,
         statusCode: (firstError as any).statusCode,
-        fullError: firstError,
       });
 
       // Try to create bucket if it doesn't exist
