@@ -30,18 +30,32 @@ export const useAnonymousTracking = ({
   const sessionId = useRef<string>('');
   const durationWatchedRef = useRef<number>(0);
   const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const iframeFoundRef = useRef<boolean>(false);
 
   // Initialize session ID on mount
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     sessionId.current = getSessionId();
-    console.log('[Anonymous Tracking] Session ID:', sessionId.current);
-  }, []);
+    console.log('[Anonymous Tracking] Initialized with session ID:', sessionId.current);
+    console.log('[Anonymous Tracking] Tracking:', { mediaId, mediaType, title });
+  }, [mediaId, mediaType, title]);
 
   // Function to track watch progress
   const trackWatch = async (currentDuration: number) => {
-    if (!sessionId.current) return;
+    if (!sessionId.current) {
+      console.log('[Anonymous Tracking] No session ID, skipping track');
+      return;
+    }
 
     try {
+      console.log('[Anonymous Tracking] Posting watch event:', {
+        sessionId: sessionId.current,
+        mediaId,
+        mediaType,
+        durationWatched: currentDuration,
+      });
+
       const response = await fetch('/api/admin/watch', {
         method: 'POST',
         headers: {
@@ -58,8 +72,12 @@ export const useAnonymousTracking = ({
       });
 
       if (!response.ok) {
-        console.error('[Anonymous Tracking] Failed to track watch:', response.statusText);
+        console.error('[Anonymous Tracking] Failed to track watch:', response.status, response.statusText);
+        return;
       }
+
+      const data = await response.json();
+      console.log('[Anonymous Tracking] Watch event recorded successfully:', data);
     } catch (error) {
       console.error('[Anonymous Tracking] Error tracking watch:', error);
     }
@@ -67,26 +85,33 @@ export const useAnonymousTracking = ({
 
   // Start tracking interval when component mounts
   useEffect(() => {
-    // Try to get the iframe and track progress
-    const startTracking = () => {
-      trackingIntervalRef.current = setInterval(() => {
-        try {
-          const iframe = document.querySelector('iframe[src*="vidlink"]') as HTMLIFrameElement;
-          if (iframe) {
-            // Send message to iframe to get current time (if supported)
-            // Fallback: just track that the video is being watched
-            trackWatch(durationWatchedRef.current);
-            durationWatchedRef.current += 5; // Increment by 5 seconds per interval
-          }
-        } catch (error) {
-          console.error('[Anonymous Tracking] Error in tracking interval:', error);
-        }
-      }, 5000); // Track every 5 seconds
-    };
+    if (typeof window === 'undefined') return;
 
-    startTracking();
+    console.log('[Anonymous Tracking] Starting tracking interval...');
+
+    // Set up interval to track every 5 seconds
+    trackingIntervalRef.current = setInterval(() => {
+      try {
+        // Check if iframe exists (any iframe on the page)
+        const iframe = document.querySelector('iframe') as HTMLIFrameElement;
+        
+        if (iframe && !iframeFoundRef.current) {
+          console.log('[Anonymous Tracking] Found iframe:', iframe.src);
+          iframeFoundRef.current = true;
+        }
+
+        // Track regardless of whether iframe is found - just post the current duration
+        durationWatchedRef.current += 5; // Increment by 5 seconds per interval (5s * 1 call = 5s watched)
+        
+        console.log('[Anonymous Tracking] Track tick - duration:', durationWatchedRef.current);
+        trackWatch(durationWatchedRef.current);
+      } catch (error) {
+        console.error('[Anonymous Tracking] Error in tracking interval:', error);
+      }
+    }, 5000); // Track every 5 seconds
 
     return () => {
+      console.log('[Anonymous Tracking] Cleaning up tracking interval');
       if (trackingIntervalRef.current) {
         clearInterval(trackingIntervalRef.current);
       }
