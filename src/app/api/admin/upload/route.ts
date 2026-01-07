@@ -33,6 +33,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient(true); // Use service role
 
+    console.log("📤 Upload API called", {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+    });
+
     // Generate unique filename
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(7);
@@ -43,6 +49,8 @@ export async function POST(request: NextRequest) {
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    console.log("📁 Attempting upload to:", filePath);
 
     // Upload to Supabase Storage with retry logic
     let uploadError: any = null;
@@ -58,7 +66,12 @@ export async function POST(request: NextRequest) {
 
     if (firstError) {
       // Log error details
-      console.error("First upload attempt failed:", firstError);
+      console.error("❌ First upload attempt failed:", {
+        message: firstError.message,
+        status: firstError.status,
+        statusCode: (firstError as any).statusCode,
+        fullError: firstError,
+      });
 
       // Try to create bucket if it doesn't exist
       if (firstError.message?.includes("not found") || firstError.message?.includes("404")) {
