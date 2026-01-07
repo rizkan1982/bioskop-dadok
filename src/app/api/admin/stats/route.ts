@@ -348,7 +348,7 @@ export async function GET(request: NextRequest) {
 
     // Add anonymous watchers
     if (recentAnonSessions) {
-      recentAnonSessions.forEach((a: any, i) => {
+      recentAnonSessions.forEach((a: any, i: number) => {
         allWatchers.push({
           id: `anon-${i}`,
           title: a.title || "Unknown Title",
