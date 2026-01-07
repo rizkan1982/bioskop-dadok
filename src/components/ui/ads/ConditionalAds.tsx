@@ -14,8 +14,8 @@ const AdsterraBanner728x90 = dynamic(() => import("./AdsterraBanner728x90"), { s
 const ConditionalAds: React.FC = () => {
   const pathname = usePathname();
   
-  // Disable ads on admin routes
-  const isAdminRoute = pathname?.startsWith("/admin");
+  // Disable ads on admin routes (including admin auth)
+  const isAdminRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/auth/admin");
   
   if (isAdminRoute) {
     return null; // No ads on admin pages
