@@ -180,6 +180,23 @@ export async function GET(request: NextRequest) {
 
     if (recentError) {
       console.error("[ADMIN STATS] Error fetching recent histories:", recentError);
+    }
+
+    // Also get recent anonymous sessions
+    const { data: recentAnonSessions, error: recentAnonError } = await (supabase
+      .from("anonymous_sessions" as any) as any)
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(10);
+
+    if (recentAnonError) {
+      console.error("[ADMIN STATS] Error fetching recent anonymous sessions:", recentAnonError);
+    }
+
+    console.log("[ADMIN STATS] Recent histories:", recentHistories?.length, "Recent anon sessions:", recentAnonSessions?.length);
+
+    if (recentError) {
+      console.error("[ADMIN STATS] Error fetching recent histories:", recentError);
     } else {
       console.log("[ADMIN STATS] Recent histories count:", recentHistories?.length);
     }
@@ -195,21 +212,34 @@ export async function GET(request: NextRequest) {
       const nextDate = new Date(date);
       nextDate.setDate(nextDate.getDate() + 1);
 
-      const { count, error: dayError } = await supabase
+      // Get from authenticated histories
+      const { count: authCount, error: dayError } = await supabase
         .from("histories")
         .select("*", { count: "exact", head: true })
         .gte("created_at", date.toISOString())
         .lt("created_at", nextDate.toISOString());
 
-      if (dayError) {
-        console.error(`[ADMIN STATS] Error fetching data for ${days[date.getDay()]}:`, dayError);
-      }
+      // Get from anonymous sessions
+      const { count: anonCount, error: anonDayError } = await (supabase
+        .from("anonymous_sessions" as any) as any)
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", date.toISOString())
+        .lt("created_at", nextDate.toISOString());
 
+      const dayName = days[(i === 6 ? new Date().getDay() : (new Date().getDay() + 7 - i) % 7)];
+      const totalCount = (authCount || 0) + (anonCount || 0);
+      
       weeklyData.push({
-        day: days[date.getDay()],
-        visitors: count || 0,
+        day: dayName,
+        visitors: totalCount,
       });
-      console.log(`[ADMIN STATS] ${days[date.getDay()]}: ${count || 0} watches`);
+
+      if (dayError) {
+        console.error("[ADMIN STATS] Error fetching day:", dayError);
+      }
+      if (anonDayError) {
+        console.error("[ADMIN STATS] Error fetching anon day data:", anonDayError);
+      }
     }
 
     // Get hourly distribution (simplified - based on existing data timestamps)
@@ -299,14 +329,81 @@ export async function GET(request: NextRequest) {
     console.log("[ADMIN STATS] Unique movies:", uniqueMovies);
     console.log("[ADMIN STATS] Unique TV shows:", uniqueTvShows);
 
-    // Format current watchers from recent histories
-    const currentWatchers = (recentHistories || []).slice(0, 6).map((h, i) => ({
-      id: `watcher-${i}`,
-      title: h.title || "Unknown Title",
-      type: (h as any).content_type || (h as any).type || "movie",
-      country: "Indonesia", // Default since we don't track location
-      startedAt: new Date(h.updated_at),
-    }));
+    // Combine authenticated and anonymous watchers for "Sedang Ditonton"
+    const allWatchers: any[] = [];
+
+    // Add authenticated watchers
+    if (recentHistories) {
+      recentHistories.forEach((h, i) => {
+        allWatchers.push({
+          id: `auth-${i}`,
+          title: h.title || "Unknown Title",
+          type: (h as any).content_type || (h as any).type || "movie",
+          country: "Indonesia",
+          startedAt: new Date(h.updated_at),
+          source: "authenticated",
+        });
+      });
+    }
+
+    // Add anonymous watchers
+    if (recentAnonSessions) {
+      recentAnonSessions.forEach((a: any, i) => {
+        allWatchers.push({
+          id: `anon-${i}`,
+          title: a.title || "Unknown Title",
+          type: a.media_type || "movie",
+          country: "Anonymous",
+          startedAt: new Date(a.updated_at),
+          source: "anonymous",
+        });
+      });
+    }
+
+    // Sort by most recent and limit to 6
+    const currentWatchers = allWatchers
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      .slice(0, 6)
+      .map((w, i) => ({
+        ...w,
+        id: `watcher-${i}`,
+      }));
+
+    console.log("[ADMIN STATS] Current watchers (combined):", currentWatchers.length);
+
+    // Count movies and TV shows watched TODAY (from both authenticated and anonymous)
+    let moviesWatchedToday = 0;
+    let tvShowsWatchedToday = 0;
+
+    // Count from authenticated histories
+    if (allHistories) {
+      allHistories.forEach((h) => {
+        const isToday = new Date(h.created_at).toDateString() === new Date().toDateString();
+        if (isToday) {
+          if ((h as any).content_type === "movie" || (h as any).type === "movie") {
+            moviesWatchedToday++;
+          } else if ((h as any).content_type === "tv" || (h as any).type === "tv") {
+            tvShowsWatchedToday++;
+          }
+        }
+      });
+    }
+
+    // Count from anonymous sessions
+    if (allAnonSessions) {
+      allAnonSessions.forEach((a: any) => {
+        const isToday = new Date(a.created_at).toDateString() === new Date().toDateString();
+        if (isToday) {
+          if (a.media_type === "movie") {
+            moviesWatchedToday++;
+          } else if (a.media_type === "tv") {
+            tvShowsWatchedToday++;
+          }
+        }
+      });
+    }
+
+    console.log("[ADMIN STATS] Movies watched today:", moviesWatchedToday, "TV shows:", tvShowsWatchedToday);
 
     console.log("[ADMIN STATS] Response prepared successfully");
     console.log("[ADMIN STATS] Summary: Today=" + todayTotal + ", Week=" + weekTotal + ", Month=" + monthWatches);
@@ -329,13 +426,8 @@ export async function GET(request: NextRequest) {
         totalHistories: totalHistories || 0,
         uniqueMovies,
         uniqueTvShows,
-        // Breakdown by content type
-        moviesWatchedToday: (uniqueContent as { tmdb_id: number; content_type: string }[] | null)
-          ?.filter((c) => c.content_type === "movie")
-          .length || 0,
-        tvShowsWatchedToday: (uniqueContent as { tmdb_id: number; content_type: string }[] | null)
-          ?.filter((c) => c.content_type === "tv")
-          .length || 0,
+        moviesWatchedToday,
+        tvShowsWatchedToday,
         hourlyTraffic,
         weeklyTraffic: weeklyData,
         countryData,
