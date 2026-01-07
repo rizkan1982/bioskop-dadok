@@ -100,13 +100,13 @@ export default function AnalyticsPage() {
         />
         <StatCard
           label="Film Ditonton"
-          value={stats?.uniqueMovies || 0}
+          value={stats?.moviesWatchedToday || 0}
           icon={<HiFilm className="text-lg" />}
           color="green"
         />
         <StatCard
           label="TV Series"
-          value={stats?.uniqueTvShows || 0}
+          value={stats?.tvShowsWatchedToday || 0}
           icon={<HiTv className="text-lg" />}
           color="amber"
         />

@@ -168,7 +168,7 @@ export default function AdminDashboard() {
               <HiFilm className="text-xl text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{stats?.uniqueMovies || 0}</p>
+              <p className="text-2xl font-bold text-white">{stats?.moviesWatchedToday || 0}</p>
               <p className="text-xs text-slate-400">Film Ditonton</p>
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
               <HiTv className="text-xl text-purple-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{stats?.uniqueTvShows || 0}</p>
+              <p className="text-2xl font-bold text-white">{stats?.tvShowsWatchedToday || 0}</p>
               <p className="text-xs text-slate-400">TV Series</p>
             </div>
           </div>
