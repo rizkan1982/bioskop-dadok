@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
 
     console.log("[ANONYMOUS WATCH] Session:", sessionId, "Media:", mediaId, "Type:", mediaType);
 
-    // Use service role to bypass RLS
-    const supabase = await createClient(true);
+    // Use regular client (not service role) - RLS allows public access
+    const supabase = await createClient(false);
 
     // Try to find existing session
     const { data: existingSession, error: findError } = await (supabase
